@@ -1,0 +1,10 @@
+{
+    "logFile": "timesheet.log",
+    "logLevel": "FINE",
+	"timetrackerDB": "timetracker.db",
+    "oidcIssuerUrl": "https://uuidentity.plus4u.net/uu-oidc-maing02/bb977a99f4cc4c37a2afce3fd599d0a7/oidc",
+    "oidcClientId": "8031926f783d4aaba733af73c1974840",
+    "wtmBaseUrl": "https://uuapp.plus4u.net/uu-specialistwtm-maing01/99923616732453117-8031926f783d4aaba733af73c1974840",
+	"proxyHost": "",
+	"proxyPort": 0
+}
