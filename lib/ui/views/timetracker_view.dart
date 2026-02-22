@@ -407,6 +407,7 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
               // Worked
               // --------------------------------------------------
               SizedBox(
+                width: dimensions.workedW,
                 child: Text(
                   toHmString(widget.item.to.difference(widget.item.from)),
                 ),
