@@ -5,6 +5,7 @@ import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/models/timesheet_item.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
+import 'package:timesheet/ui/macos_toolbar_text_field.dart';
 import 'package:timesheet/ui/snackbar.dart';
 import 'package:timesheet/ui/cupertino_calendar_toolbar_button.dart';
 import 'package:timesheet/utils/duration_utils.dart';
@@ -25,6 +26,13 @@ class _TimeSheetViewState extends State<TimeSheetView> {
   static const int _spacingCount = 7;
 
   bool _hasLoaded = false;
+  final TextEditingController _filterController = TextEditingController();
+
+  @override
+  void dispose() {
+    _filterController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +95,11 @@ class _TimeSheetViewState extends State<TimeSheetView> {
                   }
                 },
               ),
+              MacosToolbarTextField(
+                controller: _filterController,
+                placeholder: 'Filter',
+                onChanged: provider.setFilter,
+              ),
               ToolBarIconButton(
                 label: 'Refresh',
                 showLabel: false,
@@ -146,7 +159,11 @@ class _TimeSheetViewState extends State<TimeSheetView> {
                         },
                       ),
                     ),
-                    _buildFooter(context, provider),
+                    _buildFooter(
+                      context,
+                      itemCount: provider.itemCount,
+                      totalDuration: provider.totalDuration,
+                    ),
                   ],
                 );
               },
@@ -440,7 +457,11 @@ class _TimeSheetViewState extends State<TimeSheetView> {
     );
   }
 
-  Widget _buildFooter(BuildContext context, TimesheetProvider provider) {
+  Widget _buildFooter(
+    BuildContext context, {
+    required int itemCount,
+    required Duration totalDuration,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       decoration: BoxDecoration(
@@ -457,7 +478,7 @@ class _TimeSheetViewState extends State<TimeSheetView> {
           ),
           SizedBox(width: 8),
           SelectableText(
-            'Worked: ${toHmString(provider.totalDuration)}',
+            'Worked: ${toHmString(totalDuration)}',
             style: MacosTheme.of(context).typography.body,
           ),
           SizedBox(width: 8),
