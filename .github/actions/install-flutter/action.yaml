@@ -1,0 +1,87 @@
+name: Install Flutter SDK
+
+inputs:
+  flutter-version:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Verify required tools
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        platform="$(echo "${RUNNER_OS}" | tr '[:upper:]' '[:lower:]')"
+
+        require() {
+          if ! command -v "$1" >/dev/null 2>&1; then
+            echo "Missing required tool: $1" >&2
+            exit 1
+          fi
+        }
+
+        require curl
+        require unzip
+
+        case "${platform}" in
+          windows) require cygpath ;;
+          linux)   require tar ;;
+        esac
+
+    - name: Download, install and setup Flutter SDK
+      id: install
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        FLUTTER_VERSION='${{ inputs.flutter-version }}'
+        BASE_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable"
+
+        platform="$(echo "${RUNNER_OS}" | tr '[:upper:]' '[:lower:]')"
+
+        case "${platform}" in
+          windows) archive_name="flutter_windows_${FLUTTER_VERSION}-stable.zip" ;;
+          macos)   archive_name="flutter_macos_arm64_${FLUTTER_VERSION}-stable.zip" ;;
+          linux)   archive_name="flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" ;;
+        esac
+
+        url="${BASE_URL}/${platform}/${archive_name}"
+
+        runner_temp="${RUNNER_TEMP}"
+        if [[ "${platform}" == "windows" ]]; then
+          runner_temp="$(cygpath -u "${RUNNER_TEMP}")"
+        fi
+        archive_path="${runner_temp}/${archive_name}"
+        flutter_root="${runner_temp}/flutter"
+
+        curl -fL --connect-timeout 15 --retry 5 "${url}" -o "${archive_path}"
+
+        rm -rf "${flutter_root}"
+        mkdir -p "${flutter_root}"
+
+        if [[ "${archive_name}" == *.zip ]]; then
+          # The Flutter zip contains a top-level "flutter/" directory. Extracting into runner_temp will populate ${runner_temp}/flutter.
+          unzip -q -o "${archive_path}" -d "${runner_temp}"
+        else
+          tar xf "${archive_path}" -C "${flutter_root}" --strip-components=1
+        fi
+
+        rm -f "${archive_path}"
+
+        if [[ "${platform}" == "windows" ]]; then
+          flutter_root_env="$(cygpath -w "${flutter_root}")"
+          echo "FLUTTER_ROOT=${flutter_root_env}" >> "${GITHUB_ENV}"
+          printf '%s\n' "${flutter_root_env}\\bin" >> "${GITHUB_PATH}"
+          printf '%s\n' "${flutter_root_env}\\bin\\cache\\dart-sdk\\bin" >> "${GITHUB_PATH}"
+        else
+          echo "FLUTTER_ROOT=${flutter_root}" >> "${GITHUB_ENV}"
+          echo "${flutter_root}/bin" >> "${GITHUB_PATH}"
+          echo "${flutter_root}/bin/cache/dart-sdk/bin" >> "${GITHUB_PATH}"
+        fi
+
+    - name: Verify flutter command
+      shell: bash
+      run: |
+        set -euo pipefail
+        flutter --version
