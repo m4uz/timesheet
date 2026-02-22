@@ -152,6 +152,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
         ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text(
             'Items: ${provider.itemCount}',
@@ -159,9 +160,10 @@ class _TimetrackerViewState extends State<TimetrackerView> {
           ),
           SizedBox(width: 8),
           SelectableText(
-            'Hours: ${toHmString(provider.totalDuration)}',
+            'Time: ${toHmString(provider.totalDuration)}',
             style: MacosTheme.of(context).typography.body,
           ),
+          SizedBox(width: 8),
         ],
       ),
     );
