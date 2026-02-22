@@ -5,8 +5,10 @@ import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/models/timesheet_item.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
+import 'package:timesheet/ui/macos_toolbar_text_field.dart';
 import 'package:timesheet/ui/snackbar.dart';
 import 'package:timesheet/ui/cupertino_calendar_toolbar_button.dart';
+import 'package:timesheet/utils/duration_utils.dart';
 
 class TimeSheetView extends StatefulWidget {
   const TimeSheetView({super.key});
@@ -24,6 +26,13 @@ class _TimeSheetViewState extends State<TimeSheetView> {
   static const int _spacingCount = 7;
 
   bool _hasLoaded = false;
+  final TextEditingController _filterController = TextEditingController();
+
+  @override
+  void dispose() {
+    _filterController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +95,11 @@ class _TimeSheetViewState extends State<TimeSheetView> {
                   }
                 },
               ),
+              MacosToolbarTextField(
+                controller: _filterController,
+                placeholder: 'Filter',
+                onChanged: provider.setFilter,
+              ),
               ToolBarIconButton(
                 label: 'Refresh',
                 showLabel: false,
@@ -145,7 +159,11 @@ class _TimeSheetViewState extends State<TimeSheetView> {
                         },
                       ),
                     ),
-                    _buildFooter(context, provider),
+                    _buildFooter(
+                      context,
+                      itemCount: provider.itemCount,
+                      totalDuration: provider.totalDuration,
+                    ),
                   ],
                 );
               },
@@ -239,7 +257,7 @@ class _TimeSheetViewState extends State<TimeSheetView> {
         SizedBox(
           width: durationW,
           child: Text(
-            'Duration',
+            'Worked',
             style: MacosTheme.of(
               context,
             ).typography.headline.copyWith(fontWeight: FontWeight.w600),
@@ -317,9 +335,6 @@ class _TimeSheetViewState extends State<TimeSheetView> {
   }) {
     final locale = Localizations.localeOf(context).toString();
     final dayLabel = DateFormat('EEE', locale).format(item.from);
-    final duration = item.to.difference(item.from);
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -369,12 +384,12 @@ class _TimeSheetViewState extends State<TimeSheetView> {
         ),
         SizedBox(width: spacingW),
         // --------------------------------------------------
-        // Duration
+        // Worked
         // --------------------------------------------------
         SizedBox(
           width: durationW,
           child: Text(
-            '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}',
+            toHmString(item.to.difference(item.from)),
             style: MacosTheme.of(context).typography.title3,
           ),
         ),
@@ -442,12 +457,11 @@ class _TimeSheetViewState extends State<TimeSheetView> {
     );
   }
 
-  Widget _buildFooter(BuildContext context, TimesheetProvider provider) {
-    final itemCount = provider.itemCount;
-    final totalDuration = provider.totalDuration;
-    final hours = totalDuration.inHours;
-    final minutes = totalDuration.inMinutes.remainder(60);
-
+  Widget _buildFooter(
+    BuildContext context, {
+    required int itemCount,
+    required Duration totalDuration,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       decoration: BoxDecoration(
@@ -456,6 +470,7 @@ class _TimeSheetViewState extends State<TimeSheetView> {
         ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text(
             'Items: $itemCount',
@@ -463,9 +478,10 @@ class _TimeSheetViewState extends State<TimeSheetView> {
           ),
           SizedBox(width: 8),
           SelectableText(
-            'Hours: ${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}',
+            'Worked: ${toHmString(totalDuration)}',
             style: MacosTheme.of(context).typography.body,
           ),
+          SizedBox(width: 8),
         ],
       ),
     );
