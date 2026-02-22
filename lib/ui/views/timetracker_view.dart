@@ -193,8 +193,9 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
   static const double _dayPrefW = 40.0;
   static const double _datePickerPrefW = 120.0;
   static const double _timePickerPrefW = 80.0;
+  static const double _workedPrefW = 55.0;
   static const double _spacingPrefW = 10.0;
-  static const int _spacingCount = 8;
+  static const int _spacingCount = 9;
 
   late TextEditingController _subjectController;
   late TextEditingController _descriptionController;
@@ -242,6 +243,7 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
     double dayW,
     double datePickerW,
     double timePickerW,
+    double workedW,
     double spacingW,
   })
   _calculateLayoutDimensions(BoxConstraints constraints) {
@@ -251,6 +253,7 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
         _datePickerPrefW +
         _timePickerPrefW +
         _timePickerPrefW +
+        _workedPrefW +
         _btnPrefW +
         _btnPrefW +
         _spacingPrefW * _spacingCount;
@@ -265,6 +268,7 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
       dayW: _dayPrefW * scale,
       datePickerW: _datePickerPrefW * scale,
       timePickerW: _timePickerPrefW * scale,
+      workedW: _workedPrefW * scale,
       spacingW: _spacingPrefW * scale,
     );
   }
@@ -403,6 +407,7 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
               // Worked
               // --------------------------------------------------
               SizedBox(
+                width: dimensions.workedW,
                 child: Text(
                   toHmString(widget.item.to.difference(widget.item.from)),
                 ),
