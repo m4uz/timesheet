@@ -160,7 +160,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
           ),
           SizedBox(width: 8),
           SelectableText(
-            'Time: ${toHmString(provider.totalDuration)}',
+            'Worked: ${toHmString(provider.totalDuration)}',
             style: MacosTheme.of(context).typography.body,
           ),
           SizedBox(width: 8),
@@ -400,7 +400,7 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
               ),
               SizedBox(width: dimensions.spacingW),
               // --------------------------------------------------
-              // Total
+              // Worked
               // --------------------------------------------------
               SizedBox(
                 child: Text(

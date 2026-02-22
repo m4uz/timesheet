@@ -240,7 +240,7 @@ class _TimeSheetViewState extends State<TimeSheetView> {
         SizedBox(
           width: durationW,
           child: Text(
-            'Duration',
+            'Worked',
             style: MacosTheme.of(
               context,
             ).typography.headline.copyWith(fontWeight: FontWeight.w600),
@@ -367,7 +367,7 @@ class _TimeSheetViewState extends State<TimeSheetView> {
         ),
         SizedBox(width: spacingW),
         // --------------------------------------------------
-        // Duration
+        // Worked
         // --------------------------------------------------
         SizedBox(
           width: durationW,
@@ -441,11 +441,6 @@ class _TimeSheetViewState extends State<TimeSheetView> {
   }
 
   Widget _buildFooter(BuildContext context, TimesheetProvider provider) {
-    final itemCount = provider.itemCount;
-    final totalDuration = provider.totalDuration;
-    final hours = totalDuration.inHours;
-    final minutes = totalDuration.inMinutes.remainder(60);
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       decoration: BoxDecoration(
@@ -457,12 +452,12 @@ class _TimeSheetViewState extends State<TimeSheetView> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text(
-            'Items: $itemCount',
+            'Items: ${provider.itemCount}',
             style: MacosTheme.of(context).typography.body,
           ),
           SizedBox(width: 8),
           SelectableText(
-            'Hours: ${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}',
+            'Worked: ${toHmString(provider.totalDuration)}',
             style: MacosTheme.of(context).typography.body,
           ),
           SizedBox(width: 8),
