@@ -9,6 +9,7 @@ import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/providers/subjects_categories_provider.dart';
 import 'package:timesheet/ui/dialog.dart';
 import 'package:timesheet/ui/snackbar.dart';
+import 'package:timesheet/utils/duration_utils.dart';
 
 class TimetrackerView extends StatefulWidget {
   const TimetrackerView({super.key});
@@ -143,11 +144,6 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   }
 
   Widget _buildFooter(BuildContext context, TimetrackerProvider provider) {
-    final itemCount = provider.itemCount;
-    final totalDuration = provider.totalDuration;
-    final hours = totalDuration.inHours;
-    final minutes = totalDuration.inMinutes.remainder(60);
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       decoration: BoxDecoration(
@@ -158,12 +154,12 @@ class _TimetrackerViewState extends State<TimetrackerView> {
       child: Row(
         children: [
           Text(
-            'Items: $itemCount',
+            'Items: ${provider.itemCount}',
             style: MacosTheme.of(context).typography.body,
           ),
           SizedBox(width: 8),
           SelectableText(
-            'Hours: ${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}',
+            'Hours: ${toHmString(provider.totalDuration)}',
             style: MacosTheme.of(context).typography.body,
           ),
         ],
@@ -398,6 +394,15 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
                   buttonDecoration: PickerButtonDecoration(
                     textStyle: MacosTheme.of(context).typography.title3,
                   ),
+                ),
+              ),
+              SizedBox(width: dimensions.spacingW),
+              // --------------------------------------------------
+              // Total
+              // --------------------------------------------------
+              SizedBox(
+                child: Text(
+                  toHmString(widget.item.to.difference(widget.item.from)),
                 ),
               ),
               SizedBox(width: dimensions.spacingW),
