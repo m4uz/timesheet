@@ -13,26 +13,46 @@ class TimesheetProvider extends ChangeNotifier {
   DateTime _toDate;
   DateTime? _lastLoadedFromDate;
   DateTime? _lastLoadedToDate;
+  String _filter = '';
 
   TimesheetProvider({required TimesheetRepository repository})
     : _repository = repository,
       _fromDate = DateTime.now(),
       _toDate = DateTime.now();
 
-  List<TimesheetItem> get items => List.unmodifiable(_items);
+  List<TimesheetItem> get items {
+    final normalizedFilter = _filter.trim().toLowerCase();
+    if (normalizedFilter.isEmpty) {
+      return List.unmodifiable(_items);
+    }
+
+    return List.unmodifiable(
+      _items.where((item) {
+        return item.subject.trim().toLowerCase().contains(normalizedFilter) ||
+            item.category.trim().toLowerCase().contains(normalizedFilter) ||
+            item.description.trim().toLowerCase().contains(normalizedFilter);
+      }),
+    );
+  }
+
   bool get isLoading => _isLoading;
   String? get errorMsg => _errorMsg;
   DateTime get fromDate => _fromDate;
   DateTime get toDate => _toDate;
-
-  int get itemCount => _items.length;
+  String get filter => _filter;
+  int get itemCount => items.length;
 
   Duration get totalDuration {
     Duration total = Duration.zero;
-    for (final item in _items) {
+    for (final item in items) {
       total += item.to.difference(item.from);
     }
     return total;
+  }
+
+  void setFilter(String value) {
+    _filter = value;
+    notifyListeners();
   }
 
   void setFromDate(DateTime date) {
