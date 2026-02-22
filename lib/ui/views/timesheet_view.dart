@@ -473,7 +473,7 @@ class _TimeSheetViewState extends State<TimeSheetView> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text(
-            'Items: $itemCount',
+            'Items: ${provider.itemCount}',
             style: MacosTheme.of(context).typography.body,
           ),
           SizedBox(width: 8),
