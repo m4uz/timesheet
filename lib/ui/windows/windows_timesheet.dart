@@ -1,4 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
+import 'package:timesheet/ui/windows/views/debug_view.dart';
 
 class WindowsTimesheet extends StatefulWidget {
   const WindowsTimesheet({super.key});
@@ -37,11 +39,12 @@ class _WindowsTimesheetState extends State<WindowsTimesheet> {
             title: const Text('Config'),
             body: const _MockView(title: 'Config'),
           ),
-          PaneItem(
-            icon: const WindowsIcon(WindowsIcons.bug),
-            title: const Text('Debug'),
-            body: const _MockView(title: 'Debug'),
-          ),
+          if (!kReleaseMode)
+            PaneItem(
+              icon: const WindowsIcon(WindowsIcons.bug),
+              title: const Text('Debug'),
+              body: const DebugView(),
+            ),
         ],
         footerItems: [
           PaneItemSeparator(),
