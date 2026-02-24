@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:fluent_ui/fluent_ui.dart';
+
+const Duration _kDismissDuration = Duration(seconds: 10);
 
 class InfoBarManager {
   InfoBarManager._();
@@ -40,7 +44,27 @@ class InfoBarManager {
         child: Align(
           alignment: Alignment.bottomCenter,
           child: InfoBar(
-            title: const Text(''),
+            severity: severity,
+            style: InfoBarThemeData(
+              icon: (severity) {
+                switch (severity) {
+                  case InfoBarSeverity.info:
+                    return WindowsIcons.info;
+                  case InfoBarSeverity.success:
+                    return WindowsIcons.check_mark;
+                  case InfoBarSeverity.warning:
+                    return WindowsIcons.warning;
+                  case InfoBarSeverity.error:
+                    return WindowsIcons.error;
+                }
+              },
+            ),
+            title: Text(switch (severity) {
+              InfoBarSeverity.info => 'Info',
+              InfoBarSeverity.success => 'Success',
+              InfoBarSeverity.warning => 'Warning',
+              InfoBarSeverity.error => 'Error',
+            }),
             content: Text(message),
             action: IconButton(
               icon: const Icon(FluentIcons.clear),
@@ -48,12 +72,15 @@ class InfoBarManager {
                 entry.remove();
               },
             ),
-            severity: severity,
           ),
         ),
       ),
     );
 
     overlay.insert(entry);
+
+    Future<void>.delayed(_kDismissDuration, () {
+      if (entry.mounted) entry.remove();
+    });
   }
 }
