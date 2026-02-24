@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
-import 'package:timesheet/platform_menu.dart';
+import 'package:timesheet/ui/platform_menu.dart';
 import 'package:timesheet/providers/auth_provider.dart';
 import 'package:timesheet/ui/macos/views/config_view.dart';
 import 'package:timesheet/ui/macos/views/debug_view.dart';
