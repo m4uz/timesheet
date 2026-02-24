@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -25,19 +24,30 @@ import 'package:timesheet/services/auth_service.dart';
 import 'package:timesheet/services/session_manager.dart';
 import 'package:timesheet/services/timetracker_db_service.dart';
 import 'package:timesheet/services/wtm_service.dart';
-import 'package:timesheet/theme.dart';
+import 'package:timesheet/ui/theme.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:timesheet/ui/macos/dialog.dart';
+import 'package:timesheet/ui/macos/dialog.dart' as mac_dialog;
 import 'package:timesheet/ui/macos/macos_timesheet.dart';
 import 'package:timesheet/ui/macos/snackbar.dart';
 import 'package:timesheet/ui/macos/views/login_view.dart';
-import 'package:timesheet/ui/windows/views/login_view.dart' as windows;
+import 'package:timesheet/ui/windows/dialog.dart' as windows_dialog;
+import 'package:timesheet/ui/windows/infobar.dart';
 import 'package:timesheet/ui/windows/windows_timesheet.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isWindows) {
+    InfoBarManager.initialize(navigatorKey);
+    windows_dialog.DialogManager.initialize(navigatorKey);
+  }
+
   if (Platform.isMacOS) {
     await MacosWindowUtilsConfig().apply();
+    mac_dialog.DialogManager.initialize(navigatorKey);
+    SnackBarManager.initialize(navigatorKey);
   }
 
   await AppConfig.init();
@@ -57,13 +67,10 @@ class TimesheetApp extends StatefulWidget {
 
 class _TimesheetAppState extends State<TimesheetApp> {
   late final SessionManager sessionManager = SessionManager();
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
     super.initState();
-    DialogManager.initialize(navigatorKey);
-    SnackBarManager.initialize(navigatorKey);
   }
 
   @override
@@ -156,17 +163,17 @@ class _TimesheetAppState extends State<TimesheetApp> {
         if (Platform.isWindows) {
           return FluentApp(
             navigatorKey: navigatorKey,
-            title: 'Timesheet',
+            title: '🦄⏰💩',
             themeMode: appTheme.mode,
-            debugShowCheckedModeBanner: !kReleaseMode,
             localizationsDelegates: const [
+              // TODO which ones do we need?
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
               FluentLocalizations.delegate,
             ],
             supportedLocales: const [Locale('en')],
-            home: const WindowsTimesheet()
+            debugShowCheckedModeBanner: !kReleaseMode,
+            home: const WindowsTimesheet(),
           );
         }
 
@@ -175,6 +182,7 @@ class _TimesheetAppState extends State<TimesheetApp> {
           title: '🦄⏰💩',
           themeMode: appTheme.mode,
           localizationsDelegates: const [
+            // TODO which ones do we need?
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
