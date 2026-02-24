@@ -5,8 +5,8 @@ import 'package:timesheet/models/result.dart';
 import 'package:timesheet/models/session.dart';
 import 'package:timesheet/repositories/auth_repository.dart';
 import 'package:timesheet/services/session_manager.dart';
-import 'package:timesheet/ui/dialog.dart';
-import 'package:timesheet/ui/snackbar.dart';
+import 'package:timesheet/ui/macos/dialog.dart';
+import 'package:timesheet/ui/macos/snackbar.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository;

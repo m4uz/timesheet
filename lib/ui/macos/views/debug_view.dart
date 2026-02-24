@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:macos_ui/macos_ui.dart';
-import 'package:timesheet/ui/snackbar.dart';
-import 'package:timesheet/ui/dialog.dart';
+import 'package:timesheet/ui/macos/snackbar.dart';
+import 'package:timesheet/ui/macos/dialog.dart';
 
 class DebugView extends StatelessWidget {
   const DebugView({super.key});

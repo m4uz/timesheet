@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:timesheet/models/category.dart';
 import 'package:timesheet/models/subject.dart';
 import 'package:timesheet/providers/subjects_categories_provider.dart';
-import 'package:timesheet/ui/snackbar.dart';
+import 'package:timesheet/ui/macos/snackbar.dart';
 
 class SubjectsCategoriesView extends StatefulWidget {
   const SubjectsCategoriesView({super.key});
