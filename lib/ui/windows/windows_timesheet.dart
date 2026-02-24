@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:timesheet/ui/windows/views/config_view.dart';
 import 'package:timesheet/ui/windows/views/debug_view.dart';
+import 'package:timesheet/ui/windows/views/subjects_categories_view.dart';
 
 class WindowsTimesheet extends StatefulWidget {
   const WindowsTimesheet({super.key});
@@ -33,7 +34,7 @@ class _WindowsTimesheetState extends State<WindowsTimesheet> {
           PaneItem(
             icon: const WindowsIcon(WindowsIcons.bulleted_list),
             title: const Text('Subjects & Categories'),
-            body: const _MockView(title: 'Subjects & Categories'),
+            body: const SubjectsCategoriesView(),
           ),
           PaneItem(
             icon: const WindowsIcon(WindowsIcons.settings),
