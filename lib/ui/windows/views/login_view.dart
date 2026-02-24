@@ -2,8 +2,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/providers/auth_provider.dart';
 
-class WindowsLoginView extends StatelessWidget {
-  const WindowsLoginView({super.key});
+class WinLoginView extends StatelessWidget {
+  const WinLoginView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class WindowsLoginView extends StatelessWidget {
               children: [
                 Image.asset('assets/logo.png', width: 250, height: 250),
                 const SizedBox(height: 32),
-                FilledButton(
+                Button(
                   onPressed: () => _handleLogin(context, authProvider),
                   child: const Text('Login with OIDC'),
                 ),

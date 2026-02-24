@@ -32,6 +32,7 @@ import 'package:timesheet/ui/macos/snackbar.dart';
 import 'package:timesheet/ui/macos/views/login_view.dart';
 import 'package:timesheet/ui/windows/dialog.dart' as windows_dialog;
 import 'package:timesheet/ui/windows/infobar.dart';
+import 'package:timesheet/ui/windows/views/login_view.dart';
 import 'package:timesheet/ui/windows/windows_timesheet.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -173,7 +174,9 @@ class _TimesheetAppState extends State<TimesheetApp> {
             ],
             supportedLocales: const [Locale('en')],
             debugShowCheckedModeBanner: !kReleaseMode,
-            home: const WindowsTimesheet(),
+            home: authProvider.isAuthenticated
+                ? const WindowsTimesheet()
+                : const WinLoginView(),
           );
         }
 
