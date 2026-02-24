@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:timesheet/ui/windows/views/config_view.dart';
 import 'package:timesheet/ui/windows/views/debug_view.dart';
 import 'package:timesheet/ui/windows/views/subjects_categories_view.dart';
+import 'package:timesheet/ui/windows/views/timetracker_view.dart';
 import 'package:timesheet/ui/windows/views/timesheet_view.dart';
 
 class WindowsTimesheet extends StatefulWidget {
@@ -25,7 +26,7 @@ class _WindowsTimesheetState extends State<WindowsTimesheet> {
           PaneItem(
             icon: const WindowsIcon(WindowsIcons.stopwatch),
             title: const Text('Timetracker'),
-            body: const _MockView(title: 'Timetracker'),
+            body: const TimetrackerView(),
           ),
           PaneItem(
             icon: const WindowsIcon(WindowsIcons.calendar),
