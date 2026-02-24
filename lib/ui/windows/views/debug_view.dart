@@ -51,7 +51,10 @@ class _DebugViewState extends State<DebugView> {
                 child: const Text('Show dialog'),
                 onPressed: () {
                   DialogManager.warningConfirmation(
+                    title: 'Confirm',
                     message: 'Confirm dialog?',
+                    confirmText: 'Yes',
+                    cancelText: 'Cancel',
                     onResult: (confirmed) {
                       if (confirmed) {
                         InfoBarManager.success('Dialog option confirmed');

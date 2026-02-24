@@ -14,14 +14,26 @@ class DialogManager {
   BuildContext? get _context => _navigatorKey?.currentContext;
 
   static void warningConfirmation({
+    required String title,
     required String message,
+    required String confirmText,
+    required String cancelText,
     required void Function(bool confirmed) onResult,
   }) {
-    _instance._warningConfirmation(message: message, onResult: onResult);
+    _instance._warningConfirmation(
+      title: title,
+      message: message,
+      confirmText: confirmText,
+      cancelText: cancelText,
+      onResult: onResult,
+    );
   }
 
   void _warningConfirmation({
+    required String title,
     required String message,
+    required String confirmText,
+    required String cancelText,
     required void Function(bool confirmed) onResult,
   }) {
     final context = _context;
@@ -33,12 +45,15 @@ class DialogManager {
     showDialog<bool>(
       context: context,
       builder: (ctx) => ContentDialog(
-        title: Text('Warning'),
+        title: Text(title),
         content: Text(message),
         actions: [
-          Button(child: Text('No'), onPressed: () => Navigator.pop(ctx, false)),
+          Button(
+            child: Text(cancelText),
+            onPressed: () => Navigator.pop(ctx, false),
+          ),
           FilledButton(
-            child: Text('Yes'),
+            child: Text(confirmText),
             onPressed: () => Navigator.pop(ctx, true),
           ),
         ],
