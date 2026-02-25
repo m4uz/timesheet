@@ -61,22 +61,3 @@ class _WindowsTimesheetState extends State<WindowsTimesheet> {
     );
   }
 }
-
-class _MockView extends StatelessWidget {
-  const _MockView({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return ScaffoldPage(
-      header: PageHeader(title: Text(title)),
-      content: Center(
-        child: Text(
-          '$title — mock view',
-          style: FluentTheme.of(context).typography.body,
-        ),
-      ),
-    );
-  }
-}

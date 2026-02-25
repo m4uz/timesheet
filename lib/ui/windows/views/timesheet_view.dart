@@ -25,20 +25,36 @@ class _TimesheetViewState extends State<TimesheetView> {
   final TextEditingController _filterController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    _filterController.text = context.read<TimesheetProvider>().filter;
+  }
+
+  @override
   void dispose() {
     _filterController.dispose();
     super.dispose();
   }
 
-  ({double dayW, double datePickerW, double timePickerW, double durationW, double spacingW})
-      _calculateLayoutDimensions(BoxConstraints constraints) {
-    const fixedPrefTotal = _dayPrefW +
+  ({
+    double dayW,
+    double datePickerW,
+    double timePickerW,
+    double durationW,
+    double spacingW,
+  })
+  _calculateLayoutDimensions(BoxConstraints constraints) {
+    const fixedPrefTotal =
+        _dayPrefW +
         _datePickerPrefW +
         _timePickerPrefW +
         _timePickerPrefW +
         _durationPrefW +
         _spacingPrefW * _spacingCount;
-    final scale = ((constraints.maxWidth - 0.001) / fixedPrefTotal).clamp(0.0, 1.0);
+    final scale = ((constraints.maxWidth - 0.001) / fixedPrefTotal).clamp(
+      0.0,
+      1.0,
+    );
     return (
       dayW: _dayPrefW * scale,
       datePickerW: _datePickerPrefW * scale,
@@ -66,31 +82,52 @@ class _TimesheetViewState extends State<TimesheetView> {
             commandBar: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                const Text('From'),
+                const SizedBox(width: 8),
                 SizedBox(
-                  width: 140,
-                  child: DatePicker(
-                    header: 'From',
-                    selected: provider.fromDate,
-                    startDate: DateTime.now().subtract(const Duration(days: 365)),
-                    endDate: DateTime.now().add(const Duration(days: 365)),
-                    onChanged: (date) {
-                      provider.setFromDate(date);
+                  width: 120,
+                  child: CalendarDatePicker(
+                    initialStart: provider.fromDate,
+                    onSelectionChanged: (calendarSelection) {
+                      if (calendarSelection.startDate == null) {
+                        return;
+                      }
+                      if (calendarSelection.startDate!.isAtSameMomentAs(
+                        provider.fromDate,
+                      )) {
+                        return;
+                      }
+                      provider.setFromDate(calendarSelection.startDate!);
                       provider.loadTimesheetItems();
                     },
+                    minDate: DateTime.now().subtract(const Duration(days: 365)),
+                    firstDayOfWeek: DateTime.monday,
+                    closeOnSelection: false,
+                    dateFormatter: DateFormat('d.M.yyyy'),
                   ),
                 ),
                 const SizedBox(width: 8),
+                const Text('To'),
+                const SizedBox(width: 8),
                 SizedBox(
-                  width: 140,
-                  child: DatePicker(
-                    header: 'To',
-                    selected: provider.toDate,
-                    startDate: DateTime.now().subtract(const Duration(days: 365)),
-                    endDate: DateTime.now().add(const Duration(days: 365)),
-                    onChanged: (date) {
-                      provider.setToDate(date);
+                  width: 120,
+                  child: CalendarDatePicker(
+                    initialStart: provider.toDate,
+                    onSelectionChanged: (calendarSelection) {
+                      if (calendarSelection.startDate == null) {
+                        return;
+                      }
+                      if (calendarSelection.startDate!.isAtSameMomentAs(
+                        provider.toDate,
+                      )) {
+                        return;
+                      }
+                      provider.setToDate(calendarSelection.startDate!);
                       provider.loadTimesheetItems();
                     },
+                    firstDayOfWeek: DateTime.monday,
+                    closeOnSelection: false,
+                    dateFormatter: DateFormat('d.M.yyyy'),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -150,10 +187,8 @@ class _TimesheetViewState extends State<TimesheetView> {
         Expanded(
           child: ListView.builder(
             itemCount: provider.items.length,
-            itemBuilder: (context, index) => _buildDataRow(
-              context: context,
-              item: provider.items[index],
-            ),
+            itemBuilder: (context, index) =>
+                _buildDataRow(context: context, item: provider.items[index]),
           ),
         ),
         _buildFooter(
@@ -169,9 +204,7 @@ class _TimesheetViewState extends State<TimesheetView> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: const Color(0xFFE1E1E1)),
-        ),
+        border: Border(bottom: BorderSide(color: const Color(0xFFE1E1E1))),
         color: const Color(0x0D000000),
       ),
       child: LayoutBuilder(
@@ -203,9 +236,11 @@ class _TimesheetViewState extends State<TimesheetView> {
   }
 
   Widget _headerCell(BuildContext context, String label, double? width) {
-    final style = FluentTheme.of(context).typography.body?.copyWith(
-          fontWeight: FontWeight.w600,
-        ) ?? const TextStyle(fontWeight: FontWeight.w600);
+    final style =
+        FluentTheme.of(
+          context,
+        ).typography.body?.copyWith(fontWeight: FontWeight.w600) ??
+        const TextStyle(fontWeight: FontWeight.w600);
     final child = Text(label, style: style);
     if (width != null) {
       return SizedBox(width: width, child: child);
@@ -220,9 +255,7 @@ class _TimesheetViewState extends State<TimesheetView> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: const Color(0xFFE1E1E1)),
-        ),
+        border: Border(bottom: BorderSide(color: const Color(0xFFE1E1E1))),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -240,26 +273,37 @@ class _TimesheetViewState extends State<TimesheetView> {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(width: d.dayW, child: Text(dayLabel, style: bodyStyle)),
+              SizedBox(
+                width: d.dayW,
+                child: Text(dayLabel, style: bodyStyle),
+              ),
               SizedBox(width: d.spacingW),
-              SizedBox(width: d.datePickerW, child: Text(dateStr, style: bodyStyle)),
+              SizedBox(
+                width: d.datePickerW,
+                child: Text(dateStr, style: bodyStyle),
+              ),
               SizedBox(width: d.spacingW),
-              SizedBox(width: d.timePickerW, child: Text(fromStr, style: bodyStyle)),
+              SizedBox(
+                width: d.timePickerW,
+                child: Text(fromStr, style: bodyStyle),
+              ),
               SizedBox(width: d.spacingW),
-              SizedBox(width: d.timePickerW, child: Text(toStr, style: bodyStyle)),
+              SizedBox(
+                width: d.timePickerW,
+                child: Text(toStr, style: bodyStyle),
+              ),
               SizedBox(width: d.spacingW),
               SizedBox(
                 width: d.durationW,
-                child: Text(toHmString(item.to.difference(item.from)), style: bodyStyle),
+                child: Text(
+                  toHmString(item.to.difference(item.from)),
+                  style: bodyStyle,
+                ),
               ),
               SizedBox(width: d.spacingW),
-              Expanded(
-                child: SelectableText(item.subject, style: bodyStyle),
-              ),
+              Expanded(child: SelectableText(item.subject, style: bodyStyle)),
               SizedBox(width: d.spacingW),
-              Expanded(
-                child: SelectableText(item.category, style: bodyStyle),
-              ),
+              Expanded(child: SelectableText(item.category, style: bodyStyle)),
               SizedBox(width: d.spacingW),
               Expanded(
                 child: SelectableText(item.description, style: bodyStyle),
@@ -279,9 +323,7 @@ class _TimesheetViewState extends State<TimesheetView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: const Color(0xFFE1E1E1)),
-        ),
+        border: Border(top: BorderSide(color: const Color(0xFFE1E1E1))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
