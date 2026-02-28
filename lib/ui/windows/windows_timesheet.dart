@@ -1,5 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
+import 'package:timesheet/providers/auth_provider.dart';
 import 'package:timesheet/ui/windows/views/config_view.dart';
 import 'package:timesheet/ui/windows/views/debug_view.dart';
 import 'package:timesheet/ui/windows/views/subjects_categories_view.dart';
@@ -54,7 +56,11 @@ class _WindowsTimesheetState extends State<WindowsTimesheet> {
           PaneItemSeparator(),
           PaneItem(
             icon: const WindowsIcon(WindowsIcons.contact),
-            title: const Text('Maurice Moss'),
+            title: Consumer<AuthProvider>(
+              builder: (context, authProvider, _) {
+                return Text(authProvider.userName ?? 'User');
+              },
+            ),
           ),
         ],
       ),

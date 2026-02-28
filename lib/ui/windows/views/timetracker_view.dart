@@ -147,7 +147,7 @@ class _TimetrackerItemRow extends StatefulWidget {
 class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
   static const double _btnW = 30.0;
   static const double _dayW = 40.0;
-  static const double _dateW = 100.0;
+  static const double _dateW = 110.0;
   static const double _timeW = 70.0;
   static const double _workedW = 55.0;
   static const double _spacingW = 8.0;
@@ -230,7 +230,7 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
           // Date
           // --------------------------------------------------
           SizedBox(
-            width: _dateW + 10,
+            width: _dateW,
             child: CalendarDatePicker(
               initialStart: widget.item.from,
               onSelectionChanged: (calendarSelection) {
