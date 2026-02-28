@@ -1,0 +1,87 @@
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
+import 'package:timesheet/providers/auth_provider.dart';
+import 'package:timesheet/ui/windows/views/config_view.dart';
+import 'package:timesheet/ui/windows/views/debug_view.dart';
+import 'package:timesheet/ui/windows/views/subjects_categories_view.dart';
+import 'package:timesheet/ui/windows/views/timetracker_view.dart';
+import 'package:timesheet/ui/windows/views/timesheet_view.dart';
+
+class WindowsTimesheet extends StatefulWidget {
+  const WindowsTimesheet({super.key});
+
+  @override
+  State<WindowsTimesheet> createState() => _WindowsTimesheetState();
+}
+
+class _WindowsTimesheetState extends State<WindowsTimesheet> {
+  int _selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return NavigationView(
+      pane: NavigationPane(
+        selected: _selectedIndex,
+        onChanged: (index) => setState(() => _selectedIndex = index),
+        items: [
+          // --------------------------------------------------
+          // Timetracker
+          // --------------------------------------------------
+          PaneItem(
+            icon: const WindowsIcon(WindowsIcons.stopwatch),
+            title: const Text('Timetracker'),
+            body: const TimetrackerView(),
+          ),
+          // --------------------------------------------------
+          // Timesheet
+          // --------------------------------------------------
+          PaneItem(
+            icon: const WindowsIcon(WindowsIcons.calendar),
+            title: const Text('Timesheet'),
+            body: const TimesheetView(),
+          ),
+          // --------------------------------------------------
+          // Subjects & Categories
+          // --------------------------------------------------
+          PaneItem(
+            icon: const WindowsIcon(WindowsIcons.bulleted_list),
+            title: const Text('Subjects & Categories'),
+            body: const SubjectsCategoriesView(),
+          ),
+          // --------------------------------------------------
+          // Config
+          // --------------------------------------------------
+          PaneItem(
+            icon: const WindowsIcon(WindowsIcons.settings),
+            title: const Text('Config'),
+            body: const ConfigView(),
+          ),
+          // --------------------------------------------------
+          // Debug
+          // --------------------------------------------------
+          if (!kReleaseMode)
+            PaneItem(
+              icon: const WindowsIcon(WindowsIcons.bug),
+              title: const Text('Debug'),
+              body: const DebugView(),
+            ),
+        ],
+        footerItems: [
+          // --------------------------------------------------
+          // Current user
+          // --------------------------------------------------
+          PaneItemSeparator(),
+          PaneItem(
+            icon: const WindowsIcon(WindowsIcons.contact),
+            title: Consumer<AuthProvider>(
+              builder: (context, authProvider, _) {
+                return Text(authProvider.userName ?? 'User');
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
