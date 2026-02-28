@@ -167,14 +167,19 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
   @override
   void didUpdateWidget(_TimetrackerItemRow oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Only update controllers if the item changed from external source
+    // (not from our own typing)
     if (widget.item.id != oldWidget.item.id ||
         widget.item.itemIndex != oldWidget.item.itemIndex) {
+      // Item was replaced (e.g., reordered, deleted and recreated)
       _subjectController.text = widget.item.subject;
       _descriptionController.text = widget.item.description;
     } else {
+      // Check if subject changed externally (not from our controller)
       if (widget.item.subject != _subjectController.text) {
         _subjectController.text = widget.item.subject;
       }
+      // Check if description changed externally (not from our controller)
       if (widget.item.description != _descriptionController.text) {
         _descriptionController.text = widget.item.description;
       }
@@ -192,37 +197,47 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
     final dayLabel = DateFormat('EEE', locale).format(widget.item.from);
-    final bodyStyle = FluentTheme.of(context).typography.body;
 
     return Container(
-      key: widget.key,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: const Color(0xFFE1E1E1))),
+        border: Border(
+          bottom: BorderSide(
+            color: FluentTheme.of(context).resources.dividerStrokeColorDefault,
+          ),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // --------------------------------------------------
+          // Drag handle
+          // --------------------------------------------------
           SizedBox(
             width: _btnW,
-            child: material.ReorderableDragStartListener(
+            child: ReorderableDragStartListener(
               index: widget.index,
-              child: const Icon(FluentIcons.move, size: 16),
+              child: Icon(FluentIcons.move),
             ),
           ),
           SizedBox(width: _spacingW),
-          SizedBox(
-            width: _dayW,
-            child: Text(dayLabel, style: bodyStyle),
-          ),
+          // --------------------------------------------------
+          // Day
+          // --------------------------------------------------
+          SizedBox(width: _dayW, child: Text(dayLabel)),
           SizedBox(width: _spacingW),
+          // --------------------------------------------------
+          // Date
+          // --------------------------------------------------
           SizedBox(
-            width: _dateW,
-            child: DatePicker(
-              selected: widget.item.from,
-              startDate: DateTime.now().subtract(const Duration(days: 365)),
-              endDate: DateTime.now().add(const Duration(days: 365)),
-              onChanged: (date) {
+            width: _dateW + 10,
+            child: CalendarDatePicker(
+              initialStart: widget.item.from,
+              onSelectionChanged: (calendarSelection) {
+                // if (calendarSelection.startDate == null) {
+                //   return;
+                // }
+                final date = calendarSelection.startDate!;
                 final newFrom = DateTime(
                   date.year,
                   date.month,
@@ -243,9 +258,16 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
                   widget.item.copyWith(from: newFrom, to: newTo),
                 );
               },
+              minDate: DateTime.now().subtract(const Duration(days: 365)),
+              maxDate: DateTime.now().add(const Duration(days: 365)),
+              firstDayOfWeek: 1,
+              dateFormatter: DateFormat('d.M.yyyy'),
             ),
           ),
           SizedBox(width: _spacingW),
+          // --------------------------------------------------
+          // From
+          // --------------------------------------------------
           SizedBox(
             width: _timeW,
             child: TimePicker(
@@ -268,6 +290,9 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
             ),
           ),
           SizedBox(width: _spacingW),
+          // --------------------------------------------------
+          // To
+          // --------------------------------------------------
           SizedBox(
             width: _timeW,
             child: TimePicker(
@@ -290,24 +315,22 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
             ),
           ),
           SizedBox(width: _spacingW),
+          // --------------------------------------------------
+          // Worked
+          // --------------------------------------------------
           SizedBox(
             width: _workedW,
             child: Text(
               toHmString(widget.item.to.difference(widget.item.from)),
-              style: bodyStyle,
             ),
           ),
           SizedBox(width: _spacingW),
+          // --------------------------------------------------
+          // Subject
+          // --------------------------------------------------
           Expanded(
             child: AutoSuggestBox<String>(
               controller: _subjectController,
-              placeholder: 'Subject',
-              items: widget.userConfigProvider.subjects
-                  .map(
-                    (s) =>
-                        AutoSuggestBoxItem<String>(value: s.uri, label: s.uri),
-                  )
-                  .toList(),
               onChanged: (value, _) {
                 widget.timeTrackerProvider.updateItem(
                   widget.item.copyWith(subject: value),
@@ -318,14 +341,25 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
                   widget.item.copyWith(subject: selected.value),
                 );
               },
+              clearButtonEnabled: false,
+              placeholder: 'Subject',
+              items: widget.userConfigProvider.subjects
+                  .map(
+                    (s) =>
+                        AutoSuggestBoxItem<String>(value: s.uri, label: s.uri),
+                  )
+                  .toList(),
             ),
           ),
           SizedBox(width: _spacingW),
+          // --------------------------------------------------
+          // Description
+          // --------------------------------------------------
           Expanded(
             child: TextBox(
               controller: _descriptionController,
               placeholder: 'Description',
-              maxLines: 1,
+              maxLines: null,
               onChanged: (text) {
                 widget.timeTrackerProvider.updateItem(
                   widget.item.copyWith(description: text),
@@ -334,13 +368,37 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
             ),
           ),
           SizedBox(width: _spacingW),
+          // --------------------------------------------------
+          // Status
+          // --------------------------------------------------
           SizedBox(
             width: _btnW,
             child: widget.timeTrackerProvider.isSavingItem(widget.item)
-                ? const ProgressRing()
-                : _statusIcon(widget.item.status),
+                ? Center(
+                    child: SizedBox.square(
+                      dimension: 16,
+                      child: const ProgressRing(strokeWidth: 3),
+                    ),
+                  )
+                : switch (widget.item.status) {
+                    TimetrackerItemStatus.staged => Icon(
+                      FluentIcons.cloud,
+                      color: material.Colors.grey,
+                    ),
+                    TimetrackerItemStatus.saved => Icon(
+                      FluentIcons.cloud,
+                      color: material.Colors.green,
+                    ),
+                    TimetrackerItemStatus.error => Icon(
+                      FluentIcons.cloud,
+                      color: material.Colors.red,
+                    ),
+                  },
           ),
           SizedBox(width: _spacingW),
+          // --------------------------------------------------
+          // Delete button
+          // --------------------------------------------------
           SizedBox(
             width: _btnW,
             child: IconButton(
@@ -352,16 +410,5 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
         ],
       ),
     );
-  }
-
-  Widget _statusIcon(TimetrackerItemStatus status) {
-    switch (status) {
-      case TimetrackerItemStatus.staged:
-        return Icon(FluentIcons.cloud, size: 16, color: material.Colors.grey);
-      case TimetrackerItemStatus.saved:
-        return Icon(FluentIcons.cloud, size: 16, color: material.Colors.green);
-      case TimetrackerItemStatus.error:
-        return Icon(FluentIcons.cloud, size: 16, color: material.Colors.red);
-    }
   }
 }
