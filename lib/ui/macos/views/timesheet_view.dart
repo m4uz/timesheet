@@ -5,9 +5,9 @@ import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/models/timesheet_item.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
-import 'package:timesheet/ui/macos_toolbar_text_field.dart';
-import 'package:timesheet/ui/snackbar.dart';
-import 'package:timesheet/ui/cupertino_calendar_toolbar_button.dart';
+import 'package:timesheet/ui/macos/macos_toolbar_text_field.dart';
+import 'package:timesheet/ui/macos/snackbar.dart';
+import 'package:timesheet/ui/macos/cupertino_calendar_toolbar_button.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
 class TimeSheetView extends StatefulWidget {

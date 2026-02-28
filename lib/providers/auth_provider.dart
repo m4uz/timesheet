@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:timesheet/models/result.dart';
 import 'package:timesheet/models/session.dart';
 import 'package:timesheet/repositories/auth_repository.dart';
 import 'package:timesheet/services/session_manager.dart';
-import 'package:timesheet/ui/dialog.dart';
-import 'package:timesheet/ui/snackbar.dart';
+import 'package:timesheet/ui/macos/dialog.dart' as mac_dialog;
+import 'package:timesheet/ui/macos/snackbar.dart';
+import 'package:timesheet/ui/windows/dialog.dart' as win_dialog;
+import 'package:timesheet/ui/windows/infobar.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository;
@@ -53,7 +56,11 @@ class AuthProvider extends ChangeNotifier {
       case Error():
         _isLoading = false;
         notifyListeners();
-        SnackBarManager.error(result.message);
+        if (Platform.isWindows) {
+          InfoBarManager.error(result.message);
+        } else {
+          SnackBarManager.error(result.message);
+        }
     }
   }
 
@@ -133,20 +140,37 @@ class AuthProvider extends ChangeNotifier {
         ? (timeRemaining.inSeconds / 60).ceil()
         : 0;
 
-    DialogManager.warningConfirmation(
-      title: 'Session Expiring Soon',
-      message:
-          'Your session will expire in $minutes minute${minutes != 1 ? 's' : ''}. '
-          'Would you like to extend your session?',
-      confirmText: 'Extend Session',
-      cancelText: 'Log Out',
-      onResult: (confirmed) {
-        if (confirmed) {
-          extendSession();
-        } else {
-          logout();
-        }
-      },
-    );
+    const title = 'Session Expiring';
+    final message =
+        'Your session will expire in $minutes minute${minutes != 1 ? 's' : ''}. '
+        'Would you like to extend your session?';
+    const confirmText = 'Extend Session';
+    const cancelText = 'Log Out';
+
+    void onResult(bool confirmed) {
+      if (confirmed) {
+        extendSession();
+      } else {
+        logout();
+      }
+    }
+
+    if (Platform.isWindows) {
+      win_dialog.DialogManager.warningConfirmation(
+        title: title,
+        message: message,
+        confirmText: confirmText,
+        cancelText: cancelText,
+        onResult: onResult,
+      );
+    } else {
+      mac_dialog.DialogManager.warningConfirmation(
+        title: title,
+        message: message,
+        confirmText: confirmText,
+        cancelText: cancelText,
+        onResult: onResult,
+      );
+    }
   }
 }
