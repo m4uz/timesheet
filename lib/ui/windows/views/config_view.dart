@@ -165,8 +165,9 @@ class _ConfigViewState extends State<ConfigView> {
                     onPressed: provider.isLoading || config == null
                         ? null
                         : () {
-                            final portError =
-                                _validatePort(_proxyPortController.text);
+                            final portError = _validatePort(
+                              _proxyPortController.text,
+                            );
                             if (portError != null) {
                               InfoBarManager.error(portError);
                               return;
@@ -183,132 +184,133 @@ class _ConfigViewState extends State<ConfigView> {
           content: provider.isLoading
               ? const Center(child: ProgressRing())
               : config == null
-                  // --------------------------------------------------
-                  // Empty state
-                  // --------------------------------------------------
-                  ? Center(
-                      child: Text(
-                        'No config loaded.',
-                        style: FluentTheme.of(context).typography.body,
+              // --------------------------------------------------
+              // Empty state
+              // --------------------------------------------------
+              ? Center(
+                  child: Text(
+                    'No config loaded.',
+                    style: FluentTheme.of(context).typography.body,
+                  ),
+                )
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // --------------------------------------------------
+                      // App directories
+                      // --------------------------------------------------
+                      _buildSectionTitle(context, 'App directories'),
+                      _buildRow(
+                        context: context,
+                        label: 'Application Support',
+                        value: SelectableText(
+                          provider.appSupportPath ?? '-',
+                          style: FluentTheme.of(context).typography.body,
+                        ),
+                        action: IconButton(
+                          icon: const Icon(FluentIcons.folder),
+                          onPressed:
+                              provider.appSupportPath == null ||
+                                  provider.appSupportPath!.isEmpty
+                              ? null
+                              : () =>
+                                    _openAppSupportDir(provider.appSupportPath),
+                        ),
                       ),
-                    )
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // --------------------------------------------------
-                          // App directories
-                          // --------------------------------------------------
-                          _buildSectionTitle(context, 'App directories'),
-                          _buildRow(
-                            context: context,
-                            label: 'Application Support',
-                            value: SelectableText(
-                              provider.appSupportPath ?? '-',
-                              style: FluentTheme.of(context).typography.body,
-                            ),
-                            action: IconButton(
-                              icon: const Icon(FluentIcons.folder),
-                              onPressed: provider.appSupportPath == null ||
-                                      provider.appSupportPath!.isEmpty
-                                  ? null
-                                  : () =>
-                                      _openAppSupportDir(provider.appSupportPath),
-                            ),
-                          ),
-                          const Divider(),
-                          const SizedBox(height: 16),
-                          // --------------------------------------------------
-                          // Logging
-                          // --------------------------------------------------
-                          _buildSectionTitle(context, 'Logging'),
-                          _buildRow(
-                            context: context,
-                            label: 'Log file',
-                            value: TextBox(controller: _logFileController),
-                          ),
-                          _buildRow(
-                            context: context,
-                            label: 'Log level',
-                            value: ComboBox<String>(
-                              value: _logLevel,
-                              items: _logLevels
-                                  .map(
-                                    (item) => ComboBoxItem<String>(
-                                      value: item,
-                                      child: Text(item),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (value) {
-                                if (value != null) {
-                                  setState(() => _logLevel = value);
-                                }
-                              },
-                              isExpanded: true,
-                            ),
-                          ),
-                          const Divider(),
-                          const SizedBox(height: 16),
-                          // --------------------------------------------------
-                          // Storage
-                          // --------------------------------------------------
-                          _buildSectionTitle(context, 'Storage'),
-                          _buildRow(
-                            context: context,
-                            label: 'Timetracker DB',
-                            value: TextBox(controller: _timetrackerDbController),
-                          ),
-                          const Divider(),
-                          const SizedBox(height: 16),
-                          // --------------------------------------------------
-                          // Authentication
-                          // --------------------------------------------------
-                          _buildSectionTitle(context, 'Authentication'),
-                          _buildRow(
-                            context: context,
-                            label: 'OIDC URL',
-                            value: TextBox(controller: _oidcIssuerUrlController),
-                          ),
-                          _buildRow(
-                            context: context,
-                            label: 'Client ID',
-                            value: TextBox(controller: _oidcClientIdController),
-                          ),
-                          const Divider(),
-                          const SizedBox(height: 16),
-                          // --------------------------------------------------
-                          // WTM
-                          // --------------------------------------------------
-                          _buildSectionTitle(context, 'WTM'),
-                          _buildRow(
-                            context: context,
-                            label: 'URL',
-                            value: TextBox(controller: _wtmBaseUrlController),
-                          ),
-                          const Divider(),
-                          const SizedBox(height: 16),
-                          // --------------------------------------------------
-                          // Proxy
-                          // --------------------------------------------------
-                          _buildSectionTitle(context, 'Proxy'),
-                          _buildRow(
-                            context: context,
-                            label: 'Host',
-                            value: TextBox(controller: _proxyHostController),
-                          ),
-                          _buildRow(
-                            context: context,
-                            label: 'Port',
-                            value: TextBox(
-                              controller: _proxyPortController,
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                        ],
+                      const Divider(),
+                      const SizedBox(height: 16),
+                      // --------------------------------------------------
+                      // Logging
+                      // --------------------------------------------------
+                      _buildSectionTitle(context, 'Logging'),
+                      _buildRow(
+                        context: context,
+                        label: 'Log file',
+                        value: TextBox(controller: _logFileController),
                       ),
-                    ),
+                      _buildRow(
+                        context: context,
+                        label: 'Log level',
+                        value: ComboBox<String>(
+                          value: _logLevel,
+                          items: _logLevels
+                              .map(
+                                (item) => ComboBoxItem<String>(
+                                  value: item,
+                                  child: Text(item),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => _logLevel = value);
+                            }
+                          },
+                          isExpanded: true,
+                        ),
+                      ),
+                      const Divider(),
+                      const SizedBox(height: 16),
+                      // --------------------------------------------------
+                      // Storage
+                      // --------------------------------------------------
+                      _buildSectionTitle(context, 'Storage'),
+                      _buildRow(
+                        context: context,
+                        label: 'Timetracker DB',
+                        value: TextBox(controller: _timetrackerDbController),
+                      ),
+                      const Divider(),
+                      const SizedBox(height: 16),
+                      // --------------------------------------------------
+                      // Authentication
+                      // --------------------------------------------------
+                      _buildSectionTitle(context, 'Authentication'),
+                      _buildRow(
+                        context: context,
+                        label: 'OIDC URL',
+                        value: TextBox(controller: _oidcIssuerUrlController),
+                      ),
+                      _buildRow(
+                        context: context,
+                        label: 'Client ID',
+                        value: TextBox(controller: _oidcClientIdController),
+                      ),
+                      const Divider(),
+                      const SizedBox(height: 16),
+                      // --------------------------------------------------
+                      // WTM
+                      // --------------------------------------------------
+                      _buildSectionTitle(context, 'WTM'),
+                      _buildRow(
+                        context: context,
+                        label: 'URL',
+                        value: TextBox(controller: _wtmBaseUrlController),
+                      ),
+                      const Divider(),
+                      const SizedBox(height: 16),
+                      // --------------------------------------------------
+                      // Proxy
+                      // --------------------------------------------------
+                      _buildSectionTitle(context, 'Proxy'),
+                      _buildRow(
+                        context: context,
+                        label: 'Host',
+                        value: TextBox(controller: _proxyHostController),
+                      ),
+                      _buildRow(
+                        context: context,
+                        label: 'Port',
+                        value: TextBox(
+                          controller: _proxyPortController,
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
         );
       },
     );
@@ -317,12 +319,7 @@ class _ConfigViewState extends State<ConfigView> {
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        title,
-        style: FluentTheme.of(context).typography.title?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-      ),
+      child: Text(title, style: FluentTheme.of(context).typography.subtitle),
     );
   }
 
@@ -339,10 +336,7 @@ class _ConfigViewState extends State<ConfigView> {
         children: [
           SizedBox(
             width: _labelWidth,
-            child: Text(
-              label,
-              style: FluentTheme.of(context).typography.body,
-            ),
+            child: Text(label, style: FluentTheme.of(context).typography.body),
           ),
           const SizedBox(width: 12),
           Expanded(child: value),
