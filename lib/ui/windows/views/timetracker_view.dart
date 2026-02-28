@@ -107,20 +107,18 @@ class TimetrackerView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: const Color(0xFFE1E1E1))),
+        border: Border(
+          top: BorderSide(
+            color: FluentTheme.of(context).resources.dividerStrokeColorDefault,
+          ),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text(
-            'Items: ${provider.itemCount}',
-            style: FluentTheme.of(context).typography.body,
-          ),
+          Text('Items: ${provider.itemCount}'),
           const SizedBox(width: 8),
-          SelectableText(
-            'Worked: ${toHmString(provider.totalDuration)}',
-            style: FluentTheme.of(context).typography.body,
-          ),
+          Text('Worked: ${toHmString(provider.totalDuration)}'),
           const SizedBox(width: 8),
         ],
       ),
