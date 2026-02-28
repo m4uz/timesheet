@@ -18,6 +18,9 @@ class _DebugViewState extends State<DebugView> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // --------------------------------------------------
+          // InfoBar messages
+          // --------------------------------------------------
           Row(
             children: [
               Button(
@@ -45,6 +48,9 @@ class _DebugViewState extends State<DebugView> {
             ],
           ),
           const SizedBox(height: 16),
+          // --------------------------------------------------
+          // Confirmation dialog
+          // --------------------------------------------------
           Row(
             children: [
               Button(

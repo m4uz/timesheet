@@ -82,6 +82,9 @@ class _TimesheetViewState extends State<TimesheetView> {
             commandBar: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // --------------------------------------------------
+                // From
+                // --------------------------------------------------
                 const Text('From'),
                 const SizedBox(width: 8),
                 SizedBox(
@@ -107,6 +110,9 @@ class _TimesheetViewState extends State<TimesheetView> {
                   ),
                 ),
                 const SizedBox(width: 8),
+                // --------------------------------------------------
+                // To
+                // --------------------------------------------------
                 const Text('To'),
                 const SizedBox(width: 8),
                 SizedBox(
@@ -131,6 +137,9 @@ class _TimesheetViewState extends State<TimesheetView> {
                   ),
                 ),
                 const SizedBox(width: 8),
+                // --------------------------------------------------
+                // Filter
+                // --------------------------------------------------
                 SizedBox(
                   width: 160,
                   child: TextBox(
@@ -140,6 +149,9 @@ class _TimesheetViewState extends State<TimesheetView> {
                   ),
                 ),
                 const SizedBox(width: 8),
+                // --------------------------------------------------
+                // Refresh
+                // --------------------------------------------------
                 Tooltip(
                   message: 'Refresh timesheet items',
                   child: IconButton(
@@ -183,7 +195,13 @@ class _TimesheetViewState extends State<TimesheetView> {
 
     return Column(
       children: [
+        // --------------------------------------------------
+        // Header
+        // --------------------------------------------------
         _buildHeader(context),
+        // --------------------------------------------------
+        // Items list
+        // --------------------------------------------------
         Expanded(
           child: ListView.builder(
             itemCount: provider.items.length,
@@ -191,6 +209,9 @@ class _TimesheetViewState extends State<TimesheetView> {
                 _buildDataRow(context: context, item: provider.items[index]),
           ),
         ),
+        // --------------------------------------------------
+        // Footer summary
+        // --------------------------------------------------
         _buildFooter(
           context,
           itemCount: provider.itemCount,
@@ -273,26 +294,41 @@ class _TimesheetViewState extends State<TimesheetView> {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // --------------------------------------------------
+              // Day
+              // --------------------------------------------------
               SizedBox(
                 width: d.dayW,
                 child: Text(dayLabel, style: bodyStyle),
               ),
               SizedBox(width: d.spacingW),
+              // --------------------------------------------------
+              // Date
+              // --------------------------------------------------
               SizedBox(
                 width: d.datePickerW,
                 child: Text(dateStr, style: bodyStyle),
               ),
               SizedBox(width: d.spacingW),
+              // --------------------------------------------------
+              // From
+              // --------------------------------------------------
               SizedBox(
                 width: d.timePickerW,
                 child: Text(fromStr, style: bodyStyle),
               ),
               SizedBox(width: d.spacingW),
+              // --------------------------------------------------
+              // To
+              // --------------------------------------------------
               SizedBox(
                 width: d.timePickerW,
                 child: Text(toStr, style: bodyStyle),
               ),
               SizedBox(width: d.spacingW),
+              // --------------------------------------------------
+              // Worked
+              // --------------------------------------------------
               SizedBox(
                 width: d.durationW,
                 child: Text(
@@ -301,10 +337,19 @@ class _TimesheetViewState extends State<TimesheetView> {
                 ),
               ),
               SizedBox(width: d.spacingW),
+              // --------------------------------------------------
+              // Subject
+              // --------------------------------------------------
               Expanded(child: SelectableText(item.subject, style: bodyStyle)),
               SizedBox(width: d.spacingW),
+              // --------------------------------------------------
+              // Category
+              // --------------------------------------------------
               Expanded(child: SelectableText(item.category, style: bodyStyle)),
               SizedBox(width: d.spacingW),
+              // --------------------------------------------------
+              // Description
+              // --------------------------------------------------
               Expanded(
                 child: SelectableText(item.description, style: bodyStyle),
               ),
@@ -328,15 +373,9 @@ class _TimesheetViewState extends State<TimesheetView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text(
-            'Items: $itemCount',
-            style: FluentTheme.of(context).typography.body,
-          ),
+          Text('Items: $itemCount'),
           const SizedBox(width: 8),
-          SelectableText(
-            'Worked: ${toHmString(totalDuration)}',
-            style: FluentTheme.of(context).typography.body,
-          ),
+          Text('Worked: ${toHmString(totalDuration)}'),
           const SizedBox(width: 8),
         ],
       ),

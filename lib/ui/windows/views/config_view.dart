@@ -143,6 +143,9 @@ class _ConfigViewState extends State<ConfigView> {
             commandBar: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // --------------------------------------------------
+                // Reload config
+                // --------------------------------------------------
                 Tooltip(
                   message: 'Reload config',
                   child: IconButton(
@@ -153,6 +156,9 @@ class _ConfigViewState extends State<ConfigView> {
                   ),
                 ),
                 const SizedBox(width: 8),
+                // --------------------------------------------------
+                // Save config
+                // --------------------------------------------------
                 Tooltip(
                   message: 'Save config',
                   child: FilledButton(
@@ -177,6 +183,9 @@ class _ConfigViewState extends State<ConfigView> {
           content: provider.isLoading
               ? const Center(child: ProgressRing())
               : config == null
+                  // --------------------------------------------------
+                  // Empty state
+                  // --------------------------------------------------
                   ? Center(
                       child: Text(
                         'No config loaded.',
@@ -188,6 +197,9 @@ class _ConfigViewState extends State<ConfigView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // --------------------------------------------------
+                          // App directories
+                          // --------------------------------------------------
                           _buildSectionTitle(context, 'App directories'),
                           _buildRow(
                             context: context,
@@ -207,6 +219,9 @@ class _ConfigViewState extends State<ConfigView> {
                           ),
                           const Divider(),
                           const SizedBox(height: 16),
+                          // --------------------------------------------------
+                          // Logging
+                          // --------------------------------------------------
                           _buildSectionTitle(context, 'Logging'),
                           _buildRow(
                             context: context,
@@ -236,6 +251,9 @@ class _ConfigViewState extends State<ConfigView> {
                           ),
                           const Divider(),
                           const SizedBox(height: 16),
+                          // --------------------------------------------------
+                          // Storage
+                          // --------------------------------------------------
                           _buildSectionTitle(context, 'Storage'),
                           _buildRow(
                             context: context,
@@ -244,6 +262,9 @@ class _ConfigViewState extends State<ConfigView> {
                           ),
                           const Divider(),
                           const SizedBox(height: 16),
+                          // --------------------------------------------------
+                          // Authentication
+                          // --------------------------------------------------
                           _buildSectionTitle(context, 'Authentication'),
                           _buildRow(
                             context: context,
@@ -257,6 +278,9 @@ class _ConfigViewState extends State<ConfigView> {
                           ),
                           const Divider(),
                           const SizedBox(height: 16),
+                          // --------------------------------------------------
+                          // WTM
+                          // --------------------------------------------------
                           _buildSectionTitle(context, 'WTM'),
                           _buildRow(
                             context: context,
@@ -265,6 +289,9 @@ class _ConfigViewState extends State<ConfigView> {
                           ),
                           const Divider(),
                           const SizedBox(height: 16),
+                          // --------------------------------------------------
+                          // Proxy
+                          // --------------------------------------------------
                           _buildSectionTitle(context, 'Proxy'),
                           _buildRow(
                             context: context,

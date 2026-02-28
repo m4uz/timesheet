@@ -61,6 +61,9 @@ class _SubjectsCategoriesViewState extends State<SubjectsCategoriesView> {
             commandBar: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // --------------------------------------------------
+                // Refresh data
+                // --------------------------------------------------
                 Tooltip(
                   message: 'Refresh subjects and categories',
                   child: IconButton(
@@ -71,6 +74,9 @@ class _SubjectsCategoriesViewState extends State<SubjectsCategoriesView> {
                   ),
                 ),
                 const SizedBox(width: 8),
+                // --------------------------------------------------
+                // Save changes
+                // --------------------------------------------------
                 Tooltip(
                   message: 'Save subjects and categories',
                   child: FilledButton(
@@ -90,6 +96,9 @@ class _SubjectsCategoriesViewState extends State<SubjectsCategoriesView> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // --------------------------------------------------
+                      // Subjects panel
+                      // --------------------------------------------------
                       Expanded(
                         child: _ListPanel<Subject>(
                           title: 'Subjects',
@@ -138,6 +147,9 @@ class _SubjectsCategoriesViewState extends State<SubjectsCategoriesView> {
                         ),
                       ),
                       const SizedBox(width: 24),
+                      // --------------------------------------------------
+                      // Categories panel
+                      // --------------------------------------------------
                       Expanded(
                         child: _ListPanel<Category>(
                           title: 'Categories',
@@ -242,6 +254,9 @@ class _ListPanel<T> extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // --------------------------------------------------
+          // Panel title + controls
+          // --------------------------------------------------
           Text(
             title,
             style: FluentTheme.of(context).typography.title?.copyWith(
@@ -251,6 +266,9 @@ class _ListPanel<T> extends StatelessWidget {
           const SizedBox(height: 8),
           _buildHeader(context, filteredItems),
           const SizedBox(height: 16),
+          // --------------------------------------------------
+          // Panel rows
+          // --------------------------------------------------
           ...filteredItems.map((item) {
             final isSelected = selectedItems.contains(item);
             return Padding(

@@ -33,6 +33,9 @@ class TimetrackerView extends StatelessWidget {
             commandBar: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // --------------------------------------------------
+                // Add item
+                // --------------------------------------------------
                 Tooltip(
                   message: 'Add timesheet item',
                   child: IconButton(
@@ -41,6 +44,9 @@ class TimetrackerView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
+                // --------------------------------------------------
+                // Send to WTM
+                // --------------------------------------------------
                 Tooltip(
                   message: 'Send timesheet items to WTM',
                   child: IconButton(
@@ -53,6 +59,9 @@ class TimetrackerView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
+                // --------------------------------------------------
+                // Clear all
+                // --------------------------------------------------
                 Tooltip(
                   message: 'Clear all timesheet items',
                   child: IconButton(
@@ -77,6 +86,9 @@ class TimetrackerView extends StatelessWidget {
           ),
           content: Column(
             children: [
+              // --------------------------------------------------
+              // Items list
+              // --------------------------------------------------
               Expanded(
                 child: material.ReorderableListView(
                   buildDefaultDragHandles: false,
@@ -95,6 +107,9 @@ class TimetrackerView extends StatelessWidget {
                   ],
                 ),
               ),
+              // --------------------------------------------------
+              // Footer summary
+              // --------------------------------------------------
               _buildFooter(context, timeTrackerProvider),
             ],
           ),

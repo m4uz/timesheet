@@ -25,26 +25,41 @@ class _WindowsTimesheetState extends State<WindowsTimesheet> {
         selected: _selectedIndex,
         onChanged: (index) => setState(() => _selectedIndex = index),
         items: [
+          // --------------------------------------------------
+          // Timetracker
+          // --------------------------------------------------
           PaneItem(
             icon: const WindowsIcon(WindowsIcons.stopwatch),
             title: const Text('Timetracker'),
             body: const TimetrackerView(),
           ),
+          // --------------------------------------------------
+          // Timesheet
+          // --------------------------------------------------
           PaneItem(
             icon: const WindowsIcon(WindowsIcons.calendar),
             title: const Text('Timesheet'),
             body: const TimesheetView(),
           ),
+          // --------------------------------------------------
+          // Subjects & Categories
+          // --------------------------------------------------
           PaneItem(
             icon: const WindowsIcon(WindowsIcons.bulleted_list),
             title: const Text('Subjects & Categories'),
             body: const SubjectsCategoriesView(),
           ),
+          // --------------------------------------------------
+          // Config
+          // --------------------------------------------------
           PaneItem(
             icon: const WindowsIcon(WindowsIcons.settings),
             title: const Text('Config'),
             body: const ConfigView(),
           ),
+          // --------------------------------------------------
+          // Debug
+          // --------------------------------------------------
           if (!kReleaseMode)
             PaneItem(
               icon: const WindowsIcon(WindowsIcons.bug),
@@ -53,6 +68,9 @@ class _WindowsTimesheetState extends State<WindowsTimesheet> {
             ),
         ],
         footerItems: [
+          // --------------------------------------------------
+          // Current user
+          // --------------------------------------------------
           PaneItemSeparator(),
           PaneItem(
             icon: const WindowsIcon(WindowsIcons.contact),

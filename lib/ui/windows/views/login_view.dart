@@ -12,6 +12,9 @@ class WinLoginView extends StatelessWidget {
       content: Center(
         child: Consumer<AuthProvider>(
           builder: (context, authProvider, _) {
+            // --------------------------------------------------
+            // Loading state
+            // --------------------------------------------------
             if (authProvider.isLoading) {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -25,6 +28,9 @@ class WinLoginView extends StatelessWidget {
                 ],
               );
             }
+            // --------------------------------------------------
+            // Login content
+            // --------------------------------------------------
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
