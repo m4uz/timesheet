@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -9,7 +8,6 @@ import 'package:timesheet/config/app_config.dart';
 import 'package:timesheet/config/http_client_config.dart';
 import 'package:timesheet/config/log_config.dart';
 import 'package:timesheet/factories/service_factory.dart';
-import 'package:timesheet/platform_menu.dart';
 import 'package:timesheet/providers/auth_provider.dart';
 import 'package:timesheet/providers/config_provider.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
@@ -26,20 +24,31 @@ import 'package:timesheet/services/auth_service.dart';
 import 'package:timesheet/services/session_manager.dart';
 import 'package:timesheet/services/timetracker_db_service.dart';
 import 'package:timesheet/services/wtm_service.dart';
-import 'package:timesheet/theme.dart';
-import 'package:timesheet/ui/dialog.dart';
-import 'package:timesheet/ui/snackbar.dart';
-import 'package:timesheet/ui/views/config_view.dart';
-import 'package:timesheet/ui/views/debug_view.dart';
-import 'package:timesheet/ui/views/login_view.dart';
-import 'package:timesheet/ui/views/timetracker_view.dart';
-import 'package:timesheet/ui/views/timesheet_view.dart';
-import 'package:timesheet/ui/views/subjects_categories_view.dart';
+import 'package:timesheet/ui/theme.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:timesheet/ui/macos/dialog.dart' as mac_dialog;
+import 'package:timesheet/ui/macos/macos_timesheet.dart';
+import 'package:timesheet/ui/macos/snackbar.dart';
+import 'package:timesheet/ui/macos/views/login_view.dart';
+import 'package:timesheet/ui/windows/dialog.dart' as windows_dialog;
+import 'package:timesheet/ui/windows/infobar.dart';
+import 'package:timesheet/ui/windows/views/login_view.dart';
+import 'package:timesheet/ui/windows/windows_timesheet.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isWindows) {
+    InfoBarManager.initialize(navigatorKey);
+    windows_dialog.DialogManager.initialize(navigatorKey);
+  }
+
   if (Platform.isMacOS) {
     await MacosWindowUtilsConfig().apply();
+    mac_dialog.DialogManager.initialize(navigatorKey);
+    SnackBarManager.initialize(navigatorKey);
   }
 
   await AppConfig.init();
@@ -59,13 +68,10 @@ class TimesheetApp extends StatefulWidget {
 
 class _TimesheetAppState extends State<TimesheetApp> {
   late final SessionManager sessionManager = SessionManager();
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
     super.initState();
-    DialogManager.initialize(navigatorKey);
-    SnackBarManager.initialize(navigatorKey);
   }
 
   @override
@@ -155,11 +161,31 @@ class _TimesheetAppState extends State<TimesheetApp> {
         final appTheme = context.watch<AppTheme>();
         final authProvider = context.watch<AuthProvider>();
 
+        if (Platform.isWindows) {
+          return FluentApp(
+            navigatorKey: navigatorKey,
+            title: '🦄⏰💩',
+            themeMode: appTheme.mode,
+            localizationsDelegates: const [
+              // TODO which ones do we need?
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              FluentLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('en')],
+            debugShowCheckedModeBanner: !kReleaseMode,
+            home: authProvider.isAuthenticated
+                ? const WindowsTimesheet()
+                : const WinLoginView(),
+          );
+        }
+
         return MacosApp(
           navigatorKey: navigatorKey,
           title: '🦄⏰💩',
           themeMode: appTheme.mode,
           localizationsDelegates: const [
+            // TODO which ones do we need?
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
@@ -167,84 +193,10 @@ class _TimesheetAppState extends State<TimesheetApp> {
           supportedLocales: const [Locale('en')],
           debugShowCheckedModeBanner: !kReleaseMode,
           home: authProvider.isAuthenticated
-              ? const Timesheet()
+              ? const MacosTimesheet()
               : const LoginView(),
         );
       },
-    );
-  }
-}
-
-class Timesheet extends StatefulWidget {
-  const Timesheet({super.key});
-
-  @override
-  State<Timesheet> createState() => _TimesheetState();
-}
-
-class _TimesheetState extends State<Timesheet> {
-  int pageIndex = 0;
-
-  late final searchFieldController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return PlatformMenuBar(
-      menus: menuBarItems(),
-      child: MacosWindow(
-        sidebar: Sidebar(
-          minWidth: 200,
-          builder: (context, scrollController) {
-            return SidebarItems(
-              currentIndex: pageIndex,
-              onChanged: (i) {
-                setState(() => pageIndex = i);
-              },
-              scrollController: scrollController,
-              itemSize: SidebarItemSize.large,
-              items: const [
-                SidebarItem(
-                  leading: MacosIcon(CupertinoIcons.stopwatch),
-                  label: Text('Timetracker'),
-                ),
-                SidebarItem(
-                  leading: MacosIcon(CupertinoIcons.calendar),
-                  label: Text('Timesheet'),
-                ),
-                SidebarItem(
-                  leading: MacosIcon(CupertinoIcons.list_bullet),
-                  label: Text('Subjects & Categories'),
-                ),
-                SidebarItem(
-                  leading: MacosIcon(CupertinoIcons.settings),
-                  label: Text('Config'),
-                ),
-                if (!kReleaseMode)
-                  SidebarItem(
-                    leading: MacosIcon(CupertinoIcons.ant),
-                    label: Text('Debug'),
-                  ),
-              ],
-            );
-          },
-          bottom: Consumer<AuthProvider>(
-            builder: (context, authProvider, _) {
-              return MacosListTile(
-                leading: const MacosIcon(CupertinoIcons.profile_circled),
-                title: Text(authProvider.userName ?? 'User'),
-                subtitle: Text(authProvider.userEmail ?? ''),
-              );
-            },
-          ),
-        ),
-        child: [
-          const TimetrackerView(),
-          const TimeSheetView(),
-          const SubjectsCategoriesView(),
-          const ConfigView(),
-          if (!kReleaseMode) const DebugView(),
-        ][pageIndex],
-      ),
     );
   }
 }

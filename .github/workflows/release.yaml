@@ -64,8 +64,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - os: windows-2025
-          #   platform: windows        
+          - os: windows-2025
+            platform: windows
           - os: macos-26
             platform: macos
           # - os: ubuntu-22.04

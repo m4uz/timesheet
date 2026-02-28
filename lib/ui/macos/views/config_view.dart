@@ -4,7 +4,7 @@ import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/models/app_config_model.dart';
 import 'package:timesheet/providers/config_provider.dart';
-import 'package:timesheet/ui/snackbar.dart';
+import 'package:timesheet/ui/macos/snackbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ConfigView extends StatefulWidget {
