@@ -15,21 +15,17 @@ class TimetrackerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer2<TimetrackerProvider, SubjectsCategoriesProvider>(
-      builder: (context, timeTrackerProvider, userConfigProvider, _) {
-        final successMsg = timeTrackerProvider.successMsg;
-        final errorMsg = timeTrackerProvider.errorMsg;
-        if (successMsg != null || errorMsg != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (successMsg != null) {
-              InfoBarManager.success(successMsg);
-              timeTrackerProvider.clearSuccessMsg();
-            }
-            if (errorMsg != null) {
-              InfoBarManager.error(errorMsg);
-              timeTrackerProvider.clearErrorMsg();
-            }
-          });
-        }
+      builder: (context, timeTrackerProvider, subjectsCategoriesProvider, _) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (timeTrackerProvider.successMsg != null) {
+            InfoBarManager.success(timeTrackerProvider.successMsg!);
+            timeTrackerProvider.clearSuccessMsg();
+          }
+          if (timeTrackerProvider.errorMsg != null) {
+            InfoBarManager.error(timeTrackerProvider.errorMsg!);
+            timeTrackerProvider.clearErrorMsg();
+          }
+        });
 
         return ScaffoldPage(
           header: PageHeader(
@@ -46,24 +42,25 @@ class TimetrackerView extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Tooltip(
-                  message: 'Save timesheet items to WTM',
-                  child: FilledButton(
+                  message: 'Send timesheet items to WTM',
+                  child: IconButton(
+                    icon: const Icon(FluentIcons.cloud_upload),
                     onPressed: () async {
                       await timeTrackerProvider.saveToWTM();
-                      await userConfigProvider.loadSubjectsAndCategories();
+                      await subjectsCategoriesProvider
+                          .loadSubjectsAndCategories();
                     },
-                    child: const Text('Save to WTM'),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Tooltip(
                   message: 'Clear all timesheet items',
-                  child: Button(
+                  child: IconButton(
+                    icon: const Icon(FluentIcons.delete),
                     onPressed: () {
                       DialogManager.warningConfirmation(
                         title: 'Warning',
-                        message:
-                            'Are you sure you want to delete all items?',
+                        message: 'Are you sure you want to delete all items?',
                         confirmText: 'Yes',
                         cancelText: 'No',
                         onResult: (confirmed) {
@@ -73,7 +70,6 @@ class TimetrackerView extends StatelessWidget {
                         },
                       );
                     },
-                    child: const Text('Clear timesheet'),
                   ),
                 ),
               ],
@@ -92,7 +88,7 @@ class TimetrackerView extends StatelessWidget {
                       _TimetrackerItemRow(
                         key: ValueKey(timeTrackerProvider.items[i].itemIndex),
                         timeTrackerProvider: timeTrackerProvider,
-                        userConfigProvider: userConfigProvider,
+                        userConfigProvider: subjectsCategoriesProvider,
                         index: i,
                         item: timeTrackerProvider.items[i],
                       ),
@@ -107,16 +103,11 @@ class TimetrackerView extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter(
-    BuildContext context,
-    TimetrackerProvider provider,
-  ) {
+  Widget _buildFooter(BuildContext context, TimetrackerProvider provider) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: const Color(0xFFE1E1E1)),
-        ),
+        border: Border(top: BorderSide(color: const Color(0xFFE1E1E1))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -170,7 +161,9 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
   void initState() {
     super.initState();
     _subjectController = TextEditingController(text: widget.item.subject);
-    _descriptionController = TextEditingController(text: widget.item.description);
+    _descriptionController = TextEditingController(
+      text: widget.item.description,
+    );
   }
 
   @override
@@ -207,9 +200,7 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
       key: widget.key,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: const Color(0xFFE1E1E1)),
-        ),
+        border: Border(bottom: BorderSide(color: const Color(0xFFE1E1E1))),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -315,10 +306,8 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
               placeholder: 'Subject',
               items: widget.userConfigProvider.subjects
                   .map(
-                    (s) => AutoSuggestBoxItem<String>(
-                      value: s.uri,
-                      label: s.uri,
-                    ),
+                    (s) =>
+                        AutoSuggestBoxItem<String>(value: s.uri, label: s.uri),
                   )
                   .toList(),
               onChanged: (value, _) {
@@ -358,7 +347,8 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
             width: _btnW,
             child: IconButton(
               icon: const Icon(FluentIcons.delete, size: 16),
-              onPressed: () => widget.timeTrackerProvider.deleteItem(widget.item),
+              onPressed: () =>
+                  widget.timeTrackerProvider.deleteItem(widget.item),
             ),
           ),
         ],
