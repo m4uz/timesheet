@@ -39,7 +39,38 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final result = await _authRepository.authenticate();
+    try {
+      final result = await _authRepository.authenticate();
+
+      switch (result) {
+        case OK():
+          _sessionManager.updateSession(
+            Session(
+              accessToken: result.value.accessToken,
+              expiresAt: result.value.expiresAt,
+              userName: result.value.name,
+              email: result.value.email,
+            ),
+          );
+        case Error():
+          if (Platform.isWindows) {
+            InfoBarManager.error(result.message);
+          } else {
+            SnackBarManager.error(result.message);
+          }
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> extendSession() async {
+    _dialogShown = false;
+    _isLoading = true;
+    notifyListeners();
+
+    final result = await _authRepository.refreshSession();
 
     switch (result) {
       case OK():
@@ -62,11 +93,6 @@ class AuthProvider extends ChangeNotifier {
           SnackBarManager.error(result.message);
         }
     }
-  }
-
-  Future<void> extendSession() async {
-    _dialogShown = false;
-    return await login();
   }
 
   void logout() {

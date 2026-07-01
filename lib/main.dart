@@ -24,18 +24,15 @@ import 'package:timesheet/services/auth_service.dart';
 import 'package:timesheet/services/session_manager.dart';
 import 'package:timesheet/services/timetracker_db_service.dart';
 import 'package:timesheet/services/wtm_service.dart';
+import 'package:timesheet/ui/auth_gate.dart';
 import 'package:timesheet/ui/theme.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:timesheet/ui/macos/dialog.dart' as mac_dialog;
 import 'package:timesheet/services/oidc_auth_coordinator.dart';
-import 'package:timesheet/ui/macos/macos_timesheet.dart';
 import 'package:timesheet/ui/macos/oidc_auth_host.dart';
 import 'package:timesheet/ui/macos/snackbar.dart';
-import 'package:timesheet/ui/macos/views/login_view.dart';
 import 'package:timesheet/ui/windows/dialog.dart' as windows_dialog;
 import 'package:timesheet/ui/windows/infobar.dart';
-import 'package:timesheet/ui/windows/views/login_view.dart';
-import 'package:timesheet/ui/windows/windows_timesheet.dart';
 import 'package:webview_all/webview_all.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
@@ -173,7 +170,6 @@ class _TimesheetAppState extends State<TimesheetApp> {
       ],
       builder: (context, _) {
         final appTheme = context.watch<AppTheme>();
-        final authProvider = context.watch<AuthProvider>();
 
         if (Platform.isWindows) {
           return FluentApp(
@@ -181,16 +177,13 @@ class _TimesheetAppState extends State<TimesheetApp> {
             title: '🦄⏰💩',
             themeMode: appTheme.mode,
             localizationsDelegates: const [
-              // TODO which ones do we need?
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               FluentLocalizations.delegate,
             ],
             supportedLocales: const [Locale('en')],
             debugShowCheckedModeBanner: !kReleaseMode,
-            home: authProvider.isAuthenticated
-                ? const WindowsTimesheet()
-                : const WinLoginView(),
+            home: const AuthGate(),
           );
         }
 
@@ -208,9 +201,7 @@ class _TimesheetAppState extends State<TimesheetApp> {
           builder: (context, child) {
             return OidcAuthHost(child: child);
           },
-          home: authProvider.isAuthenticated
-              ? const MacosTimesheet()
-              : const LoginView(),
+          home: const AuthGate(),
         );
       },
     );

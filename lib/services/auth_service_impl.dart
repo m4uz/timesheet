@@ -28,8 +28,13 @@ class AuthServiceImpl implements IAuthService {
     return _authorize(interactive: true);
   }
 
+  @override
+  Future<Result<AuthInfo>> refreshSession() {
+    return _authorize(interactive: false);
+  }
+
   Future<Result<AuthInfo>> _authorize({required bool interactive}) async {
-    _log.fine('Authenticating...');
+    _log.fine(interactive ? 'Authenticating...' : 'Refreshing session...');
 
     try {
       final flow = await _flowHelper.createFlow(interactive: interactive);
@@ -43,14 +48,22 @@ class AuthServiceImpl implements IAuthService {
       );
       final authInfo = await _flowHelper.toAuthInfo(credential);
 
-      _log.fine('Authentication finished.');
+      _log.fine(interactive ? 'Authentication finished.' : 'Session refreshed.');
 
       return Result.ok(authInfo);
     } on OpenIdException catch (e, stackTrace) {
-      _log.shout('Authentication error', e, stackTrace);
+      _log.shout(
+        interactive ? 'Authentication error' : 'Session refresh error',
+        e,
+        stackTrace,
+      );
       return Result.error(e.message ?? 'Authentication failed.');
     } catch (e, stackTrace) {
-      _log.shout('Authentication error', e, stackTrace);
+      _log.shout(
+        interactive ? 'Authentication error' : 'Session refresh error',
+        e,
+        stackTrace,
+      );
       return Result.error('Authentication failed: ${e.toString()}');
     }
   }

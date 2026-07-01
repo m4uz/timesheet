@@ -11,4 +11,8 @@ class AuthRepository {
   Future<Result<AuthInfo>> authenticate() async {
     return await _authService.authenticate();
   }
+
+  Future<Result<AuthInfo>> refreshSession() async {
+    return await _authService.refreshSession();
+  }
 }
