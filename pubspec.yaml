@@ -5,6 +5,7 @@ version: 0.0.0-semantically-released
 environment:
   sdk: ^3.11.0
 flutter:
+  uses-material-design: true
   assets:
     - assets/config.json
     - assets/logo.png

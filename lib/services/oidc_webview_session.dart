@@ -7,21 +7,30 @@ import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class OidcWebViewSession {
   final _log = Logger('OidcWebViewSession');
-  final WebViewController controller;
+  WebViewController? _controller;
   Completer<Map<String, String>>? _pendingAuthorization;
+  Future<void>? _initialization;
 
-  OidcWebViewSession() : controller = _createController() {
-    controller
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(onNavigationRequest: _onNavigationRequest),
-      );
+  bool get isInitialized => _controller != null;
+
+  WebViewController get controller {
+    final controller = _controller;
+    if (controller == null) {
+      throw StateError('OidcWebViewSession is not initialized.');
+    }
+    return controller;
+  }
+
+  Future<void> ensureInitialized() {
+    return _initialization ??= _initialize();
   }
 
   bool get isAuthorizing =>
       _pendingAuthorization != null && !_pendingAuthorization!.isCompleted;
 
-  Future<Map<String, String>> loadAuthorizationUri(Uri authorizationUri) {
+  Future<Map<String, String>> loadAuthorizationUri(Uri authorizationUri) async {
+    await ensureInitialized();
+
     if (isAuthorizing) {
       return Future.error(StateError('Authorization already in progress.'));
     }
@@ -50,6 +59,15 @@ class OidcWebViewSession {
       pending.completeError(Exception('Authorization cancelled.'));
     }
     _pendingAuthorization = null;
+  }
+
+  Future<void> _initialize() async {
+    final controller = _createController();
+    await controller.setJavaScriptMode(JavaScriptMode.unrestricted);
+    await controller.setNavigationDelegate(
+      NavigationDelegate(onNavigationRequest: _onNavigationRequest),
+    );
+    _controller = controller;
   }
 
   static WebViewController _createController() {

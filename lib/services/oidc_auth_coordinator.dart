@@ -20,6 +20,8 @@ class OidcAuthCoordinator extends ChangeNotifier {
     Uri authorizationUri, {
     required bool interactive,
   }) async {
+    await session.ensureInitialized();
+
     if (session.isAuthorizing) {
       throw StateError('Authorization already in progress.');
     }

@@ -188,23 +188,23 @@ class _TimesheetAppState extends State<TimesheetApp> {
           );
         }
 
-        return OidcAuthHost(
-          child: MacosApp(
-            navigatorKey: navigatorKey,
-            title: '🦄⏰💩',
-            themeMode: appTheme.mode,
-            localizationsDelegates: const [
-              // TODO which ones do we need?
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [Locale('en')],
-            debugShowCheckedModeBanner: !kReleaseMode,
-            home: authProvider.isAuthenticated
-                ? const MacosTimesheet()
-                : const LoginView(),
-          ),
+        return MacosApp(
+          navigatorKey: navigatorKey,
+          title: '🦄⏰💩',
+          themeMode: appTheme.mode,
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en')],
+          debugShowCheckedModeBanner: !kReleaseMode,
+          builder: (context, child) {
+            return OidcAuthHost(child: child);
+          },
+          home: authProvider.isAuthenticated
+              ? const MacosTimesheet()
+              : const LoginView(),
         );
       },
     );

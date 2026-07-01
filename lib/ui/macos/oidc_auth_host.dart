@@ -4,21 +4,43 @@ import 'package:provider/provider.dart';
 import 'package:timesheet/services/oidc_auth_coordinator.dart';
 import 'package:webview_all/webview_all.dart';
 
-class OidcAuthHost extends StatelessWidget {
-  final Widget child;
+class OidcAuthHost extends StatefulWidget {
+  final Widget? child;
 
-  const OidcAuthHost({super.key, required this.child});
+  const OidcAuthHost({super.key, this.child});
+
+  @override
+  State<OidcAuthHost> createState() => _OidcAuthHostState();
+}
+
+class _OidcAuthHostState extends State<OidcAuthHost> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initializeSession());
+  }
+
+  Future<void> _initializeSession() async {
+    final coordinator = context.read<OidcAuthCoordinator>();
+    await coordinator.session.ensureInitialized();
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final coordinator = context.watch<OidcAuthCoordinator>();
+    final child = widget.child;
+    final sessionReady = coordinator.session.isInitialized;
 
     return Stack(
+      alignment: Alignment.topLeft,
       children: [
-        child,
-        if (coordinator.visible && coordinator.interactive)
+        if (child != null) child,
+        if (sessionReady && coordinator.visible && coordinator.interactive)
           _InteractiveAuthOverlay(coordinator: coordinator),
-        if (coordinator.visible && !coordinator.interactive)
+        if (sessionReady && coordinator.visible && !coordinator.interactive)
           _SilentAuthWebView(coordinator: coordinator),
       ],
     );
