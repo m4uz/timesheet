@@ -27,10 +27,11 @@ class OidcFlowHelper {
   Future<Flow> createFlow({required bool interactive}) async {
     final client = await getClient();
     return Flow.authorizationCodeWithPKCE(
-      client,
-      prompt: interactive ? null : 'none',
-      scopes: OidcConfig.scopes(_wtmBaseUrl),
-    )..redirectUri = OidcConfig.redirectUri;
+          client,
+          prompt: interactive ? null : 'none',
+        )
+        ..scopes.addAll([OidcConfig.scope(_wtmBaseUrl)])
+        ..redirectUri = OidcConfig.redirectUri;
   }
 
   Future<Credential> completeAuthorization(
