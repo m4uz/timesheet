@@ -9,5 +9,8 @@ class OidcConfig {
   static const Duration expirationCheckInterval = Duration(seconds: 30);
   static const Duration authorizationTimeout = Duration(minutes: 5);
 
-  static String scope(Uri wtmBaseUrl) => 'openid $wtmBaseUrl';
+  static List<String> scopes(Uri wtmBaseUrl) => [
+    'openid',
+    wtmBaseUrl.toString(),
+  ];
 }
