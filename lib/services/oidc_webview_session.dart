@@ -9,20 +9,26 @@ class OidcWebViewSession {
   final _log = Logger('OidcWebViewSession');
   WebViewController? _controller;
   Completer<Map<String, String>>? _pendingAuthorization;
-  Future<void>? _initialization;
+  Future<void>? _configuration;
+  bool _configured = false;
 
-  bool get isInitialized => _controller != null;
+  bool get hasController => _controller != null;
+  bool get isInitialized => _configured;
 
   WebViewController get controller {
     final controller = _controller;
     if (controller == null) {
-      throw StateError('OidcWebViewSession is not initialized.');
+      throw StateError('OidcWebViewSession controller is not created.');
     }
     return controller;
   }
 
+  void ensureControllerCreated() {
+    _controller ??= _createController();
+  }
+
   Future<void> ensureInitialized() {
-    return _initialization ??= _initialize();
+    return _configuration ??= _configure();
   }
 
   bool get isAuthorizing =>
@@ -61,13 +67,17 @@ class OidcWebViewSession {
     _pendingAuthorization = null;
   }
 
-  Future<void> _initialize() async {
-    final controller = _createController();
+  Future<void> _configure() async {
+    if (_configured) {
+      return;
+    }
+
+    ensureControllerCreated();
     await controller.setJavaScriptMode(JavaScriptMode.unrestricted);
     await controller.setNavigationDelegate(
       NavigationDelegate(onNavigationRequest: _onNavigationRequest),
     );
-    _controller = controller;
+    _configured = true;
   }
 
   static WebViewController _createController() {

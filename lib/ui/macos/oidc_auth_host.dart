@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/services/oidc_auth_coordinator.dart';
@@ -14,6 +15,9 @@ class OidcAuthHost extends StatefulWidget {
 }
 
 class _OidcAuthHostState extends State<OidcAuthHost> {
+  var _mountWebView = false;
+  var _sessionReady = false;
+
   @override
   void initState() {
     super.initState();
@@ -21,98 +25,108 @@ class _OidcAuthHostState extends State<OidcAuthHost> {
   }
 
   Future<void> _initializeSession() async {
-    final coordinator = context.read<OidcAuthCoordinator>();
-    await coordinator.session.ensureInitialized();
-    if (mounted) {
-      setState(() {});
+    final session = context.read<OidcAuthCoordinator>().session;
+    session.ensureControllerCreated();
+    if (!mounted) {
+      return;
     }
+
+    setState(() => _mountWebView = true);
+    await SchedulerBinding.instance.endOfFrame;
+    if (!mounted) {
+      return;
+    }
+
+    await session.ensureInitialized();
+    if (!mounted) {
+      return;
+    }
+
+    setState(() => _sessionReady = true);
   }
 
   @override
   Widget build(BuildContext context) {
     final coordinator = context.watch<OidcAuthCoordinator>();
     final child = widget.child;
-    final sessionReady = coordinator.session.isInitialized;
+    final interactive =
+        _sessionReady && coordinator.visible && coordinator.interactive;
 
     return Stack(
       alignment: Alignment.topLeft,
       children: [
         if (child != null) child,
-        if (sessionReady && coordinator.visible && coordinator.interactive)
-          _InteractiveAuthOverlay(coordinator: coordinator),
-        if (sessionReady && coordinator.visible && !coordinator.interactive)
-          _SilentAuthWebView(coordinator: coordinator),
+        if (_mountWebView)
+          _MountedWebView(
+            coordinator: coordinator,
+            interactive: interactive,
+          ),
       ],
     );
   }
 }
 
-class _InteractiveAuthOverlay extends StatelessWidget {
+class _MountedWebView extends StatelessWidget {
   final OidcAuthCoordinator coordinator;
+  final bool interactive;
 
-  const _InteractiveAuthOverlay({required this.coordinator});
+  const _MountedWebView({
+    required this.coordinator,
+    required this.interactive,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Colors.black54,
-      child: Center(
-        child: Container(
-          width: 500,
-          height: 700,
-          decoration: BoxDecoration(
-            color: MacosTheme.of(context).canvasColor,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: MacosTheme.of(context).dividerColor,
+    final webView = WebViewWidget(controller: coordinator.session.controller);
+
+    if (interactive) {
+      return ColoredBox(
+        color: Colors.black54,
+        child: Center(
+          child: Container(
+            width: 500,
+            height: 700,
+            decoration: BoxDecoration(
+              color: MacosTheme.of(context).canvasColor,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: MacosTheme.of(context).dividerColor,
+              ),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Login',
+                        style: MacosTheme.of(context).typography.title3,
+                      ),
+                      const Spacer(),
+                      PushButton(
+                        controlSize: ControlSize.regular,
+                        secondary: true,
+                        onPressed: coordinator.cancel,
+                        child: const Text('Cancel'),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(child: webView),
+              ],
             ),
           ),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  children: [
-                    Text(
-                      'Login',
-                      style: MacosTheme.of(context).typography.title3,
-                    ),
-                    const Spacer(),
-                    PushButton(
-                      controlSize: ControlSize.regular,
-                      secondary: true,
-                      onPressed: coordinator.cancel,
-                      child: const Text('Cancel'),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: WebViewWidget(
-                  controller: coordinator.session.controller,
-                ),
-              ),
-            ],
-          ),
         ),
-      ),
-    );
-  }
-}
+      );
+    }
 
-class _SilentAuthWebView extends StatelessWidget {
-  final OidcAuthCoordinator coordinator;
-
-  const _SilentAuthWebView({required this.coordinator});
-
-  @override
-  Widget build(BuildContext context) {
     return Positioned(
       left: -10000,
       top: -10000,
       width: 1,
       height: 1,
-      child: WebViewWidget(controller: coordinator.session.controller),
+      child: webView,
     );
   }
 }

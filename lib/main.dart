@@ -36,11 +36,17 @@ import 'package:timesheet/ui/windows/dialog.dart' as windows_dialog;
 import 'package:timesheet/ui/windows/infobar.dart';
 import 'package:timesheet/ui/windows/views/login_view.dart';
 import 'package:timesheet/ui/windows/windows_timesheet.dart';
+import 'package:webview_all/webview_all.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isMacOS) {
+    WebViewPlatform.instance = WebKitWebViewPlatform();
+  }
 
   if (Platform.isWindows) {
     InfoBarManager.initialize(navigatorKey);
