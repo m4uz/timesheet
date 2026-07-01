@@ -27,7 +27,9 @@ import 'package:timesheet/services/wtm_service.dart';
 import 'package:timesheet/ui/theme.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:timesheet/ui/macos/dialog.dart' as mac_dialog;
+import 'package:timesheet/services/oidc_auth_coordinator.dart';
 import 'package:timesheet/ui/macos/macos_timesheet.dart';
+import 'package:timesheet/ui/macos/oidc_auth_host.dart';
 import 'package:timesheet/ui/macos/snackbar.dart';
 import 'package:timesheet/ui/macos/views/login_view.dart';
 import 'package:timesheet/ui/windows/dialog.dart' as windows_dialog;
@@ -68,6 +70,7 @@ class TimesheetApp extends StatefulWidget {
 
 class _TimesheetAppState extends State<TimesheetApp> {
   late final SessionManager sessionManager = SessionManager();
+  late final OidcAuthCoordinator oidcAuthCoordinator = OidcAuthCoordinator();
 
   @override
   void initState() {
@@ -83,8 +86,13 @@ class _TimesheetAppState extends State<TimesheetApp> {
         // **************************************************
         ValueListenableProvider<Session>.value(value: sessionManager),
         ListenableProvider<SessionManager>.value(value: sessionManager),
+        ChangeNotifierProvider<OidcAuthCoordinator>.value(
+          value: oidcAuthCoordinator,
+        ),
         Provider<IAuthService>(
-          create: (_) => ServiceFactory.createAuthService(),
+          create: (_) => ServiceFactory.createAuthService(
+            coordinator: oidcAuthCoordinator,
+          ),
         ),
         Provider<AuthRepository>(
           create: (context) =>
@@ -180,21 +188,23 @@ class _TimesheetAppState extends State<TimesheetApp> {
           );
         }
 
-        return MacosApp(
-          navigatorKey: navigatorKey,
-          title: '🦄⏰💩',
-          themeMode: appTheme.mode,
-          localizationsDelegates: const [
-            // TODO which ones do we need?
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [Locale('en')],
-          debugShowCheckedModeBanner: !kReleaseMode,
-          home: authProvider.isAuthenticated
-              ? const MacosTimesheet()
-              : const LoginView(),
+        return OidcAuthHost(
+          child: MacosApp(
+            navigatorKey: navigatorKey,
+            title: '🦄⏰💩',
+            themeMode: appTheme.mode,
+            localizationsDelegates: const [
+              // TODO which ones do we need?
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('en')],
+            debugShowCheckedModeBanner: !kReleaseMode,
+            home: authProvider.isAuthenticated
+                ? const MacosTimesheet()
+                : const LoginView(),
+          ),
         );
       },
     );
