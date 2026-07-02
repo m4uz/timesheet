@@ -1,5 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:openid_client/openid_client.dart';
+import 'package:timesheet/config/oidc_config.dart';
 import 'package:timesheet/models/auth_info.dart';
 import 'package:timesheet/models/result.dart';
 import 'package:timesheet/services/auth_service.dart';
@@ -57,6 +58,9 @@ class AuthServiceImpl implements IAuthService {
         e,
         stackTrace,
       );
+      if (!interactive && OidcFlowHelper.isInteractionRequired(e)) {
+        return Result.error(OidcConfig.interactionRequiredError);
+      }
       return Result.error(e.message ?? 'Authentication failed.');
     } catch (e, stackTrace) {
       _log.shout(
