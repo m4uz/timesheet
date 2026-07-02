@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart' hide OverlayVisibilityMode;
-import 'package:flutter/widgets.dart';
 import 'package:macos_ui/macos_ui.dart';
 
 class MacosToolbarTextField extends ToolbarItem {

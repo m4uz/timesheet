@@ -3,4 +3,5 @@ import 'package:timesheet/models/result.dart';
 
 abstract class IAuthService {
   Future<Result<AuthInfo>> authenticate();
+  Future<Result<AuthInfo>> refreshSession();
 }
