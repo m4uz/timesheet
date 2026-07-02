@@ -24,6 +24,7 @@ class AuthProvider extends ChangeNotifier {
   bool _autoRefreshTriggered = false;
   Timer? _sessionMonitorTimer;
   bool _dialogShown = false;
+  Future<TokenRefreshResult>? _ongoingRefresh;
 
   AuthProvider({
     required AuthRepository authRepository,
@@ -61,16 +62,41 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<TokenRefreshResult> refreshToken({bool showErrors = true}) async {
-    if (_refreshInProgress || _sessionManager.isEmpty) {
-      return TokenRefreshResult.failed;
+  Future<TokenRefreshResult> refreshToken({bool showErrors = true}) {
+    if (_sessionManager.isEmpty) {
+      return Future.value(TokenRefreshResult.failed);
+    }
+    if (_ongoingRefresh != null) {
+      return _ongoingRefresh!;
     }
 
+    final refresh = _doRefreshToken(showErrors);
+    _ongoingRefresh = refresh;
+    return refresh.whenComplete(() {
+      if (identical(_ongoingRefresh, refresh)) {
+        _ongoingRefresh = null;
+      }
+    });
+  }
+
+  Future<bool> refreshTokenForHttp() async {
+    final result = await refreshToken(showErrors: false);
+    if (result == TokenRefreshResult.interactionRequired) {
+      _showReLoginDialog();
+    }
+    return result == TokenRefreshResult.success;
+  }
+
+  Future<TokenRefreshResult> _doRefreshToken(bool showErrors) async {
     _refreshInProgress = true;
     notifyListeners();
 
     try {
-      for (var attempt = 0; attempt < OidcConfig.tokenRefreshRetryCount; attempt++) {
+      for (
+        var attempt = 0;
+        attempt < OidcConfig.tokenRefreshRetryCount;
+        attempt++
+      ) {
         if (attempt > 0) {
           await Future.delayed(OidcConfig.tokenRefreshRetryInterval);
         }

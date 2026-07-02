@@ -108,8 +108,13 @@ class _TimesheetAppState extends State<TimesheetApp> {
           ),
         ),
         Provider<HttpClient>(
-          create: (context) =>
-              HttpClient(sessionManager: context.read<SessionManager>()),
+          create: (context) {
+            final authProvider = context.read<AuthProvider>();
+            return HttpClient(
+              sessionManager: context.read<SessionManager>(),
+              refreshToken: authProvider.refreshTokenForHttp,
+            );
+          },
         ),
         Provider<IWTMService>(
           create: (context) => ServiceFactory.createWTMService(
