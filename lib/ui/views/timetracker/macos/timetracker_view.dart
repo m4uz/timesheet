@@ -10,6 +10,7 @@ import 'package:timesheet/providers/subjects_categories_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/utils/duration_utils.dart';
+import 'package:timesheet/utils/weekday_colors.dart';
 
 class TimetrackerView extends StatefulWidget {
   const TimetrackerView({super.key});
@@ -273,6 +274,28 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
     );
   }
 
+  Widget _buildWeekdayLabel(
+    BuildContext context,
+    String dayLabel,
+    DateTime date,
+  ) {
+    final backgroundColor = weekdayLabelBackgroundColor(date);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        dayLabel,
+        style: MacosTheme.of(context).typography.title3.copyWith(
+          color: weekdayLabelForegroundColor(backgroundColor),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     const pad = EdgeInsets.all(10);
@@ -311,10 +334,7 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
               // --------------------------------------------------
               SizedBox(
                 width: dimensions.dayW,
-                child: Text(
-                  dayLabel,
-                  style: MacosTheme.of(context).typography.title3,
-                ),
+                child: _buildWeekdayLabel(context, dayLabel, widget.item.from),
               ),
               SizedBox(width: dimensions.spacingW),
               // --------------------------------------------------
