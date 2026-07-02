@@ -127,7 +127,9 @@ class _SnackBar extends StatelessWidget {
             Expanded(
               child: SelectableText(
                 message,
-                style: MacosTheme.of(context).typography.body,
+                style: MacosTheme.of(context).typography.body.copyWith(
+                  color: Colors.black87,
+                ),
               ),
             ),
             SizedBox(width: 16),
