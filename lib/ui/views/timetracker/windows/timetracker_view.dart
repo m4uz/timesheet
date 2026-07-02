@@ -8,6 +8,7 @@ import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/utils/duration_utils.dart';
+import 'package:timesheet/utils/weekday_colors.dart';
 
 class TimetrackerView extends StatelessWidget {
   const TimetrackerView({super.key});
@@ -208,6 +209,26 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
     super.dispose();
   }
 
+  Widget _buildWeekdayLabel(
+    BuildContext context,
+    String dayLabel,
+    DateTime date,
+  ) {
+    final backgroundColor = weekdayLabelBackgroundColor(date);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        dayLabel,
+        style: TextStyle(color: weekdayLabelForegroundColor(backgroundColor)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
@@ -239,7 +260,10 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
           // --------------------------------------------------
           // Day
           // --------------------------------------------------
-          SizedBox(width: _dayW, child: Text(dayLabel)),
+          SizedBox(
+            width: _dayW,
+            child: _buildWeekdayLabel(context, dayLabel, widget.item.from),
+          ),
           SizedBox(width: _spacingW),
           // --------------------------------------------------
           // Date
