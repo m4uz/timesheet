@@ -13,12 +13,11 @@ class AuthServiceImpl implements IAuthService {
   final OidcFlowHelper _flowHelper;
 
   AuthServiceImpl({
-    required OidcAuthCoordinator coordinator,
+    required this._coordinator,
     required Uri issuerUrl,
     required String clientId,
     required Uri wtmBaseUrl,
-  }) : _coordinator = coordinator,
-       _flowHelper = OidcFlowHelper(
+  }) : _flowHelper = OidcFlowHelper(
          issuerUrl: issuerUrl,
          clientId: clientId,
          wtmBaseUrl: wtmBaseUrl,

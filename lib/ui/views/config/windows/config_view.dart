@@ -341,7 +341,7 @@ class _ConfigViewState extends State<ConfigView> {
           const SizedBox(width: 12),
           Expanded(child: value),
           const SizedBox(width: 12),
-          if (action != null) action,
+          ?action,
         ],
       ),
     );

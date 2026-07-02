@@ -24,10 +24,9 @@ class AuthProvider extends ChangeNotifier {
   Future<TokenRefreshResult>? _ongoingRefresh;
 
   AuthProvider({
-    required AuthRepository authRepository,
-    required SessionManager sessionManager,
-  }) : _authRepository = authRepository,
-       _sessionManager = sessionManager {
+    required this._authRepository,
+    required this._sessionManager,
+  }) {
     _sessionManager.addListener(_onSessionChanged);
     _startSessionMonitoring();
   }

@@ -72,7 +72,7 @@ class _OidcAuthHostCoreState extends State<OidcAuthHostCore> {
     return Stack(
       alignment: Alignment.topLeft,
       children: [
-        if (child != null) child,
+        ?child,
         if (_mountWebView)
           _MountedOidcWebView(
             coordinator: coordinator,

@@ -12,8 +12,7 @@ class TimetrackerProvider extends ChangeNotifier {
   String? _successMsg;
   String? _errorMsg;
 
-  TimetrackerProvider({required TimetrackerRepository repository})
-    : _repository = repository {
+  TimetrackerProvider({required this._repository}) {
     loadItems();
   }
 

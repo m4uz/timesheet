@@ -11,8 +11,7 @@ class ConfigProvider extends ChangeNotifier {
   String? _errorMsg;
   String? _appSupportPath;
 
-  ConfigProvider({required ConfigRepository repository})
-    : _repository = repository {
+  ConfigProvider({required this._repository}) {
     loadConfig();
   }
 

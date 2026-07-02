@@ -15,9 +15,8 @@ class TimesheetProvider extends ChangeNotifier {
   DateTime? _lastLoadedToDate;
   String _filter = '';
 
-  TimesheetProvider({required TimesheetRepository repository})
-    : _repository = repository,
-      _fromDate = DateTime.now(),
+  TimesheetProvider({required this._repository})
+    : _fromDate = DateTime.now(),
       _toDate = DateTime.now();
 
   List<TimesheetItem> get items {

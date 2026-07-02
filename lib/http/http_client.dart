@@ -18,10 +18,9 @@ class HttpClient {
   final Duration _timeout = const Duration(minutes: 1);
 
   HttpClient({
-    required SessionManager sessionManager,
-    SessionRefreshCallback? refreshToken,
-  }) : _sessionManager = sessionManager,
-       _refreshToken = refreshToken;
+    required this._sessionManager,
+    this._refreshToken,
+  });
 
   Future<Response?> get<T>(Uri uri, {Object? body}) async {
     return _executeRequest<T>(httpMethod: HttpMethod.get, uri: uri, body: body);

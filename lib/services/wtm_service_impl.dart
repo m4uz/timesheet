@@ -17,9 +17,8 @@ class WTMServiceImpl implements IWTMService {
   final Uri _createTimesheetItemUrl;
   final Uri _listWorkerTimesheetItemsByTimeUrl;
 
-  WTMServiceImpl({required HttpClient client, required Uri wtmBaseUrl})
-    : _client = client,
-      _loadConfigAndUserInfoUrl = Uri.parse(
+  WTMServiceImpl({required this._client, required Uri wtmBaseUrl})
+    : _loadConfigAndUserInfoUrl = Uri.parse(
         '${wtmBaseUrl.toString()}/loadConfigAndUserInfo',
       ),
       _updateUserOptionsUrl = Uri.parse(

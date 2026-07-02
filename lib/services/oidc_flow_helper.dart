@@ -11,12 +11,10 @@ class OidcFlowHelper {
   Client? _client;
 
   OidcFlowHelper({
-    required Uri issuerUrl,
-    required String clientId,
-    required Uri wtmBaseUrl,
-  }) : _issuerUrl = issuerUrl,
-       _clientId = clientId,
-       _wtmBaseUrl = wtmBaseUrl;
+    required this._issuerUrl,
+    required this._clientId,
+    required this._wtmBaseUrl,
+  });
 
   Future<Client> getClient() async {
     _issuer ??= await Issuer.discover(_issuerUrl);
