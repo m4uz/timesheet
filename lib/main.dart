@@ -44,17 +44,12 @@ Future<void> main() async {
 
   if (Platform.isMacOS) {
     WebViewPlatform.instance = WebKitWebViewPlatform();
-  }
-
-  if (Platform.isWindows) {
-    InfoBarManager.initialize(navigatorKey);
-    windows_dialog.DialogManager.initialize(navigatorKey);
-  }
-
-  if (Platform.isMacOS) {
     await MacosWindowUtilsConfig().apply();
     mac_dialog.DialogManager.initialize(navigatorKey);
     SnackBarManager.initialize(navigatorKey);
+  } else if (Platform.isWindows) {
+    InfoBarManager.initialize(navigatorKey);
+    windows_dialog.DialogManager.initialize(navigatorKey);
   }
 
   await AppConfig.init();
@@ -73,12 +68,14 @@ class TimesheetApp extends StatefulWidget {
 }
 
 class _TimesheetAppState extends State<TimesheetApp> {
-  late final SessionManager sessionManager = SessionManager();
-  late final OidcAuthCoordinator oidcAuthCoordinator = OidcAuthCoordinator();
+  final SessionManager sessionManager = SessionManager();
+  final OidcAuthCoordinator oidcAuthCoordinator = OidcAuthCoordinator();
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    oidcAuthCoordinator.dispose();
+    sessionManager.dispose();
+    super.dispose();
   }
 
   @override

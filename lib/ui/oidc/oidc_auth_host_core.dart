@@ -66,7 +66,8 @@ class _OidcAuthHostCoreState extends State<OidcAuthHostCore> {
     final coordinator = context.watch<OidcAuthCoordinator>();
     final child = widget.child;
     final interactive =
-        _sessionReady && coordinator.visible && coordinator.interactive;
+        _sessionReady &&
+        coordinator.presentation == OidcAuthPresentation.interactive;
 
     return Stack(
       alignment: Alignment.topLeft,
@@ -119,4 +120,3 @@ class _MountedOidcWebView extends StatelessWidget {
     );
   }
 }
-

@@ -4,17 +4,20 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/foundation.dart';
 import 'package:timesheet/services/oidc_webview_session.dart';
 
+enum OidcAuthPresentation { hidden, silent, interactive }
+
 class OidcAuthCoordinator extends ChangeNotifier {
   final OidcWebViewSession session;
 
-  bool _visible = false;
-  bool _interactive = false;
+  OidcAuthPresentation _presentation = OidcAuthPresentation.hidden;
+  bool _disposed = false;
 
   OidcAuthCoordinator({OidcWebViewSession? session})
     : session = session ?? OidcWebViewSession();
 
-  bool get visible => _visible;
-  bool get interactive => _interactive;
+  OidcAuthPresentation get presentation => _presentation;
+  bool get visible => _presentation != OidcAuthPresentation.hidden;
+  bool get interactive => _presentation == OidcAuthPresentation.interactive;
 
   Future<Map<String, String>> authorize(
     Uri authorizationUri, {
@@ -26,25 +29,39 @@ class OidcAuthCoordinator extends ChangeNotifier {
       throw StateError('Authorization already in progress.');
     }
 
-    _interactive = interactive;
-    _visible = true;
-    notifyListeners();
+    _setPresentation(
+      interactive
+          ? OidcAuthPresentation.interactive
+          : OidcAuthPresentation.silent,
+    );
 
     await SchedulerBinding.instance.endOfFrame;
 
     try {
       return await session.loadAuthorizationUri(authorizationUri);
     } finally {
-      _visible = false;
-      notifyListeners();
+      _setPresentation(OidcAuthPresentation.hidden);
     }
   }
 
   void cancel() {
     session.cancelAuthorization();
-    if (_visible) {
-      _visible = false;
-      notifyListeners();
+    _setPresentation(OidcAuthPresentation.hidden);
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    session.dispose();
+    super.dispose();
+  }
+
+  void _setPresentation(OidcAuthPresentation presentation) {
+    if (_presentation != presentation) {
+      _presentation = presentation;
+      if (!_disposed) {
+        notifyListeners();
+      }
     }
   }
 }

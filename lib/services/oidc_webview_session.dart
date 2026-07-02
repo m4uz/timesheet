@@ -11,6 +11,7 @@ class OidcWebViewSession {
   Completer<Map<String, String>>? _pendingAuthorization;
   Future<void>? _configuration;
   bool _configured = false;
+  bool _disposed = false;
   static final Uri _aboutBlank = Uri.parse('about:blank');
 
   bool get hasController => _controller != null;
@@ -25,10 +26,12 @@ class OidcWebViewSession {
   }
 
   void ensureControllerCreated() {
+    _ensureNotDisposed();
     _controller ??= _createController();
   }
 
   Future<void> ensureInitialized() {
+    _ensureNotDisposed();
     return _configuration ??= _configure();
   }
 
@@ -68,6 +71,14 @@ class OidcWebViewSession {
     _pendingAuthorization = null;
   }
 
+  void dispose() {
+    _disposed = true;
+    cancelAuthorization();
+    _controller = null;
+    _configuration = null;
+    _configured = false;
+  }
+
   Future<void> _configure() async {
     if (_configured) {
       return;
@@ -86,15 +97,17 @@ class OidcWebViewSession {
 
   static WebViewController _createController() {
     final params = WebViewPlatform.instance is WebKitWebViewPlatform
-        ? WebKitWebViewControllerCreationParams(
-            allowsInlineMediaPlayback: true,
-          )
+        ? WebKitWebViewControllerCreationParams(allowsInlineMediaPlayback: true)
         : const PlatformWebViewControllerCreationParams();
 
     return WebViewController.fromPlatformCreationParams(params);
   }
 
   FutureOr<NavigationDecision> _onNavigationRequest(NavigationRequest request) {
+    if (_disposed) {
+      return NavigationDecision.prevent;
+    }
+
     final uri = Uri.parse(request.url);
     if (!_tryCompleteAuthorization(uri)) {
       return NavigationDecision.navigate;
@@ -104,6 +117,10 @@ class OidcWebViewSession {
   }
 
   void _onUrlChange(UrlChange change) {
+    if (_disposed) {
+      return;
+    }
+
     final url = change.url;
     if (url == null) {
       return;
@@ -138,5 +155,11 @@ class OidcWebViewSession {
         uri.host == redirect.host &&
         uri.port == redirect.port &&
         uri.path == redirect.path;
+  }
+
+  void _ensureNotDisposed() {
+    if (_disposed) {
+      throw StateError('OidcWebViewSession has been disposed.');
+    }
   }
 }
