@@ -7,7 +7,6 @@ const Duration _kDismissDuration = Duration(seconds: 10);
 class InfoBarManager {
   InfoBarManager._();
   static final InfoBarManager _instance = InfoBarManager._();
-  static InfoBarManager get instance => _instance;
 
   GlobalKey<NavigatorState>? _navigatorKey;
 

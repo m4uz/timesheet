@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Dialog;
 import 'package:intl/intl.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:cupertino_calendar_picker/cupertino_calendar_picker.dart';
@@ -8,7 +8,7 @@ import 'package:timesheet/models/timetracker_item.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/providers/subjects_categories_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
-import 'package:timesheet/ui/platform/macos/snackbar.dart';
+import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
 class TimetrackerView extends StatefulWidget {
@@ -24,11 +24,11 @@ class _TimetrackerViewState extends State<TimetrackerView> {
     return Consumer2<TimetrackerProvider, SubjectsCategoriesProvider>(
       builder: (context, timeTrackerProvider, userConfigProvider, child) {
         if (timeTrackerProvider.successMsg != null) {
-          SnackBarManager.success(timeTrackerProvider.successMsg!);
+          Snackbar.success(timeTrackerProvider.successMsg!);
           timeTrackerProvider.clearSuccessMsg();
         }
         if (timeTrackerProvider.errorMsg != null) {
-          SnackBarManager.error(timeTrackerProvider.errorMsg!);
+          Snackbar.error(timeTrackerProvider.errorMsg!);
           timeTrackerProvider.clearErrorMsg();
         }
         return MacosScaffold(
@@ -85,7 +85,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
                 icon: const MacosIcon(CupertinoIcons.trash),
                 tooltipMessage: 'Clear all timesheet items',
                 onPressed: () async {
-                  PlatformDialog.warningConfirmation(
+                  Dialog.warningConfirmation(
                     title: 'Warning',
                     message: 'Are you sure you want to delete all items?',
                     confirmText: 'Yes',

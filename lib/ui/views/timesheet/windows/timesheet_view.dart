@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/models/timesheet_item.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
-import 'package:timesheet/ui/platform/windows/infobar.dart';
+import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
 class TimesheetView extends StatefulWidget {
@@ -71,7 +71,7 @@ class _TimesheetViewState extends State<TimesheetView> {
         if (provider.errorMsg != null) {
           final msg = provider.errorMsg!;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            InfoBarManager.error(msg);
+            Snackbar.error(msg);
             provider.clearErrorMsg();
           });
         }

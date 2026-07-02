@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/models/app_config_model.dart';
 import 'package:timesheet/providers/config_provider.dart';
-import 'package:timesheet/ui/platform/windows/infobar.dart';
+import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const _logLevels = [
@@ -121,11 +121,11 @@ class _ConfigViewState extends State<ConfigView> {
         if (successMsg != null || errorMsg != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (successMsg != null) {
-              InfoBarManager.success(successMsg);
+              Snackbar.success(successMsg);
               provider.clearSuccessMsg();
             }
             if (errorMsg != null) {
-              InfoBarManager.error(errorMsg);
+              Snackbar.error(errorMsg);
               provider.clearErrorMsg();
             }
           });
@@ -169,7 +169,7 @@ class _ConfigViewState extends State<ConfigView> {
                               _proxyPortController.text,
                             );
                             if (portError != null) {
-                              InfoBarManager.error(portError);
+                              Snackbar.error(portError);
                               return;
                             }
                             final updated = _buildConfigFromForm(config);

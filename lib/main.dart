@@ -32,10 +32,9 @@ import 'package:timesheet/ui/views/menu/windows/menu_view.dart' as menu_windows;
 import 'package:timesheet/ui/theme.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
+import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/services/oidc_auth_coordinator.dart';
 import 'package:timesheet/ui/platform/macos/oidc_auth_host.dart';
-import 'package:timesheet/ui/platform/macos/snackbar.dart';
-import 'package:timesheet/ui/platform/windows/infobar.dart';
 import 'package:timesheet/ui/platform/windows/oidc_auth_host.dart';
 import 'package:webview_all/webview_all.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
@@ -45,14 +44,12 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  PlatformDialog.initialize(navigatorKey);
+  Dialog.initialize(navigatorKey);
+  Snackbar.initialize(navigatorKey);
 
   if (Platform.isMacOS) {
     WebViewPlatform.instance = WebKitWebViewPlatform();
     await MacosWindowUtilsConfig().apply();
-    SnackBarManager.initialize(navigatorKey);
-  } else if (Platform.isWindows) {
-    InfoBarManager.initialize(navigatorKey);
   }
 
   await AppConfig.init();

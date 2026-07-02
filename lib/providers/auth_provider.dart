@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Dialog;
 import 'package:timesheet/config/oidc_config.dart';
 import 'package:timesheet/models/auth_info.dart';
 import 'package:timesheet/models/result.dart';
@@ -9,8 +8,7 @@ import 'package:timesheet/models/session.dart';
 import 'package:timesheet/repositories/auth_repository.dart';
 import 'package:timesheet/services/session_manager.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
-import 'package:timesheet/ui/platform/macos/snackbar.dart';
-import 'package:timesheet/ui/platform/windows/infobar.dart';
+import 'package:timesheet/ui/platform/snackbar.dart';
 
 enum TokenRefreshResult { success, failed, interactionRequired }
 
@@ -245,7 +243,7 @@ class AuthProvider extends ChangeNotifier {
       }
     }
 
-    PlatformDialog.warningConfirmation(
+    Dialog.warningConfirmation(
       title: title,
       message: message,
       confirmText: confirmText,
@@ -255,10 +253,6 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void _showError(String message) {
-    if (Platform.isWindows) {
-      InfoBarManager.error(message);
-    } else {
-      SnackBarManager.error(message);
-    }
+    Snackbar.error(message);
   }
 }

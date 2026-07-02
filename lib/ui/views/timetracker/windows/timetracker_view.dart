@@ -6,7 +6,7 @@ import 'package:timesheet/models/timetracker_item.dart';
 import 'package:timesheet/providers/subjects_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
-import 'package:timesheet/ui/platform/windows/infobar.dart';
+import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
 class TimetrackerView extends StatelessWidget {
@@ -18,11 +18,11 @@ class TimetrackerView extends StatelessWidget {
       builder: (context, timeTrackerProvider, subjectsCategoriesProvider, _) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (timeTrackerProvider.successMsg != null) {
-            InfoBarManager.success(timeTrackerProvider.successMsg!);
+            Snackbar.success(timeTrackerProvider.successMsg!);
             timeTrackerProvider.clearSuccessMsg();
           }
           if (timeTrackerProvider.errorMsg != null) {
-            InfoBarManager.error(timeTrackerProvider.errorMsg!);
+            Snackbar.error(timeTrackerProvider.errorMsg!);
             timeTrackerProvider.clearErrorMsg();
           }
         });
@@ -67,7 +67,7 @@ class TimetrackerView extends StatelessWidget {
                   child: IconButton(
                     icon: const Icon(FluentIcons.delete),
                     onPressed: () {
-                      PlatformDialog.warningConfirmation(
+                      Dialog.warningConfirmation(
                         title: 'Warning',
                         message: 'Are you sure you want to delete all items?',
                         confirmText: 'Yes',

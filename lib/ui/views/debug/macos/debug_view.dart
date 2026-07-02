@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Dialog;
 import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/providers/auth_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
-import 'package:timesheet/ui/platform/macos/snackbar.dart';
+import 'package:timesheet/ui/platform/snackbar.dart';
 
 class DebugView extends StatelessWidget {
   const DebugView({super.key});
@@ -30,28 +30,28 @@ class DebugView extends StatelessWidget {
                       PushButton(
                         controlSize: ControlSize.large,
                         onPressed: () {
-                          SnackBarManager.info('This is an info message');
+                          Snackbar.info('This is an info message');
                         },
                         child: const Text('Info SnackBar'),
                       ),
                       PushButton(
                         controlSize: ControlSize.large,
                         onPressed: () {
-                          SnackBarManager.success('This is a success message');
+                          Snackbar.success('This is a success message');
                         },
                         child: const Text('Success SnackBar'),
                       ),
                       PushButton(
                         controlSize: ControlSize.large,
                         onPressed: () {
-                          SnackBarManager.warning('This is a warning message');
+                          Snackbar.warning('This is a warning message');
                         },
                         child: const Text('Warning SnackBar'),
                       ),
                       PushButton(
                         controlSize: ControlSize.large,
                         onPressed: () {
-                          SnackBarManager.error('This is an error message');
+                          Snackbar.error('This is an error message');
                         },
                         child: const Text('Error SnackBar'),
                       ),
@@ -63,7 +63,7 @@ class DebugView extends StatelessWidget {
                       PushButton(
                         controlSize: ControlSize.large,
                         onPressed: () {
-                          PlatformDialog.warningConfirmation(
+                          Dialog.warningConfirmation(
                             title: 'Warning Dialog',
                             message: 'Confirm warning?',
                             confirmText: 'Yes',

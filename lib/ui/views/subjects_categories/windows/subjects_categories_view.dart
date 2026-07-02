@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:timesheet/models/category.dart';
 import 'package:timesheet/models/subject.dart';
 import 'package:timesheet/providers/subjects_categories_provider.dart';
-import 'package:timesheet/ui/platform/windows/infobar.dart';
+import 'package:timesheet/ui/platform/snackbar.dart';
 
 class SubjectsCategoriesView extends StatefulWidget {
   const SubjectsCategoriesView({super.key});
@@ -44,11 +44,11 @@ class _SubjectsCategoriesViewState extends State<SubjectsCategoriesView> {
         if (successMsg != null || errorMsg != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (successMsg != null) {
-              InfoBarManager.success(successMsg);
+              Snackbar.success(successMsg);
               provider.clearSuccessMsg();
             }
             if (errorMsg != null) {
-              InfoBarManager.error(errorMsg);
+              Snackbar.error(errorMsg);
               provider.clearErrorMsg();
             }
           });

@@ -1,15 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
-import 'package:timesheet/ui/platform/macos/dialog.dart' as mac_dialog;
-import 'package:timesheet/ui/platform/windows/dialog.dart' as win_dialog;
+import 'package:timesheet/ui/platform/macos/dialog_manager.dart' as macos;
+import 'package:timesheet/ui/platform/windows/dialog_manager.dart' as windows;
 
-class PlatformDialog {
-  PlatformDialog._();
+class Dialog {
+  Dialog._();
 
   static void initialize(GlobalKey<NavigatorState> navigatorKey) {
-    mac_dialog.DialogManager.initialize(navigatorKey);
-    win_dialog.DialogManager.initialize(navigatorKey);
+    macos.DialogManager.initialize(navigatorKey);
+    windows.DialogManager.initialize(navigatorKey);
   }
 
   static void warningConfirmation({
@@ -20,7 +20,7 @@ class PlatformDialog {
     required void Function(bool confirmed) onResult,
   }) {
     if (Platform.isWindows) {
-      win_dialog.DialogManager.warningConfirmation(
+      windows.DialogManager.warningConfirmation(
         title: title,
         message: message,
         confirmText: confirmText,
@@ -28,7 +28,7 @@ class PlatformDialog {
         onResult: onResult,
       );
     } else {
-      mac_dialog.DialogManager.warningConfirmation(
+      macos.DialogManager.warningConfirmation(
         title: title,
         message: message,
         confirmText: confirmText,

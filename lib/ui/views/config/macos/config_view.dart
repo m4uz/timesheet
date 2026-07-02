@@ -4,7 +4,7 @@ import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/models/app_config_model.dart';
 import 'package:timesheet/providers/config_provider.dart';
-import 'package:timesheet/ui/platform/macos/snackbar.dart';
+import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ConfigView extends StatefulWidget {
@@ -102,11 +102,11 @@ class _ConfigViewState extends State<ConfigView> {
     return Consumer<ConfigProvider>(
       builder: (context, provider, _) {
         if (provider.successMsg != null) {
-          SnackBarManager.success(provider.successMsg!);
+          Snackbar.success(provider.successMsg!);
           provider.clearSuccessMsg();
         }
         if (provider.errorMsg != null) {
-          SnackBarManager.error(provider.errorMsg!);
+          Snackbar.error(provider.errorMsg!);
           provider.clearErrorMsg();
         }
 
@@ -163,7 +163,7 @@ class _ConfigViewState extends State<ConfigView> {
                           _proxyPortController.text,
                         );
                         if (portError != null) {
-                          SnackBarManager.error(portError);
+                          Snackbar.error(portError);
                           return;
                         }
                         final updated = _buildConfigFromForm(config);

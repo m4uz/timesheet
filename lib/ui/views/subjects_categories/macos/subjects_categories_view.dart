@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:timesheet/models/category.dart';
 import 'package:timesheet/models/subject.dart';
 import 'package:timesheet/providers/subjects_categories_provider.dart';
-import 'package:timesheet/ui/platform/macos/snackbar.dart';
+import 'package:timesheet/ui/platform/snackbar.dart';
 
 class SubjectsCategoriesView extends StatefulWidget {
   const SubjectsCategoriesView({super.key});
@@ -46,11 +46,11 @@ class _SubjectsCategoriesViewState extends State<SubjectsCategoriesView> {
     return Consumer<SubjectsCategoriesProvider>(
       builder: (context, provider, _) {
         if (provider.successMsg != null) {
-          SnackBarManager.success(provider.successMsg!);
+          Snackbar.success(provider.successMsg!);
           provider.clearSuccessMsg();
         }
         if (provider.errorMsg != null) {
-          SnackBarManager.error(provider.errorMsg!);
+          Snackbar.error(provider.errorMsg!);
           provider.clearErrorMsg();
         }
 

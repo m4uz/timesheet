@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/providers/auth_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
-import 'package:timesheet/ui/platform/windows/infobar.dart';
+import 'package:timesheet/ui/platform/snackbar.dart';
 
 class DebugView extends StatefulWidget {
   const DebugView({super.key});
@@ -46,25 +46,25 @@ class _DebugViewState extends State<DebugView> {
               children: [
                 Button(
                   onPressed: () =>
-                      InfoBarManager.info('This is an info message'),
+                      Snackbar.info('This is an info message'),
                   child: const Text('Info SnackBar'),
                 ),
                 const SizedBox(width: 12),
                 Button(
                   onPressed: () =>
-                      InfoBarManager.success('This is a success message'),
+                      Snackbar.success('This is a success message'),
                   child: const Text('Success SnackBar'),
                 ),
                 const SizedBox(width: 12),
                 Button(
                   onPressed: () =>
-                      InfoBarManager.warning('This is a warning message'),
+                      Snackbar.warning('This is a warning message'),
                   child: const Text('Warning SnackBar'),
                 ),
                 const SizedBox(width: 12),
                 Button(
                   onPressed: () =>
-                      InfoBarManager.error('This is an error message'),
+                      Snackbar.error('This is an error message'),
                   child: const Text('Error SnackBar'),
                 ),
               ],
@@ -75,16 +75,16 @@ class _DebugViewState extends State<DebugView> {
                 Button(
                   child: const Text('Show dialog'),
                   onPressed: () {
-                    PlatformDialog.warningConfirmation(
+                    Dialog.warningConfirmation(
                       title: 'Confirm',
                       message: 'Confirm dialog?',
                       confirmText: 'Yes',
                       cancelText: 'Cancel',
                       onResult: (confirmed) {
                         if (confirmed) {
-                          InfoBarManager.success('Dialog option confirmed');
+                          Snackbar.success('Dialog option confirmed');
                         } else {
-                          InfoBarManager.info('Dialog option dismissed');
+                          Snackbar.info('Dialog option dismissed');
                         }
                         setState(() {});
                       },

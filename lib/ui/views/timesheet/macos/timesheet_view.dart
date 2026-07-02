@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:timesheet/models/timesheet_item.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
 import 'package:timesheet/ui/platform/macos/calendar_toolbar_button.dart';
-import 'package:timesheet/ui/platform/macos/snackbar.dart';
+import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/ui/platform/macos/toolbar_text_field.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
@@ -127,7 +127,7 @@ class _TimesheetViewState extends State<TimesheetView> {
                 }
 
                 if (provider.errorMsg != null) {
-                  SnackBarManager.error(provider.errorMsg!);
+                  Snackbar.error(provider.errorMsg!);
                   provider.clearErrorMsg();
                 }
 
