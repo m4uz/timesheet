@@ -9,8 +9,27 @@ import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
-class TimetrackerView extends StatelessWidget {
+class TimetrackerView extends StatefulWidget {
   const TimetrackerView({super.key});
+
+  @override
+  State<TimetrackerView> createState() => _TimetrackerViewState();
+}
+
+class _TimetrackerViewState extends State<TimetrackerView> {
+  final TextEditingController _filterController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _filterController.text = context.read<TimetrackerProvider>().filter;
+  }
+
+  @override
+  void dispose() {
+    _filterController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +60,18 @@ class TimetrackerView extends StatelessWidget {
                   child: IconButton(
                     icon: const Icon(FluentIcons.add),
                     onPressed: () => timeTrackerProvider.addItem(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // --------------------------------------------------
+                // Filter
+                // --------------------------------------------------
+                SizedBox(
+                  width: 160,
+                  child: TextBox(
+                    controller: _filterController,
+                    placeholder: 'Filter',
+                    onChanged: timeTrackerProvider.setFilter,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -93,6 +124,9 @@ class TimetrackerView extends StatelessWidget {
                 child: material.ReorderableListView(
                   buildDefaultDragHandles: false,
                   onReorderItem: (oldIndex, newIndex) async {
+                    if (timeTrackerProvider.hasFilter) {
+                      return;
+                    }
                     await timeTrackerProvider.reorderItems(oldIndex, newIndex);
                   },
                   children: [
@@ -103,6 +137,7 @@ class TimetrackerView extends StatelessWidget {
                         userConfigProvider: subjectsCategoriesProvider,
                         index: i,
                         item: timeTrackerProvider.items[i],
+                        canReorder: !timeTrackerProvider.hasFilter,
                       ),
                   ],
                 ),
@@ -146,6 +181,7 @@ class _TimetrackerItemRow extends StatefulWidget {
   final SubjectsCategoriesProvider userConfigProvider;
   final int index;
   final TimetrackerItem item;
+  final bool canReorder;
 
   const _TimetrackerItemRow({
     required super.key,
@@ -153,6 +189,7 @@ class _TimetrackerItemRow extends StatefulWidget {
     required this.userConfigProvider,
     required this.index,
     required this.item,
+    required this.canReorder,
   });
 
   @override
@@ -230,10 +267,17 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
           // --------------------------------------------------
           SizedBox(
             width: _btnW,
-            child: ReorderableDragStartListener(
-              index: widget.index,
-              child: Icon(FluentIcons.move),
-            ),
+            child: widget.canReorder
+                ? ReorderableDragStartListener(
+                    index: widget.index,
+                    child: Icon(FluentIcons.move),
+                  )
+                : Icon(
+                    FluentIcons.move,
+                    color: FluentTheme.of(
+                      context,
+                    ).resources.textFillColorDisabled,
+                  ),
           ),
           SizedBox(width: _spacingW),
           // --------------------------------------------------

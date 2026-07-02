@@ -11,25 +11,47 @@ class TimetrackerProvider extends ChangeNotifier {
   List<TimetrackerItem> _items = [];
   String? _successMsg;
   String? _errorMsg;
+  String _filter = '';
 
   TimetrackerProvider({required this._repository}) {
     loadItems();
   }
 
-  List<TimetrackerItem> get items => List.unmodifiable(_items);
+  List<TimetrackerItem> get items {
+    final normalizedFilter = _filter.trim().toLowerCase();
+    if (normalizedFilter.isEmpty) {
+      return List.unmodifiable(_items);
+    }
+
+    return List.unmodifiable(
+      _items.where((item) {
+        return item.subject.trim().toLowerCase().contains(normalizedFilter) ||
+            item.description.trim().toLowerCase().contains(normalizedFilter);
+      }),
+    );
+  }
+
   bool get isLoading => _isLoading;
   String? get successMsg => _successMsg;
   String? get errorMsg => _errorMsg;
-  bool isSavingItem(TimetrackerItem item) => _savingKeys.contains(_itemKey(item));
+  bool isSavingItem(TimetrackerItem item) =>
+      _savingKeys.contains(_itemKey(item));
 
-  int get itemCount => _items.length;
+  String get filter => _filter;
+  bool get hasFilter => _filter.trim().isNotEmpty;
+  int get itemCount => items.length;
 
   Duration get totalDuration {
     Duration total = Duration.zero;
-    for (final item in _items) {
+    for (final item in items) {
       total += item.to.difference(item.from);
     }
     return total;
+  }
+
+  void setFilter(String value) {
+    _filter = value;
+    notifyListeners();
   }
 
   Future<void> loadItems() async {

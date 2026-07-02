@@ -8,6 +8,8 @@ import 'package:timesheet/models/timetracker_item.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/providers/subjects_categories_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
+import 'package:timesheet/ui/platform/macos/toolbar_text_field.dart'
+    as mac_toolbar_text_field;
 import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
@@ -19,6 +21,20 @@ class TimetrackerView extends StatefulWidget {
 }
 
 class _TimetrackerViewState extends State<TimetrackerView> {
+  final TextEditingController _filterController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _filterController.text = context.read<TimetrackerProvider>().filter;
+  }
+
+  @override
+  void dispose() {
+    _filterController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer2<TimetrackerProvider, SubjectsCategoriesProvider>(
@@ -68,6 +84,11 @@ class _TimetrackerViewState extends State<TimetrackerView> {
                 onPressed: () async {
                   timeTrackerProvider.addItem();
                 },
+              ),
+              mac_toolbar_text_field.ToolbarTextField(
+                controller: _filterController,
+                placeholder: 'Filter',
+                onChanged: timeTrackerProvider.setFilter,
               ),
               ToolBarIconButton(
                 label: 'Save to WTM',
@@ -122,9 +143,13 @@ class _TimetrackerViewState extends State<TimetrackerView> {
                               userConfigProvider: userConfigProvider,
                               index: index,
                               item: timeTrackerProvider.items[index],
+                              canReorder: !timeTrackerProvider.hasFilter,
                             ),
                         ],
                         onReorderItem: (oldIndex, newIndex) async {
+                          if (timeTrackerProvider.hasFilter) {
+                            return;
+                          }
                           await timeTrackerProvider.reorderItems(
                             oldIndex,
                             newIndex,
@@ -175,6 +200,7 @@ class _TimetrackerItem extends StatefulWidget {
   final SubjectsCategoriesProvider userConfigProvider;
   final int index;
   final TimetrackerItem item;
+  final bool canReorder;
 
   const _TimetrackerItem({
     required super.key,
@@ -182,6 +208,7 @@ class _TimetrackerItem extends StatefulWidget {
     required this.userConfigProvider,
     required this.index,
     required this.item,
+    required this.canReorder,
   });
 
   @override
@@ -297,13 +324,15 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
               // --------------------------------------------------
               SizedBox(
                 width: dimensions.btnW,
-                child: ReorderableDragStartListener(
-                  index: widget.index,
-                  child: MacosIcon(
-                    CupertinoIcons.bars,
-                    color: MacosTheme.of(context).primaryColor,
-                  ),
-                ),
+                child: widget.canReorder
+                    ? ReorderableDragStartListener(
+                        index: widget.index,
+                        child: MacosIcon(
+                          CupertinoIcons.bars,
+                          color: MacosTheme.of(context).primaryColor,
+                        ),
+                      )
+                    : MacosIcon(CupertinoIcons.bars, color: Colors.grey),
               ),
               SizedBox(width: dimensions.spacingW),
               // --------------------------------------------------
