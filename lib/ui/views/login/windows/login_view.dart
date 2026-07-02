@@ -2,8 +2,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/providers/auth_provider.dart';
 
-class WinLoginView extends StatelessWidget {
-  const WinLoginView({super.key});
+class LoginView extends StatelessWidget {
+  const LoginView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,9 +12,6 @@ class WinLoginView extends StatelessWidget {
       content: Center(
         child: Consumer<AuthProvider>(
           builder: (context, authProvider, _) {
-            // --------------------------------------------------
-            // Loading state
-            // --------------------------------------------------
             if (authProvider.isLoading) {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -28,9 +25,6 @@ class WinLoginView extends StatelessWidget {
                 ],
               );
             }
-            // --------------------------------------------------
-            // Login content
-            // --------------------------------------------------
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -53,8 +47,5 @@ class WinLoginView extends StatelessWidget {
     AuthProvider authProvider,
   ) async {
     await authProvider.login();
-    if (authProvider.isAuthenticated && context.mounted) {
-      // App will show main content when authenticated
-    }
   }
 }

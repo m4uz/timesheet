@@ -10,10 +10,7 @@ class LoginView extends StatelessWidget {
   Widget build(BuildContext context) {
     return MacosScaffold(
       toolBar: ToolBar(
-        title: Text(
-          'Login',
-          style: MacosTheme.of(context).typography.title2,
-        ),
+        title: Text('Login', style: MacosTheme.of(context).typography.title2),
         titleWidth: 150.0,
       ),
       children: [
@@ -61,10 +58,5 @@ class LoginView extends StatelessWidget {
     AuthProvider authProvider,
   ) async {
     await authProvider.login();
-    // If authentication fails, AuthProvider takes care of displaying snackbar error.
-    if (authProvider.isAuthenticated && context.mounted) {
-      // Navigation will be handled by the main app based on auth state
-      // The app will automatically show the main content when authenticated
-    }
   }
 }

@@ -9,8 +9,7 @@ class SubjectsCategoriesView extends StatefulWidget {
   const SubjectsCategoriesView({super.key});
 
   @override
-  State<SubjectsCategoriesView> createState() =>
-      _SubjectsCategoriesViewState();
+  State<SubjectsCategoriesView> createState() => _SubjectsCategoriesViewState();
 }
 
 class _SubjectsCategoriesViewState extends State<SubjectsCategoriesView> {
@@ -118,9 +117,9 @@ class _SubjectsCategoriesViewState extends State<SubjectsCategoriesView> {
                           },
                           onSelectAll: (filteredItems) {
                             setState(() {
-                              final allFilteredSelected = filteredItems
-                                  .every((item) =>
-                                      _selectedSubjects.contains(item));
+                              final allFilteredSelected = filteredItems.every(
+                                (item) => _selectedSubjects.contains(item),
+                              );
                               if (allFilteredSelected) {
                                 for (final item in filteredItems) {
                                   _selectedSubjects.remove(item);
@@ -170,8 +169,8 @@ class _SubjectsCategoriesViewState extends State<SubjectsCategoriesView> {
                           onSelectAll: (filteredItems) {
                             setState(() {
                               final allFilteredSelected = filteredItems.every(
-                                  (item) =>
-                                      _selectedCategories.contains(item));
+                                (item) => _selectedCategories.contains(item),
+                              );
                               if (allFilteredSelected) {
                                 for (final item in filteredItems) {
                                   _selectedCategories.remove(item);
@@ -237,17 +236,15 @@ class _ListPanel<T> extends StatelessWidget {
     final filteredItems = searchText.isEmpty
         ? items
         : items
-            .where((item) =>
-                itemToString(item).toLowerCase().contains(searchText))
-            .toList();
+              .where(
+                (item) => itemToString(item).toLowerCase().contains(searchText),
+              )
+              .toList();
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: const Color(0xFFE1E1E1),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFFE1E1E1), width: 1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
@@ -259,9 +256,9 @@ class _ListPanel<T> extends StatelessWidget {
           // --------------------------------------------------
           Text(
             title,
-            style: FluentTheme.of(context).typography.title?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: FluentTheme.of(
+              context,
+            ).typography.title?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           _buildHeader(context, filteredItems),
@@ -285,9 +282,7 @@ class _ListPanel<T> extends StatelessWidget {
                   const SizedBox(width: 8),
                   Checkbox(
                     checked: isSelected,
-                    onChanged: isDisabled
-                        ? null
-                        : (_) => onItemToggle(item),
+                    onChanged: isDisabled ? null : (_) => onItemToggle(item),
                   ),
                   const SizedBox(width: 8),
                   Tooltip(
@@ -309,7 +304,8 @@ class _ListPanel<T> extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context, List<T> filteredItems) {
-    final allSelected = filteredItems.isNotEmpty &&
+    final allSelected =
+        filteredItems.isNotEmpty &&
         filteredItems.every((item) => selectedItems.contains(item));
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,

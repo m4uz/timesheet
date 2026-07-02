@@ -10,14 +10,14 @@ import 'package:timesheet/ui/macos/snackbar.dart';
 import 'package:timesheet/ui/macos/cupertino_calendar_toolbar_button.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
-class TimeSheetView extends StatefulWidget {
-  const TimeSheetView({super.key});
+class TimesheetView extends StatefulWidget {
+  const TimesheetView({super.key});
 
   @override
-  State<TimeSheetView> createState() => _TimeSheetViewState();
+  State<TimesheetView> createState() => _TimesheetViewState();
 }
 
-class _TimeSheetViewState extends State<TimeSheetView> {
+class _TimesheetViewState extends State<TimesheetView> {
   static const double _dayPrefW = 40.0;
   static const double _datePickerPrefW = 120.0;
   static const double _timePickerPrefW = 80.0;

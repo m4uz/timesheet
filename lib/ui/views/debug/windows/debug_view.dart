@@ -45,7 +45,8 @@ class _DebugViewState extends State<DebugView> {
             Row(
               children: [
                 Button(
-                  onPressed: () => InfoBarManager.info('This is an info message'),
+                  onPressed: () =>
+                      InfoBarManager.info('This is an info message'),
                   child: const Text('Info SnackBar'),
                 ),
                 const SizedBox(width: 12),

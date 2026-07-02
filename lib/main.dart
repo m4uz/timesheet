@@ -24,7 +24,11 @@ import 'package:timesheet/services/auth_service.dart';
 import 'package:timesheet/services/session_manager.dart';
 import 'package:timesheet/services/timetracker_db_service.dart';
 import 'package:timesheet/services/wtm_service.dart';
-import 'package:timesheet/ui/auth_gate.dart';
+import 'package:timesheet/ui/views/login/macos/login_view.dart' as login_macos;
+import 'package:timesheet/ui/views/login/windows/login_view.dart'
+    as login_windows;
+import 'package:timesheet/ui/views/menu/macos/menu_view.dart' as menu_macos;
+import 'package:timesheet/ui/views/menu/windows/menu_view.dart' as menu_windows;
 import 'package:timesheet/ui/theme.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:timesheet/ui/macos/dialog.dart' as mac_dialog;
@@ -189,7 +193,13 @@ class _TimesheetAppState extends State<TimesheetApp> {
             builder: (context, child) {
               return WindowsOidcAuthHost(child: child);
             },
-            home: const AuthGate(),
+            home: Consumer<AuthProvider>(
+              builder: (context, auth, _) {
+                return auth.isAuthenticated
+                    ? const menu_windows.MenuView()
+                    : const login_windows.LoginView();
+              },
+            ),
           );
         }
 
@@ -207,7 +217,13 @@ class _TimesheetAppState extends State<TimesheetApp> {
           builder: (context, child) {
             return MacosOidcAuthHost(child: child);
           },
-          home: const AuthGate(),
+          home: Consumer<AuthProvider>(
+            builder: (context, auth, _) {
+              return auth.isAuthenticated
+                  ? const menu_macos.MenuView()
+                  : const login_macos.LoginView();
+            },
+          ),
         );
       },
     );

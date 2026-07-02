@@ -12,10 +12,7 @@ class DebugView extends StatelessWidget {
   Widget build(BuildContext context) {
     return MacosScaffold(
       toolBar: ToolBar(
-        title: Text(
-          'Debug',
-          style: MacosTheme.of(context).typography.title2,
-        ),
+        title: Text('Debug', style: MacosTheme.of(context).typography.title2),
         titleWidth: 150.0,
         leading: null,
       ),
@@ -142,7 +139,9 @@ class _TokenRefreshSectionState extends State<_TokenRefreshSection> {
                         showErrors: true,
                       );
                     },
-              child: Text(auth.isRefreshing ? 'Refreshing...' : 'Refresh token'),
+              child: Text(
+                auth.isRefreshing ? 'Refreshing...' : 'Refresh token',
+              ),
             ),
             const SizedBox(height: 12),
             SizedBox(
