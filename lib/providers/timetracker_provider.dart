@@ -12,8 +12,7 @@ class TimetrackerProvider extends ChangeNotifier {
   String? _successMsg;
   String? _errorMsg;
 
-  TimetrackerProvider({required TimetrackerRepository repository})
-    : _repository = repository {
+  TimetrackerProvider({required this._repository}) {
     loadItems();
   }
 
@@ -145,11 +144,6 @@ class TimetrackerProvider extends ChangeNotifier {
     _errorMsg = null;
     notifyListeners();
 
-    if (oldIndex < newIndex) {
-      newIndex -= 1;
-    }
-
-    // Remove the item from oldIndex and insert it at newIndex
     final item = _items.removeAt(oldIndex);
     _items.insert(newIndex, item);
 

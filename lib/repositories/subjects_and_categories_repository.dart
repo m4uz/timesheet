@@ -7,8 +7,7 @@ import 'package:timesheet/services/wtm_service.dart';
 class SubjectsAndCategoriesRepository {
   final IWTMService _service;
 
-  SubjectsAndCategoriesRepository({required IWTMService service})
-    : _service = service;
+  SubjectsAndCategoriesRepository({required this._service});
 
   Future<Result<({List<Subject> subjects, List<Category> categories})>>
   loadSubjectsAndCategories() async {

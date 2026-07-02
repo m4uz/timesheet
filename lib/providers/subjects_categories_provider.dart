@@ -14,8 +14,8 @@ class SubjectsCategoriesProvider extends ChangeNotifier {
   String? _errorMsg;
 
   SubjectsCategoriesProvider({
-    required SubjectsAndCategoriesRepository repository,
-  }) : _repository = repository {
+    required this._repository,
+  }) {
     loadSubjectsAndCategories();
   }
 

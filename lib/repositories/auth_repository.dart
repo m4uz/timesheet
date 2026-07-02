@@ -5,8 +5,7 @@ import 'package:timesheet/services/auth_service.dart';
 class AuthRepository {
   final IAuthService _authService;
 
-  AuthRepository({required IAuthService authService})
-    : _authService = authService;
+  AuthRepository({required this._authService});
 
   Future<Result<AuthInfo>> authenticate() async {
     return await _authService.authenticate();
