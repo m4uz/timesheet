@@ -124,7 +124,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
                               item: timeTrackerProvider.items[index],
                             ),
                         ],
-                        onReorder: (oldIndex, newIndex) async {
+                        onReorderItem: (oldIndex, newIndex) async {
                           await timeTrackerProvider.reorderItems(
                             oldIndex,
                             newIndex,

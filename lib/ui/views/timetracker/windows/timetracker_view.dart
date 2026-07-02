@@ -92,7 +92,7 @@ class TimetrackerView extends StatelessWidget {
               Expanded(
                 child: material.ReorderableListView(
                   buildDefaultDragHandles: false,
-                  onReorder: (oldIndex, newIndex) async {
+                  onReorderItem: (oldIndex, newIndex) async {
                     await timeTrackerProvider.reorderItems(oldIndex, newIndex);
                   },
                   children: [
