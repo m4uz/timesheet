@@ -108,7 +108,7 @@ jobs:
       - name: Install Flutter
         uses: ./.github/actions/install-flutter
         with:
-          flutter-version: "3.41.1"
+          flutter-version: "3.44.4"
 
       - name: Install dependencies
         run: flutter pub get
