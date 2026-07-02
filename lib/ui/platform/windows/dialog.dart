@@ -3,7 +3,6 @@ import 'package:fluent_ui/fluent_ui.dart';
 class DialogManager {
   DialogManager._();
   static final DialogManager _instance = DialogManager._();
-  static DialogManager get instance => _instance;
 
   GlobalKey<NavigatorState>? _navigatorKey;
 
@@ -59,19 +58,5 @@ class DialogManager {
         ],
       ),
     ).then((value) => onResult(value ?? false));
-  }
-
-  static Future<T?> show<T>({
-    required String title,
-    required Widget content,
-    required List<Widget> actions,
-  }) async {
-    final context = _instance._context;
-    if (context == null) return null;
-    return showDialog<T>(
-      context: context,
-      builder: (ctx) =>
-          ContentDialog(title: Text(title), content: content, actions: actions),
-    );
   }
 }

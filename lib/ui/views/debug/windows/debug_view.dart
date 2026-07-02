@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/providers/auth_provider.dart';
-import 'package:timesheet/ui/platform/windows/dialog.dart';
+import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/windows/infobar.dart';
 
 class DebugView extends StatefulWidget {
@@ -75,7 +75,7 @@ class _DebugViewState extends State<DebugView> {
                 Button(
                   child: const Text('Show dialog'),
                   onPressed: () {
-                    DialogManager.warningConfirmation(
+                    PlatformDialog.warningConfirmation(
                       title: 'Confirm',
                       message: 'Confirm dialog?',
                       confirmText: 'Yes',

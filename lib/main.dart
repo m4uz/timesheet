@@ -31,11 +31,10 @@ import 'package:timesheet/ui/views/menu/macos/menu_view.dart' as menu_macos;
 import 'package:timesheet/ui/views/menu/windows/menu_view.dart' as menu_windows;
 import 'package:timesheet/ui/theme.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:timesheet/ui/platform/macos/dialog.dart' as mac_dialog;
+import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/services/oidc_auth_coordinator.dart';
 import 'package:timesheet/ui/platform/macos/oidc_auth_host.dart';
 import 'package:timesheet/ui/platform/macos/snackbar.dart';
-import 'package:timesheet/ui/platform/windows/dialog.dart' as windows_dialog;
 import 'package:timesheet/ui/platform/windows/infobar.dart';
 import 'package:timesheet/ui/platform/windows/oidc_auth_host.dart';
 import 'package:webview_all/webview_all.dart';
@@ -46,14 +45,14 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  PlatformDialog.initialize(navigatorKey);
+
   if (Platform.isMacOS) {
     WebViewPlatform.instance = WebKitWebViewPlatform();
     await MacosWindowUtilsConfig().apply();
-    mac_dialog.DialogManager.initialize(navigatorKey);
     SnackBarManager.initialize(navigatorKey);
   } else if (Platform.isWindows) {
     InfoBarManager.initialize(navigatorKey);
-    windows_dialog.DialogManager.initialize(navigatorKey);
   }
 
   await AppConfig.init();

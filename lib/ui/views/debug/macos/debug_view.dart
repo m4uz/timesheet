@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/providers/auth_provider.dart';
-import 'package:timesheet/ui/platform/macos/dialog.dart';
+import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/macos/snackbar.dart';
 
 class DebugView extends StatelessWidget {
@@ -63,7 +63,7 @@ class DebugView extends StatelessWidget {
                       PushButton(
                         controlSize: ControlSize.large,
                         onPressed: () {
-                          DialogManager.warningConfirmation(
+                          PlatformDialog.warningConfirmation(
                             title: 'Warning Dialog',
                             message: 'Confirm warning?',
                             confirmText: 'Yes',
@@ -71,7 +71,7 @@ class DebugView extends StatelessWidget {
                             onResult: (bool confirmed) {},
                           );
                         },
-                        child: const Text('Info Dialog'),
+                        child: const Text('Warning Dialog'),
                       ),
                     ],
                   ),

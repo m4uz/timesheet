@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:timesheet/models/timetracker_item.dart';
 import 'package:timesheet/providers/subjects_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
-import 'package:timesheet/ui/platform/windows/dialog.dart';
+import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/windows/infobar.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
@@ -67,7 +67,7 @@ class TimetrackerView extends StatelessWidget {
                   child: IconButton(
                     icon: const Icon(FluentIcons.delete),
                     onPressed: () {
-                      DialogManager.warningConfirmation(
+                      PlatformDialog.warningConfirmation(
                         title: 'Warning',
                         message: 'Are you sure you want to delete all items?',
                         confirmText: 'Yes',

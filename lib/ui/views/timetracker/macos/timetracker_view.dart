@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:timesheet/models/timetracker_item.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/providers/subjects_categories_provider.dart';
-import 'package:timesheet/ui/platform/macos/dialog.dart';
+import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/macos/snackbar.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
@@ -85,7 +85,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
                 icon: const MacosIcon(CupertinoIcons.trash),
                 tooltipMessage: 'Clear all timesheet items',
                 onPressed: () async {
-                  DialogManager.warningConfirmation(
+                  PlatformDialog.warningConfirmation(
                     title: 'Warning',
                     message: 'Are you sure you want to delete all items?',
                     confirmText: 'Yes',

@@ -8,9 +8,8 @@ import 'package:timesheet/models/result.dart';
 import 'package:timesheet/models/session.dart';
 import 'package:timesheet/repositories/auth_repository.dart';
 import 'package:timesheet/services/session_manager.dart';
-import 'package:timesheet/ui/platform/macos/dialog.dart' as mac_dialog;
+import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/macos/snackbar.dart';
-import 'package:timesheet/ui/platform/windows/dialog.dart' as win_dialog;
 import 'package:timesheet/ui/platform/windows/infobar.dart';
 
 enum TokenRefreshResult { success, failed, interactionRequired }
@@ -246,23 +245,13 @@ class AuthProvider extends ChangeNotifier {
       }
     }
 
-    if (Platform.isWindows) {
-      win_dialog.DialogManager.warningConfirmation(
-        title: title,
-        message: message,
-        confirmText: confirmText,
-        cancelText: cancelText,
-        onResult: onResult,
-      );
-    } else {
-      mac_dialog.DialogManager.warningConfirmation(
-        title: title,
-        message: message,
-        confirmText: confirmText,
-        cancelText: cancelText,
-        onResult: onResult,
-      );
-    }
+    PlatformDialog.warningConfirmation(
+      title: title,
+      message: message,
+      confirmText: confirmText,
+      cancelText: cancelText,
+      onResult: onResult,
+    );
   }
 
   void _showError(String message) {
