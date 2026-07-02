@@ -24,18 +24,18 @@ import 'package:timesheet/services/auth_service.dart';
 import 'package:timesheet/services/session_manager.dart';
 import 'package:timesheet/services/timetracker_db_service.dart';
 import 'package:timesheet/services/wtm_service.dart';
-import 'package:timesheet/ui/views/login/macos/login_view.dart' as login_macos;
+import 'package:timesheet/ui/views/login/macos/login_view.dart' as mac_login_view;
 import 'package:timesheet/ui/views/login/windows/login_view.dart'
-    as login_windows;
-import 'package:timesheet/ui/views/menu/macos/menu_view.dart' as menu_macos;
-import 'package:timesheet/ui/views/menu/windows/menu_view.dart' as menu_windows;
+    as win_login_view;
+import 'package:timesheet/ui/views/menu/macos/menu_view.dart' as mac_menu_view;
+import 'package:timesheet/ui/views/menu/windows/menu_view.dart' as win_menu_view;
 import 'package:timesheet/ui/theme.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/services/oidc_auth_coordinator.dart';
-import 'package:timesheet/ui/platform/macos/oidc_auth_host.dart';
-import 'package:timesheet/ui/platform/windows/oidc_auth_host.dart';
+import 'package:timesheet/ui/platform/macos/oidc_auth_host.dart' as mac_oidc_auth_host;
+import 'package:timesheet/ui/platform/windows/oidc_auth_host.dart' as win_oidc_auth_host;
 import 'package:webview_all/webview_all.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
@@ -187,13 +187,13 @@ class _TimesheetAppState extends State<TimesheetApp> {
             supportedLocales: const [Locale('en')],
             debugShowCheckedModeBanner: !kReleaseMode,
             builder: (context, child) {
-              return WindowsOidcAuthHost(child: child);
+              return win_oidc_auth_host.WindowsOidcAuthHost(child: child);
             },
             home: Consumer<AuthProvider>(
               builder: (context, auth, _) {
                 return auth.isAuthenticated
-                    ? const menu_windows.MenuView()
-                    : const login_windows.LoginView();
+                    ? const win_menu_view.MenuView()
+                    : const win_login_view.LoginView();
               },
             ),
           );
@@ -211,13 +211,13 @@ class _TimesheetAppState extends State<TimesheetApp> {
           supportedLocales: const [Locale('en')],
           debugShowCheckedModeBanner: !kReleaseMode,
           builder: (context, child) {
-            return MacosOidcAuthHost(child: child);
+            return mac_oidc_auth_host.MacosOidcAuthHost(child: child);
           },
           home: Consumer<AuthProvider>(
             builder: (context, auth, _) {
               return auth.isAuthenticated
-                  ? const menu_macos.MenuView()
-                  : const login_macos.LoginView();
+                  ? const mac_menu_view.MenuView()
+                  : const mac_login_view.LoginView();
             },
           ),
         );
