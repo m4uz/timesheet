@@ -33,6 +33,7 @@ import 'package:timesheet/ui/macos/oidc_auth_host.dart';
 import 'package:timesheet/ui/macos/snackbar.dart';
 import 'package:timesheet/ui/windows/dialog.dart' as windows_dialog;
 import 'package:timesheet/ui/windows/infobar.dart';
+import 'package:timesheet/ui/windows/oidc_auth_host.dart';
 import 'package:webview_all/webview_all.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
@@ -188,6 +189,9 @@ class _TimesheetAppState extends State<TimesheetApp> {
             ],
             supportedLocales: const [Locale('en')],
             debugShowCheckedModeBanner: !kReleaseMode,
+            builder: (context, child) {
+              return WinOidcAuthHost(child: child);
+            },
             home: const AuthGate(),
           );
         }

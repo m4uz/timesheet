@@ -11,6 +11,7 @@ class OidcWebViewSession {
   Completer<Map<String, String>>? _pendingAuthorization;
   Future<void>? _configuration;
   bool _configured = false;
+  static final Uri _aboutBlank = Uri.parse('about:blank');
 
   bool get hasController => _controller != null;
   bool get isInitialized => _configured;
@@ -75,7 +76,10 @@ class OidcWebViewSession {
     ensureControllerCreated();
     await controller.setJavaScriptMode(JavaScriptMode.unrestricted);
     await controller.setNavigationDelegate(
-      NavigationDelegate(onNavigationRequest: _onNavigationRequest),
+      NavigationDelegate(
+        onNavigationRequest: _onNavigationRequest,
+        onUrlChange: _onUrlChange,
+      ),
     );
     _configured = true;
   }
@@ -92,8 +96,30 @@ class OidcWebViewSession {
 
   FutureOr<NavigationDecision> _onNavigationRequest(NavigationRequest request) {
     final uri = Uri.parse(request.url);
-    if (!_isRedirect(uri)) {
+    if (!_tryCompleteAuthorization(uri)) {
       return NavigationDecision.navigate;
+    }
+
+    return NavigationDecision.prevent;
+  }
+
+  void _onUrlChange(UrlChange change) {
+    final url = change.url;
+    if (url == null) {
+      return;
+    }
+
+    final uri = Uri.parse(url);
+    if (_tryCompleteAuthorization(uri)) {
+      // WebView2 can still try to load the loopback URL and show a refused page.
+      // Navigating to about:blank immediately keeps the UX clean.
+      unawaited(controller.loadRequest(_aboutBlank));
+    }
+  }
+
+  bool _tryCompleteAuthorization(Uri uri) {
+    if (!_isRedirect(uri)) {
+      return false;
     }
 
     _log.fine('Authorization redirect intercepted.');
@@ -103,7 +129,7 @@ class OidcWebViewSession {
       pending.complete(Map<String, String>.from(uri.queryParameters));
     }
 
-    return NavigationDecision.prevent;
+    return true;
   }
 
   bool _isRedirect(Uri uri) {
