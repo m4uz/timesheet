@@ -3,8 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:macos_ui/macos_ui.dart';
 
-class CupertinoCalendarPickerToolbarButton extends ToolbarItem {
-  const CupertinoCalendarPickerToolbarButton({
+class CalendarToolbarButton extends ToolbarItem {
+  const CalendarToolbarButton({
     super.key,
     required this.label,
     required this.initialDateTime,
@@ -32,8 +32,8 @@ class CupertinoCalendarPickerToolbarButton extends ToolbarItem {
             Text(
               label,
               style: MacosTheme.of(context).typography.caption1.copyWith(
-                    color: MacosColors.systemGrayColor,
-                  ),
+                color: MacosColors.systemGrayColor,
+              ),
             ),
             const SizedBox(width: 8.0),
           ],

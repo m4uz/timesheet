@@ -1,8 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/providers/auth_provider.dart';
-import 'package:timesheet/ui/windows/dialog.dart';
-import 'package:timesheet/ui/windows/infobar.dart';
+import 'package:timesheet/ui/platform/windows/dialog.dart';
+import 'package:timesheet/ui/platform/windows/infobar.dart';
 
 class DebugView extends StatefulWidget {
   const DebugView({super.key});

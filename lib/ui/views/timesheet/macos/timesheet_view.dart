@@ -5,9 +5,9 @@ import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/models/timesheet_item.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
-import 'package:timesheet/ui/macos/macos_toolbar_text_field.dart';
-import 'package:timesheet/ui/macos/snackbar.dart';
-import 'package:timesheet/ui/macos/cupertino_calendar_toolbar_button.dart';
+import 'package:timesheet/ui/platform/macos/calendar_toolbar_button.dart';
+import 'package:timesheet/ui/platform/macos/snackbar.dart';
+import 'package:timesheet/ui/platform/macos/toolbar_text_field.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
 class TimesheetView extends StatefulWidget {
@@ -67,7 +67,7 @@ class _TimesheetViewState extends State<TimesheetView> {
               ),
             ),
             actions: [
-              CupertinoCalendarPickerToolbarButton(
+              CalendarToolbarButton(
                 label: 'From',
                 initialDateTime: provider.fromDate,
                 minimumDateTime: DateTime.now().subtract(
@@ -81,7 +81,7 @@ class _TimesheetViewState extends State<TimesheetView> {
                   }
                 },
               ),
-              CupertinoCalendarPickerToolbarButton(
+              CalendarToolbarButton(
                 label: 'To',
                 initialDateTime: provider.toDate,
                 minimumDateTime: DateTime.now().subtract(
@@ -95,7 +95,7 @@ class _TimesheetViewState extends State<TimesheetView> {
                   }
                 },
               ),
-              MacosToolbarTextField(
+              ToolbarTextField(
                 controller: _filterController,
                 placeholder: 'Filter',
                 onChanged: provider.setFilter,

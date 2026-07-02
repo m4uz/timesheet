@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart' as material show Colors;
-import 'package:fluent_ui/fluent_ui.dart';
-import 'package:timesheet/ui/oidc/oidc_auth_host_core.dart';
+import 'package:flutter/material.dart';
+import 'package:macos_ui/macos_ui.dart';
+import 'package:timesheet/ui/platform/oidc/oidc_auth_host_core.dart';
 
-class WindowsOidcAuthHost extends StatelessWidget {
+class MacosOidcAuthHost extends StatelessWidget {
   final Widget? child;
 
-  const WindowsOidcAuthHost({super.key, this.child});
+  const MacosOidcAuthHost({super.key, this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -13,39 +13,36 @@ class WindowsOidcAuthHost extends StatelessWidget {
       child: child,
       buildInteractiveAuth: (context, coordinator, webView) {
         return ColoredBox(
-          color: material.Colors.black54,
+          color: Colors.black54,
           child: Center(
             child: Container(
-              width: 560,
-              height: 760,
+              width: 500,
+              height: 700,
               decoration: BoxDecoration(
-                color: FluentTheme.of(context).scaffoldBackgroundColor,
+                color: MacosTheme.of(context).canvasColor,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: FluentTheme.of(
-                    context,
-                  ).resources.dividerStrokeColorDefault,
-                ),
+                border: Border.all(color: MacosTheme.of(context).dividerColor),
               ),
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(8),
                     child: Row(
                       children: [
                         Text(
                           'Login',
-                          style: FluentTheme.of(context).typography.subtitle,
+                          style: MacosTheme.of(context).typography.title3,
                         ),
                         const Spacer(),
-                        Button(
+                        PushButton(
+                          controlSize: ControlSize.regular,
+                          secondary: true,
                           onPressed: coordinator.cancel,
                           child: const Text('Cancel'),
                         ),
                       ],
                     ),
                   ),
-                  const Divider(),
                   Expanded(child: webView),
                 ],
               ),

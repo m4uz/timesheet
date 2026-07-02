@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/models/timesheet_item.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
-import 'package:timesheet/ui/windows/infobar.dart';
+import 'package:timesheet/ui/platform/windows/infobar.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
 class TimesheetView extends StatefulWidget {

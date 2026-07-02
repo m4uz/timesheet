@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/models/app_config_model.dart';
 import 'package:timesheet/providers/config_provider.dart';
-import 'package:timesheet/ui/windows/infobar.dart';
+import 'package:timesheet/ui/platform/windows/infobar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const _logLevels = [

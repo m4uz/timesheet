@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart' hide OverlayVisibilityMode;
 import 'package:macos_ui/macos_ui.dart';
 
-class MacosToolbarTextField extends ToolbarItem {
+class ToolbarTextField extends ToolbarItem {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final String placeholder;
   final double width;
 
-  const MacosToolbarTextField({
+  const ToolbarTextField({
     required this.controller,
     required this.onChanged,
     this.placeholder = 'Filter',

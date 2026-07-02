@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/providers/auth_provider.dart';
-import 'package:timesheet/ui/platform_menu.dart';
+import 'package:timesheet/ui/platform/macos/menu_bar.dart';
 import 'package:timesheet/ui/views/config/macos/config_view.dart';
 import 'package:timesheet/ui/views/debug/macos/debug_view.dart';
 import 'package:timesheet/ui/views/menu/destinations.dart';

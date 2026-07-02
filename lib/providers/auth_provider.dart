@@ -8,10 +8,10 @@ import 'package:timesheet/models/result.dart';
 import 'package:timesheet/models/session.dart';
 import 'package:timesheet/repositories/auth_repository.dart';
 import 'package:timesheet/services/session_manager.dart';
-import 'package:timesheet/ui/macos/dialog.dart' as mac_dialog;
-import 'package:timesheet/ui/macos/snackbar.dart';
-import 'package:timesheet/ui/windows/dialog.dart' as win_dialog;
-import 'package:timesheet/ui/windows/infobar.dart';
+import 'package:timesheet/ui/platform/macos/dialog.dart' as mac_dialog;
+import 'package:timesheet/ui/platform/macos/snackbar.dart';
+import 'package:timesheet/ui/platform/windows/dialog.dart' as win_dialog;
+import 'package:timesheet/ui/platform/windows/infobar.dart';
 
 enum TokenRefreshResult { success, failed, interactionRequired }
 

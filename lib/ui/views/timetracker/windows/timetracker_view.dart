@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:timesheet/models/timetracker_item.dart';
 import 'package:timesheet/providers/subjects_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
-import 'package:timesheet/ui/windows/dialog.dart';
-import 'package:timesheet/ui/windows/infobar.dart';
+import 'package:timesheet/ui/platform/windows/dialog.dart';
+import 'package:timesheet/ui/platform/windows/infobar.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
 class TimetrackerView extends StatelessWidget {
