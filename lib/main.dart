@@ -190,7 +190,7 @@ class _TimesheetAppState extends State<TimesheetApp> {
             supportedLocales: const [Locale('en')],
             debugShowCheckedModeBanner: !kReleaseMode,
             builder: (context, child) {
-              return WinOidcAuthHost(child: child);
+              return WindowsOidcAuthHost(child: child);
             },
             home: const AuthGate(),
           );
@@ -208,7 +208,7 @@ class _TimesheetAppState extends State<TimesheetApp> {
           supportedLocales: const [Locale('en')],
           debugShowCheckedModeBanner: !kReleaseMode,
           builder: (context, child) {
-            return OidcAuthHost(child: child);
+            return MacosOidcAuthHost(child: child);
           },
           home: const AuthGate(),
         );

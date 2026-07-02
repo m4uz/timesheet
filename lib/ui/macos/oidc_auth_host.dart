@@ -1,132 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:macos_ui/macos_ui.dart';
-import 'package:provider/provider.dart';
-import 'package:timesheet/services/oidc_auth_coordinator.dart';
-import 'package:webview_all/webview_all.dart';
+import 'package:timesheet/ui/oidc/oidc_auth_host_core.dart';
 
-class OidcAuthHost extends StatefulWidget {
+class MacosOidcAuthHost extends StatelessWidget {
   final Widget? child;
 
-  const OidcAuthHost({super.key, this.child});
-
-  @override
-  State<OidcAuthHost> createState() => _OidcAuthHostState();
-}
-
-class _OidcAuthHostState extends State<OidcAuthHost> {
-  var _mountWebView = false;
-  var _sessionReady = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _initializeSession());
-  }
-
-  Future<void> _initializeSession() async {
-    final session = context.read<OidcAuthCoordinator>().session;
-    session.ensureControllerCreated();
-    if (!mounted) {
-      return;
-    }
-
-    setState(() => _mountWebView = true);
-    await SchedulerBinding.instance.endOfFrame;
-    if (!mounted) {
-      return;
-    }
-
-    await session.ensureInitialized();
-    if (!mounted) {
-      return;
-    }
-
-    setState(() => _sessionReady = true);
-  }
+  const MacosOidcAuthHost({super.key, this.child});
 
   @override
   Widget build(BuildContext context) {
-    final coordinator = context.watch<OidcAuthCoordinator>();
-    final child = widget.child;
-    final interactive =
-        _sessionReady && coordinator.visible && coordinator.interactive;
-
-    return Stack(
-      alignment: Alignment.topLeft,
-      children: [
-        if (child != null) child,
-        if (_mountWebView)
-          _MountedWebView(
-            coordinator: coordinator,
-            interactive: interactive,
-          ),
-      ],
-    );
-  }
-}
-
-class _MountedWebView extends StatelessWidget {
-  final OidcAuthCoordinator coordinator;
-  final bool interactive;
-
-  const _MountedWebView({
-    required this.coordinator,
-    required this.interactive,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final webView = WebViewWidget(controller: coordinator.session.controller);
-
-    if (interactive) {
-      return ColoredBox(
-        color: Colors.black54,
-        child: Center(
-          child: Container(
-            width: 500,
-            height: 700,
-            decoration: BoxDecoration(
-              color: MacosTheme.of(context).canvasColor,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: MacosTheme.of(context).dividerColor,
+    return OidcAuthHostCore(
+      child: child,
+      buildInteractiveAuth: (context, coordinator, webView) {
+        return ColoredBox(
+          color: Colors.black54,
+          child: Center(
+            child: Container(
+              width: 500,
+              height: 700,
+              decoration: BoxDecoration(
+                color: MacosTheme.of(context).canvasColor,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: MacosTheme.of(context).dividerColor,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Login',
+                          style: MacosTheme.of(context).typography.title3,
+                        ),
+                        const Spacer(),
+                        PushButton(
+                          controlSize: ControlSize.regular,
+                          secondary: true,
+                          onPressed: coordinator.cancel,
+                          child: const Text('Cancel'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(child: webView),
+                ],
               ),
             ),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Login',
-                        style: MacosTheme.of(context).typography.title3,
-                      ),
-                      const Spacer(),
-                      PushButton(
-                        controlSize: ControlSize.regular,
-                        secondary: true,
-                        onPressed: coordinator.cancel,
-                        child: const Text('Cancel'),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(child: webView),
-              ],
-            ),
           ),
-        ),
-      );
-    }
-
-    return Positioned(
-      left: -10000,
-      top: -10000,
-      width: 1,
-      height: 1,
-      child: webView,
+        );
+      },
     );
   }
 }
