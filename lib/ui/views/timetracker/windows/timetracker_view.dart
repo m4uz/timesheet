@@ -2,14 +2,13 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:timesheet/models/timetracker_item.dart';
 import 'package:timesheet/providers/subjects_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
+import 'package:timesheet/ui/views/timetracker/windows/timetracker_item_row.dart';
 import 'package:timesheet/ui/widgets/duration_footer.dart';
-import 'package:timesheet/utils/duration_utils.dart';
-import 'package:timesheet/utils/weekday_colors.dart';
+import 'package:timesheet/ui/widgets/pinned_footer_layout.dart';
 
 class TimetrackerView extends StatefulWidget {
   const TimetrackerView({super.key});
@@ -22,136 +21,150 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   final TextEditingController _filterController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    _filterController.text = context.read<TimetrackerProvider>().filter;
-  }
-
-  @override
-  void dispose() {
-    _filterController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Consumer2<TimetrackerProvider, SubjectsCategoriesProvider>(
-      builder: (context, timeTrackerProvider, subjectsCategoriesProvider, _) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (timeTrackerProvider.successMsg != null) {
-            Snackbar.success(timeTrackerProvider.successMsg!);
-            timeTrackerProvider.clearSuccessMsg();
-          }
-          if (timeTrackerProvider.errorMsg != null) {
-            Snackbar.error(timeTrackerProvider.errorMsg!);
-            timeTrackerProvider.clearErrorMsg();
-          }
-        });
+      builder: (context, timeTrackerProvider, userConfigProvider, _) {
+        _showProviderMessages(timeTrackerProvider);
 
         return ScaffoldPage(
-          header: PageHeader(
-            title: const Text('Timetracker'),
-            commandBar: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // --------------------------------------------------
-                // Add item
-                // --------------------------------------------------
-                Tooltip(
-                  message: 'Add timesheet item',
-                  child: IconButton(
-                    icon: const Icon(FluentIcons.add),
-                    onPressed: () => timeTrackerProvider.addItem(),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // --------------------------------------------------
-                // Filter
-                // --------------------------------------------------
-                SizedBox(
-                  width: 160,
-                  child: TextBox(
-                    controller: _filterController,
-                    placeholder: 'Filter',
-                    onChanged: timeTrackerProvider.setFilter,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // --------------------------------------------------
-                // Send to WTM
-                // --------------------------------------------------
-                Tooltip(
-                  message: 'Send timesheet items to WTM',
-                  child: IconButton(
-                    icon: const Icon(FluentIcons.cloud_upload),
-                    onPressed: () async {
-                      await timeTrackerProvider.saveToWTM();
-                      await subjectsCategoriesProvider
-                          .loadSubjectsAndCategories();
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // --------------------------------------------------
-                // Clear all
-                // --------------------------------------------------
-                Tooltip(
-                  message: 'Clear all timesheet items',
-                  child: IconButton(
-                    icon: const Icon(FluentIcons.delete),
-                    onPressed: () {
-                      Dialog.warningConfirmation(
-                        title: 'Warning',
-                        message: 'Are you sure you want to delete all items?',
-                        confirmText: 'Yes',
-                        cancelText: 'No',
-                        onResult: (confirmed) {
-                          if (confirmed) {
-                            timeTrackerProvider.deleteAll();
-                          }
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
+          header: _buildPageHeader(
+            context,
+            timeTrackerProvider: timeTrackerProvider,
+            userConfigProvider: userConfigProvider,
           ),
-          content: Column(
-            children: [
-              // --------------------------------------------------
-              // Items list
-              // --------------------------------------------------
-              Expanded(
-                child: material.ReorderableListView(
-                  buildDefaultDragHandles: false,
-                  onReorderItem: (oldIndex, newIndex) async {
-                    if (timeTrackerProvider.hasFilter) {
-                      return;
-                    }
-                    await timeTrackerProvider.reorderItems(oldIndex, newIndex);
-                  },
-                  children: [
-                    for (int i = 0; i < timeTrackerProvider.items.length; i++)
-                      _TimetrackerItemRow(
-                        key: ValueKey(timeTrackerProvider.items[i].itemIndex),
-                        timeTrackerProvider: timeTrackerProvider,
-                        userConfigProvider: subjectsCategoriesProvider,
-                        index: i,
-                        item: timeTrackerProvider.items[i],
-                        canReorder: !timeTrackerProvider.hasFilter,
-                      ),
-                  ],
-                ),
-              ),
-              // --------------------------------------------------
-              // Footer summary
-              // --------------------------------------------------
-              _buildFooter(context, timeTrackerProvider),
-            ],
+          content: _buildContentArea(
+            context,
+            timeTrackerProvider: timeTrackerProvider,
+            userConfigProvider: userConfigProvider,
           ),
         );
       },
+    );
+  }
+
+  void _showProviderMessages(TimetrackerProvider provider) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (provider.successMsg != null) {
+        Snackbar.success(provider.successMsg!);
+        provider.clearSuccessMsg();
+      }
+      if (provider.errorMsg != null) {
+        Snackbar.error(provider.errorMsg!);
+        provider.clearErrorMsg();
+      }
+    });
+  }
+
+  PageHeader _buildPageHeader(
+    BuildContext context, {
+    required TimetrackerProvider timeTrackerProvider,
+    required SubjectsCategoriesProvider userConfigProvider,
+  }) {
+    return PageHeader(
+      title: const Text('Timetracker'),
+      commandBar: _buildCommandBar(
+        timeTrackerProvider: timeTrackerProvider,
+        userConfigProvider: userConfigProvider,
+      ),
+    );
+  }
+
+  Widget _buildCommandBar({
+    required TimetrackerProvider timeTrackerProvider,
+    required SubjectsCategoriesProvider userConfigProvider,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Tooltip(
+          message: 'Add timesheet item',
+          child: IconButton(
+            icon: const Icon(FluentIcons.add),
+            onPressed: () => timeTrackerProvider.addItem(),
+          ),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 160,
+          child: TextBox(
+            controller: _filterController,
+            placeholder: 'Filter',
+            onChanged: timeTrackerProvider.setFilter,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Tooltip(
+          message: 'Send timesheet items to WTM',
+          child: IconButton(
+            icon: const Icon(FluentIcons.cloud_upload),
+            onPressed: () async {
+              await timeTrackerProvider.saveToWTM();
+              await userConfigProvider.loadSubjectsAndCategories();
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+        Tooltip(
+          message: 'Clear all timesheet items',
+          child: IconButton(
+            icon: const Icon(FluentIcons.delete),
+            onPressed: () {
+              Dialog.warningConfirmation(
+                title: 'Warning',
+                message: 'Are you sure you want to delete all items?',
+                confirmText: 'Yes',
+                cancelText: 'No',
+                onResult: (confirmed) {
+                  if (confirmed) {
+                    timeTrackerProvider.deleteAll();
+                  }
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContentArea(
+    BuildContext context, {
+    required TimetrackerProvider timeTrackerProvider,
+    required SubjectsCategoriesProvider userConfigProvider,
+  }) {
+    return PinnedFooterLayout(
+      footerHeight: DurationFooter.reservedHeight,
+      body: _buildItemList(
+        timeTrackerProvider: timeTrackerProvider,
+        userConfigProvider: userConfigProvider,
+      ),
+      footer: _buildFooter(context, timeTrackerProvider),
+    );
+  }
+
+  Widget _buildItemList({
+    required TimetrackerProvider timeTrackerProvider,
+    required SubjectsCategoriesProvider userConfigProvider,
+  }) {
+    return material.ReorderableListView(
+      buildDefaultDragHandles: false,
+      onReorderItem: (oldIndex, newIndex) async {
+        if (timeTrackerProvider.hasFilter) {
+          return;
+        }
+        await timeTrackerProvider.reorderItems(oldIndex, newIndex);
+      },
+      children: [
+        for (int index = 0; index < timeTrackerProvider.items.length; index++)
+          TimetrackerItemRow(
+            key: ValueKey(timeTrackerProvider.items[index].itemIndex),
+            timeTrackerProvider: timeTrackerProvider,
+            userConfigProvider: userConfigProvider,
+            index: index,
+            item: timeTrackerProvider.items[index],
+            canReorder: !timeTrackerProvider.hasFilter,
+          ),
+      ],
     );
   }
 
@@ -169,322 +182,16 @@ class _TimetrackerViewState extends State<TimetrackerView> {
       dividerColor: dividerColor,
     );
   }
-}
-
-class _TimetrackerItemRow extends StatefulWidget {
-  final TimetrackerProvider timeTrackerProvider;
-  final SubjectsCategoriesProvider userConfigProvider;
-  final int index;
-  final TimetrackerItem item;
-  final bool canReorder;
-
-  const _TimetrackerItemRow({
-    required super.key,
-    required this.timeTrackerProvider,
-    required this.userConfigProvider,
-    required this.index,
-    required this.item,
-    required this.canReorder,
-  });
-
-  @override
-  State<_TimetrackerItemRow> createState() => _TimetrackerItemRowState();
-}
-
-class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
-  static const double _btnW = 30.0;
-  static const double _dayW = 40.0;
-  static const double _timeW = 70.0;
-  static const double _workedW = 55.0;
-  static const double _spacingW = 8.0;
-
-  late TextEditingController _subjectController;
-  late TextEditingController _descriptionController;
 
   @override
   void initState() {
     super.initState();
-    _subjectController = TextEditingController(text: widget.item.subject);
-    _descriptionController = TextEditingController(
-      text: widget.item.description,
-    );
-  }
-
-  @override
-  void didUpdateWidget(_TimetrackerItemRow oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Only update controllers if the item changed from external source
-    // (not from our own typing)
-    if (widget.item.id != oldWidget.item.id ||
-        widget.item.itemIndex != oldWidget.item.itemIndex) {
-      // Item was replaced (e.g., reordered, deleted and recreated)
-      _subjectController.text = widget.item.subject;
-      _descriptionController.text = widget.item.description;
-    } else {
-      // Check if subject changed externally (not from our controller)
-      if (widget.item.subject != _subjectController.text) {
-        _subjectController.text = widget.item.subject;
-      }
-      // Check if description changed externally (not from our controller)
-      if (widget.item.description != _descriptionController.text) {
-        _descriptionController.text = widget.item.description;
-      }
-    }
+    _filterController.text = context.read<TimetrackerProvider>().filter;
   }
 
   @override
   void dispose() {
-    _subjectController.dispose();
-    _descriptionController.dispose();
+    _filterController.dispose();
     super.dispose();
-  }
-
-  Widget _buildWeekdayLabel(
-    BuildContext context,
-    String dayLabel,
-    DateTime date,
-  ) {
-    final backgroundColor = weekdayLabelBackgroundColor(date);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        dayLabel,
-        style: TextStyle(color: weekdayLabelForegroundColor(backgroundColor)),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).toString();
-    final dayLabel = DateFormat('EEE', locale).format(widget.item.from);
-
-    return Container(
-      padding: EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: FluentTheme.of(context).resources.dividerStrokeColorDefault,
-          ),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // --------------------------------------------------
-          // Drag handle
-          // --------------------------------------------------
-          SizedBox(
-            width: _btnW,
-            child: widget.canReorder
-                ? ReorderableDragStartListener(
-                    index: widget.index,
-                    child: Icon(FluentIcons.move),
-                  )
-                : Icon(
-                    FluentIcons.move,
-                    color: FluentTheme.of(
-                      context,
-                    ).resources.textFillColorDisabled,
-                  ),
-          ),
-          SizedBox(width: _spacingW),
-          // --------------------------------------------------
-          // Day
-          // --------------------------------------------------
-          SizedBox(
-            width: _dayW,
-            child: _buildWeekdayLabel(context, dayLabel, widget.item.from),
-          ),
-          SizedBox(width: _spacingW),
-          // --------------------------------------------------
-          // Date
-          // --------------------------------------------------
-          SizedBox(
-            width: _timeW,
-            child: CalendarDatePicker(
-              initialStart: widget.item.from,
-              onSelectionChanged: (calendarSelection) {
-                // if (calendarSelection.startDate == null) {
-                //   return;
-                // }
-                final date = calendarSelection.startDate!;
-                final newFrom = DateTime(
-                  date.year,
-                  date.month,
-                  date.day,
-                  widget.item.from.hour,
-                  widget.item.from.minute,
-                  widget.item.from.second,
-                );
-                final newTo = DateTime(
-                  date.year,
-                  date.month,
-                  date.day,
-                  widget.item.to.hour,
-                  widget.item.to.minute,
-                  widget.item.to.second,
-                );
-                widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(from: newFrom, to: newTo),
-                );
-              },
-              minDate: DateTime.now().subtract(const Duration(days: 365)),
-              maxDate: DateTime.now().add(const Duration(days: 365)),
-              firstDayOfWeek: 1,
-              dateFormatter: DateFormat('d.M.'),
-            ),
-          ),
-          SizedBox(width: _spacingW),
-          // --------------------------------------------------
-          // From
-          // --------------------------------------------------
-          SizedBox(
-            width: _timeW,
-            child: TimePicker(
-              selected: widget.item.from,
-              minuteIncrement: 15,
-              hourFormat: material.HourFormat.HH,
-              onChanged: (time) {
-                final newFrom = DateTime(
-                  widget.item.from.year,
-                  widget.item.from.month,
-                  widget.item.from.day,
-                  time.hour,
-                  time.minute,
-                  widget.item.from.second,
-                );
-                widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(from: newFrom),
-                );
-              },
-            ),
-          ),
-          SizedBox(width: _spacingW),
-          // --------------------------------------------------
-          // To
-          // --------------------------------------------------
-          SizedBox(
-            width: _timeW,
-            child: TimePicker(
-              selected: widget.item.to,
-              minuteIncrement: 15,
-              hourFormat: material.HourFormat.HH,
-              onChanged: (time) {
-                final newTo = DateTime(
-                  widget.item.to.year,
-                  widget.item.to.month,
-                  widget.item.to.day,
-                  time.hour,
-                  time.minute,
-                  widget.item.to.second,
-                );
-                widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(to: newTo),
-                );
-              },
-            ),
-          ),
-          SizedBox(width: _spacingW),
-          // --------------------------------------------------
-          // Worked
-          // --------------------------------------------------
-          SizedBox(
-            width: _workedW,
-            child: Text(
-              toHmString(widget.item.to.difference(widget.item.from)),
-            ),
-          ),
-          SizedBox(width: _spacingW),
-          // --------------------------------------------------
-          // Subject
-          // --------------------------------------------------
-          Expanded(
-            child: AutoSuggestBox<String>(
-              controller: _subjectController,
-              onChanged: (value, _) {
-                widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(subject: value),
-                );
-              },
-              onSelected: (selected) {
-                widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(subject: selected.value),
-                );
-              },
-              clearButtonEnabled: false,
-              placeholder: 'Subject',
-              items: widget.userConfigProvider.subjects
-                  .map(
-                    (s) =>
-                        AutoSuggestBoxItem<String>(value: s.uri, label: s.uri),
-                  )
-                  .toList(),
-            ),
-          ),
-          SizedBox(width: _spacingW),
-          // --------------------------------------------------
-          // Description
-          // --------------------------------------------------
-          Expanded(
-            child: TextBox(
-              controller: _descriptionController,
-              placeholder: 'Description',
-              maxLines: null,
-              onChanged: (text) {
-                widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(description: text),
-                );
-              },
-            ),
-          ),
-          SizedBox(width: _spacingW),
-          // --------------------------------------------------
-          // Status
-          // --------------------------------------------------
-          SizedBox(
-            width: _btnW,
-            child: widget.timeTrackerProvider.isSavingItem(widget.item)
-                ? Center(
-                    child: SizedBox.square(
-                      dimension: 16,
-                      child: const ProgressRing(strokeWidth: 3),
-                    ),
-                  )
-                : switch (widget.item.status) {
-                    TimetrackerItemStatus.staged => Icon(
-                      FluentIcons.cloud,
-                      color: material.Colors.grey,
-                    ),
-                    TimetrackerItemStatus.saved => Icon(
-                      FluentIcons.cloud,
-                      color: material.Colors.green,
-                    ),
-                    TimetrackerItemStatus.error => Icon(
-                      FluentIcons.cloud,
-                      color: material.Colors.red,
-                    ),
-                  },
-          ),
-          SizedBox(width: _spacingW),
-          // --------------------------------------------------
-          // Delete button
-          // --------------------------------------------------
-          SizedBox(
-            width: _btnW,
-            child: IconButton(
-              icon: const Icon(FluentIcons.delete, size: 16),
-              onPressed: () =>
-                  widget.timeTrackerProvider.deleteItem(widget.item),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
