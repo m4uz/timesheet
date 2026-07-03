@@ -20,6 +20,8 @@ class DurationFooter extends StatelessWidget {
   Duration get _totalDuration =>
       durationByDate.fold(Duration.zero, (sum, entry) => sum + entry.duration);
 
+  static const double reservedHeight = 36.0;
+
   @override
   Widget build(BuildContext context) {
     final segments = <Widget>[
