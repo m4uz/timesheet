@@ -8,7 +8,8 @@ import 'package:timesheet/providers/timesheet_provider.dart';
 import 'package:timesheet/ui/platform/macos/calendar_toolbar_button.dart'
     as mac_calendar_toolbar_button;
 import 'package:timesheet/ui/platform/snackbar.dart';
-import 'package:timesheet/ui/platform/macos/toolbar_text_field.dart' as mac_toolbar_text_field;
+import 'package:timesheet/ui/platform/macos/toolbar_text_field.dart'
+    as mac_toolbar_text_field;
 import 'package:timesheet/utils/duration_utils.dart';
 
 class TimesheetView extends StatefulWidget {
