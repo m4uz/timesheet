@@ -41,12 +41,23 @@ class TimetrackerProvider extends ChangeNotifier {
   bool get hasFilter => _filter.trim().isNotEmpty;
   int get itemCount => items.length;
 
-  Duration get totalDuration {
-    Duration total = Duration.zero;
-    for (final item in items) {
-      total += item.to.difference(item.from);
-    }
-    return total;
+  List<({DateTime date, Duration duration})> get durationByDate {
+    return items
+        .map(
+          (item) => (
+            date: DateTime(item.from.year, item.from.month, item.from.day),
+            duration: item.to.difference(item.from),
+          ),
+        )
+        .fold<Map<DateTime, Duration>>({}, (totals, entry) {
+          totals[entry.date] =
+              (totals[entry.date] ?? Duration.zero) + entry.duration;
+          return totals;
+        })
+        .entries
+        .map((entry) => (date: entry.key, duration: entry.value))
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
   }
 
   void setFilter(String value) {

@@ -7,6 +7,7 @@ import 'package:timesheet/providers/subjects_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
+import 'package:timesheet/ui/widgets/duration_footer.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 import 'package:timesheet/utils/weekday_colors.dart';
 
@@ -155,24 +156,17 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   }
 
   Widget _buildFooter(BuildContext context, TimetrackerProvider provider) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: FluentTheme.of(context).resources.dividerStrokeColorDefault,
-          ),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text('Items: ${provider.itemCount}'),
-          const SizedBox(width: 8),
-          Text('Worked: ${toHmString(provider.totalDuration)}'),
-          const SizedBox(width: 8),
-        ],
-      ),
+    final theme = FluentTheme.of(context);
+    final dividerColor = theme.resources.dividerStrokeColorDefault;
+
+    return DurationFooter(
+      durationByDate: provider.durationByDate,
+      formatDate: (date) => DateFormat('d.M.').format(date),
+      textStyle: theme.typography.body ?? const TextStyle(),
+      emphasisTextStyle:
+          theme.typography.bodyStrong ??
+          const TextStyle(fontWeight: FontWeight.w600),
+      dividerColor: dividerColor,
     );
   }
 }
@@ -200,7 +194,6 @@ class _TimetrackerItemRow extends StatefulWidget {
 class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
   static const double _btnW = 30.0;
   static const double _dayW = 40.0;
-  static const double _dateW = 110.0;
   static const double _timeW = 70.0;
   static const double _workedW = 55.0;
   static const double _spacingW = 8.0;
@@ -313,7 +306,7 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
           // Date
           // --------------------------------------------------
           SizedBox(
-            width: _dateW,
+            width: _timeW,
             child: CalendarDatePicker(
               initialStart: widget.item.from,
               onSelectionChanged: (calendarSelection) {
@@ -344,7 +337,7 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
               minDate: DateTime.now().subtract(const Duration(days: 365)),
               maxDate: DateTime.now().add(const Duration(days: 365)),
               firstDayOfWeek: 1,
-              dateFormatter: DateFormat('d.M.yyyy'),
+              dateFormatter: DateFormat('d.M.'),
             ),
           ),
           SizedBox(width: _spacingW),
