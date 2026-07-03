@@ -206,7 +206,6 @@ class _TimetrackerItem extends StatefulWidget {
 class _TimetrackerItemState extends State<_TimetrackerItem> {
   static const double _btnPrefW = 30.0;
   static const double _dayPrefW = 40.0;
-  static const double _datePickerPrefW = 120.0;
   static const double _timePickerPrefW = 80.0;
   static const double _workedPrefW = 55.0;
   static const double _spacingPrefW = 10.0;
@@ -256,7 +255,6 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
   ({
     double btnW,
     double dayW,
-    double datePickerW,
     double timePickerW,
     double workedW,
     double spacingW,
@@ -265,7 +263,7 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
     const fixedPrefTotal =
         _btnPrefW +
         _dayPrefW +
-        _datePickerPrefW +
+        _timePickerPrefW +
         _timePickerPrefW +
         _timePickerPrefW +
         _workedPrefW +
@@ -281,7 +279,6 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
     return (
       btnW: _btnPrefW * scale,
       dayW: _dayPrefW * scale,
-      datePickerW: _datePickerPrefW * scale,
       timePickerW: _timePickerPrefW * scale,
       workedW: _workedPrefW * scale,
       spacingW: _spacingPrefW * scale,
@@ -357,12 +354,13 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
               // Date
               // --------------------------------------------------
               SizedBox(
-                width: dimensions.datePickerW,
+                width: dimensions.timePickerW,
                 child: CupertinoCalendarPickerButton(
                   firstDayOfWeekIndex: 1,
                   initialDateTime: widget.item.from,
                   minimumDateTime: DateTime.now().subtract(Duration(days: 365)),
                   maximumDateTime: DateTime.now().add(Duration(days: 365)),
+                  formatter: (date) => DateFormat('d.M.').format(date),
                   onCompleted: (value) async {
                     if (value == null) {
                       return;

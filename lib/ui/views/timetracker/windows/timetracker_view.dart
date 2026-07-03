@@ -161,7 +161,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
 
     return DurationFooter(
       durationByDate: provider.durationByDate,
-      formatDate: (date) => DateFormat('d.M.yyyy').format(date),
+      formatDate: (date) => DateFormat('d.M.').format(date),
       textStyle: theme.typography.body ?? const TextStyle(),
       emphasisTextStyle:
           theme.typography.bodyStrong ??
@@ -194,7 +194,6 @@ class _TimetrackerItemRow extends StatefulWidget {
 class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
   static const double _btnW = 30.0;
   static const double _dayW = 40.0;
-  static const double _dateW = 110.0;
   static const double _timeW = 70.0;
   static const double _workedW = 55.0;
   static const double _spacingW = 8.0;
@@ -307,7 +306,7 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
           // Date
           // --------------------------------------------------
           SizedBox(
-            width: _dateW,
+            width: _timeW,
             child: CalendarDatePicker(
               initialStart: widget.item.from,
               onSelectionChanged: (calendarSelection) {
@@ -338,7 +337,7 @@ class _TimetrackerItemRowState extends State<_TimetrackerItemRow> {
               minDate: DateTime.now().subtract(const Duration(days: 365)),
               maxDate: DateTime.now().add(const Duration(days: 365)),
               firstDayOfWeek: 1,
-              dateFormatter: DateFormat('d.M.yyyy'),
+              dateFormatter: DateFormat('d.M.'),
             ),
           ),
           SizedBox(width: _spacingW),
