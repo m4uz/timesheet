@@ -11,6 +11,7 @@ import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/macos/toolbar_text_field.dart'
     as mac_toolbar_text_field;
 import 'package:timesheet/ui/platform/snackbar.dart';
+import 'package:timesheet/ui/widgets/duration_footer.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 import 'package:timesheet/utils/weekday_colors.dart';
 
@@ -170,28 +171,14 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   }
 
   Widget _buildFooter(BuildContext context, TimetrackerProvider provider) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: MacosTheme.of(context).dividerColor),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            'Items: ${provider.itemCount}',
-            style: MacosTheme.of(context).typography.body,
-          ),
-          SizedBox(width: 8),
-          SelectableText(
-            'Worked: ${toHmString(provider.totalDuration)}',
-            style: MacosTheme.of(context).typography.body,
-          ),
-          SizedBox(width: 8),
-        ],
-      ),
+    final theme = MacosTheme.of(context);
+
+    return DurationFooter(
+      durationByDate: provider.durationByDate,
+      formatDate: (date) => DateFormat('d.M.').format(date),
+      textStyle: theme.typography.body,
+      emphasisTextStyle: theme.typography.headline,
+      dividerColor: theme.dividerColor,
     );
   }
 }

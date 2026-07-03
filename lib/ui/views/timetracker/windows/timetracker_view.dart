@@ -7,6 +7,7 @@ import 'package:timesheet/providers/subjects_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
+import 'package:timesheet/ui/widgets/duration_footer.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 import 'package:timesheet/utils/weekday_colors.dart';
 
@@ -155,24 +156,17 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   }
 
   Widget _buildFooter(BuildContext context, TimetrackerProvider provider) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: FluentTheme.of(context).resources.dividerStrokeColorDefault,
-          ),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text('Items: ${provider.itemCount}'),
-          const SizedBox(width: 8),
-          Text('Worked: ${toHmString(provider.totalDuration)}'),
-          const SizedBox(width: 8),
-        ],
-      ),
+    final theme = FluentTheme.of(context);
+    final dividerColor = theme.resources.dividerStrokeColorDefault;
+
+    return DurationFooter(
+      durationByDate: provider.durationByDate,
+      formatDate: (date) => DateFormat('d.M.yyyy').format(date),
+      textStyle: theme.typography.body ?? const TextStyle(),
+      emphasisTextStyle:
+          theme.typography.bodyStrong ??
+          const TextStyle(fontWeight: FontWeight.w600),
+      dividerColor: dividerColor,
     );
   }
 }
