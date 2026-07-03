@@ -11,6 +11,7 @@ import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/macos/toolbar_text_field.dart'
     as mac_toolbar_text_field;
 import 'package:timesheet/ui/platform/snackbar.dart';
+import 'package:timesheet/ui/widgets/duration_footer.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 import 'package:timesheet/utils/weekday_colors.dart';
 
@@ -170,28 +171,14 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   }
 
   Widget _buildFooter(BuildContext context, TimetrackerProvider provider) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: MacosTheme.of(context).dividerColor),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            'Items: ${provider.itemCount}',
-            style: MacosTheme.of(context).typography.body,
-          ),
-          SizedBox(width: 8),
-          SelectableText(
-            'Worked: ${toHmString(provider.totalDuration)}',
-            style: MacosTheme.of(context).typography.body,
-          ),
-          SizedBox(width: 8),
-        ],
-      ),
+    final theme = MacosTheme.of(context);
+
+    return DurationFooter(
+      durationByDate: provider.durationByDate,
+      formatDate: (date) => DateFormat('d.M.').format(date),
+      textStyle: theme.typography.body,
+      emphasisTextStyle: theme.typography.headline,
+      dividerColor: theme.dividerColor,
     );
   }
 }
@@ -219,7 +206,6 @@ class _TimetrackerItem extends StatefulWidget {
 class _TimetrackerItemState extends State<_TimetrackerItem> {
   static const double _btnPrefW = 30.0;
   static const double _dayPrefW = 40.0;
-  static const double _datePickerPrefW = 120.0;
   static const double _timePickerPrefW = 80.0;
   static const double _workedPrefW = 55.0;
   static const double _spacingPrefW = 10.0;
@@ -269,7 +255,6 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
   ({
     double btnW,
     double dayW,
-    double datePickerW,
     double timePickerW,
     double workedW,
     double spacingW,
@@ -278,7 +263,7 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
     const fixedPrefTotal =
         _btnPrefW +
         _dayPrefW +
-        _datePickerPrefW +
+        _timePickerPrefW +
         _timePickerPrefW +
         _timePickerPrefW +
         _workedPrefW +
@@ -294,7 +279,6 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
     return (
       btnW: _btnPrefW * scale,
       dayW: _dayPrefW * scale,
-      datePickerW: _datePickerPrefW * scale,
       timePickerW: _timePickerPrefW * scale,
       workedW: _workedPrefW * scale,
       spacingW: _spacingPrefW * scale,
@@ -370,12 +354,13 @@ class _TimetrackerItemState extends State<_TimetrackerItem> {
               // Date
               // --------------------------------------------------
               SizedBox(
-                width: dimensions.datePickerW,
+                width: dimensions.timePickerW,
                 child: CupertinoCalendarPickerButton(
                   firstDayOfWeekIndex: 1,
                   initialDateTime: widget.item.from,
                   minimumDateTime: DateTime.now().subtract(Duration(days: 365)),
                   maximumDateTime: DateTime.now().add(Duration(days: 365)),
+                  formatter: (date) => DateFormat('d.M.').format(date),
                   onCompleted: (value) async {
                     if (value == null) {
                       return;
