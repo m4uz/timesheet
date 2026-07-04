@@ -161,20 +161,15 @@ class _TimesheetViewState extends State<TimesheetView> {
       footerHeight: TimesheetSummaryFooter.reservedHeight,
       body: TimesheetTable(
         items: provider.items,
+        visibleColumns: provider.visibleColumns,
         scrollController: scrollController,
       ),
-      footer: _buildFooter(context, provider),
-    );
-  }
-
-  Widget _buildFooter(BuildContext context, TimesheetProvider provider) {
-    final theme = MacosTheme.of(context);
-
-    return TimesheetSummaryFooter(
-      itemCount: provider.itemCount,
-      totalDuration: provider.totalDuration,
-      textStyle: theme.typography.body,
-      dividerColor: theme.dividerColor,
+      footer: TimesheetSummaryFooter(
+        itemCount: provider.itemCount,
+        totalDuration: provider.totalDuration,
+        textStyle: MacosTheme.of(context).typography.body,
+        dividerColor: MacosTheme.of(context).dividerColor,
+      ),
     );
   }
 

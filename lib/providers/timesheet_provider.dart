@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:timesheet/models/result.dart';
 import 'package:timesheet/models/timesheet_item.dart';
 import 'package:timesheet/repositories/timesheet_repository.dart';
+import 'package:timesheet/ui/views/timesheet/timesheet_column.dart';
 
 class TimesheetProvider extends ChangeNotifier {
   final TimesheetRepository _repository;
@@ -14,6 +15,10 @@ class TimesheetProvider extends ChangeNotifier {
   DateTime? _lastLoadedFromDate;
   DateTime? _lastLoadedToDate;
   String _filter = '';
+  final Set<TimesheetColumn> _visibleColumns = {
+    for (final column in TimesheetColumn.values)
+      if (column.defaultVisible) column,
+  };
 
   TimesheetProvider({required this._repository})
     : _fromDate = DateTime.now(),
@@ -40,6 +45,22 @@ class TimesheetProvider extends ChangeNotifier {
   DateTime get toDate => _toDate;
   String get filter => _filter;
   int get itemCount => items.length;
+
+  List<TimesheetColumn> get visibleColumns =>
+      TimesheetColumn.values.where(_visibleColumns.contains).toList();
+
+  bool isColumnVisible(TimesheetColumn column) =>
+      _visibleColumns.contains(column);
+
+  void toggleColumn(TimesheetColumn column) {
+    if (_visibleColumns.contains(column)) {
+      if (_visibleColumns.length <= 1) return;
+      _visibleColumns.remove(column);
+    } else {
+      _visibleColumns.add(column);
+    }
+    notifyListeners();
+  }
 
   Duration get totalDuration {
     Duration total = Duration.zero;

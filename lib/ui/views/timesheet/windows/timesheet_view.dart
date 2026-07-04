@@ -147,19 +147,17 @@ class _TimesheetViewState extends State<TimesheetView> {
 
     return PinnedFooterLayout(
       footerHeight: TimesheetSummaryFooter.reservedHeight,
-      body: TimesheetTable(items: provider.items),
-      footer: _buildFooter(context, provider),
-    );
-  }
-
-  Widget _buildFooter(BuildContext context, TimesheetProvider provider) {
-    final theme = FluentTheme.of(context);
-
-    return TimesheetSummaryFooter(
-      itemCount: provider.itemCount,
-      totalDuration: provider.totalDuration,
-      textStyle: theme.typography.body ?? const TextStyle(),
-      dividerColor: theme.resources.dividerStrokeColorDefault,
+      body: TimesheetTable(
+        items: provider.items,
+        visibleColumns: provider.visibleColumns,
+      ),
+      footer: TimesheetSummaryFooter(
+        itemCount: provider.itemCount,
+        totalDuration: provider.totalDuration,
+        textStyle: FluentTheme.of(context).typography.body ?? const TextStyle(),
+        dividerColor:
+            FluentTheme.of(context).resources.dividerStrokeColorDefault,
+      ),
     );
   }
 
