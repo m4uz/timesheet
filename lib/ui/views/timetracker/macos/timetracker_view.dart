@@ -10,7 +10,7 @@ import 'package:timesheet/ui/platform/macos/toolbar_text_field.dart'
     as mac_toolbar_text_field;
 import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/ui/views/timetracker/macos/timetracker_item_row.dart';
-import 'package:timesheet/ui/widgets/duration_footer.dart';
+import 'package:timesheet/ui/views/timetracker/timetracker_summary_footer.dart';
 import 'package:timesheet/ui/widgets/pinned_footer_layout.dart';
 
 class TimetrackerView extends StatefulWidget {
@@ -146,7 +146,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
     return ContentArea(
       builder: (context, scrollController) {
         return PinnedFooterLayout(
-          footerHeight: DurationFooter.reservedHeight,
+          footerHeight: TimetrackerSummaryFooter.reservedHeight,
           body: _buildItemList(
             timeTrackerProvider: timeTrackerProvider,
             userConfigProvider: userConfigProvider,
@@ -186,7 +186,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   Widget _buildFooter(BuildContext context, TimetrackerProvider provider) {
     final theme = MacosTheme.of(context);
 
-    return DurationFooter(
+    return TimetrackerSummaryFooter(
       durationByDate: provider.durationByDate,
       formatDate: (date) => DateFormat('d.M.').format(date),
       textStyle: theme.typography.body,

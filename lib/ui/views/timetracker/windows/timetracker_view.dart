@@ -7,7 +7,7 @@ import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/ui/views/timetracker/windows/timetracker_item_row.dart';
-import 'package:timesheet/ui/widgets/duration_footer.dart';
+import 'package:timesheet/ui/views/timetracker/timetracker_summary_footer.dart';
 import 'package:timesheet/ui/widgets/pinned_footer_layout.dart';
 
 class TimetrackerView extends StatefulWidget {
@@ -133,7 +133,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
     required SubjectsCategoriesProvider userConfigProvider,
   }) {
     return PinnedFooterLayout(
-      footerHeight: DurationFooter.reservedHeight,
+      footerHeight: TimetrackerSummaryFooter.reservedHeight,
       body: _buildItemList(
         timeTrackerProvider: timeTrackerProvider,
         userConfigProvider: userConfigProvider,
@@ -172,7 +172,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
     final theme = FluentTheme.of(context);
     final dividerColor = theme.resources.dividerStrokeColorDefault;
 
-    return DurationFooter(
+    return TimetrackerSummaryFooter(
       durationByDate: provider.durationByDate,
       formatDate: (date) => DateFormat('d.M.').format(date),
       textStyle: theme.typography.body ?? const TextStyle(),

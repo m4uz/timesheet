@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
-class DurationFooter extends StatelessWidget {
-  const DurationFooter({
+class TimetrackerSummaryFooter extends StatelessWidget {
+  const TimetrackerSummaryFooter({
     super.key,
     required this.durationByDate,
     required this.formatDate,
