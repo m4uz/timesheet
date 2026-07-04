@@ -2,18 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide Dialog;
 import 'package:intl/intl.dart';
 import 'package:macos_ui/macos_ui.dart';
-import 'package:cupertino_calendar_picker/cupertino_calendar_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:timesheet/models/timetracker_item.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/providers/subjects_categories_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/macos/toolbar_text_field.dart'
     as mac_toolbar_text_field;
 import 'package:timesheet/ui/platform/snackbar.dart';
-import 'package:timesheet/ui/widgets/duration_footer.dart';
-import 'package:timesheet/utils/duration_utils.dart';
-import 'package:timesheet/utils/weekday_colors.dart';
+import 'package:timesheet/ui/views/timetracker/macos/timetracker_item_row.dart';
+import 'package:timesheet/ui/views/timetracker/timetracker_summary_footer.dart';
+import 'package:timesheet/ui/widgets/pinned_footer_layout.dart';
 
 class TimetrackerView extends StatefulWidget {
   const TimetrackerView({super.key});
@@ -26,6 +24,178 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   final TextEditingController _filterController = TextEditingController();
 
   @override
+  Widget build(BuildContext context) {
+    return Consumer2<TimetrackerProvider, SubjectsCategoriesProvider>(
+      builder: (context, timeTrackerProvider, userConfigProvider, child) {
+        _showProviderMessages(timeTrackerProvider);
+
+        return MacosScaffold(
+          toolBar: _buildToolBar(
+            context,
+            timeTrackerProvider: timeTrackerProvider,
+            userConfigProvider: userConfigProvider,
+          ),
+          children: [
+            _buildContentArea(
+              context,
+              timeTrackerProvider: timeTrackerProvider,
+              userConfigProvider: userConfigProvider,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showProviderMessages(TimetrackerProvider provider) {
+    if (provider.successMsg != null) {
+      Snackbar.success(provider.successMsg!);
+      provider.clearSuccessMsg();
+    }
+    if (provider.errorMsg != null) {
+      Snackbar.error(provider.errorMsg!);
+      provider.clearErrorMsg();
+    }
+  }
+
+  ToolBar _buildToolBar(
+    BuildContext context, {
+    required TimetrackerProvider timeTrackerProvider,
+    required SubjectsCategoriesProvider userConfigProvider,
+  }) {
+    return ToolBar(
+      title: Text(
+        'Timetracker',
+        style: MacosTheme.of(context).typography.title2,
+      ),
+      titleWidth: 100.0,
+      leading: MacosTooltip(
+        message: 'Toggle Sidebar',
+        useMousePosition: false,
+        child: MacosIconButton(
+          icon: MacosIcon(
+            CupertinoIcons.sidebar_left,
+            color: MacosTheme.brightnessOf(context).resolve(
+              const Color.fromRGBO(0, 0, 0, 0.5),
+              const Color.fromRGBO(255, 255, 255, 0.5),
+            ),
+            size: 20.0,
+          ),
+          boxConstraints: const BoxConstraints(
+            minHeight: 20,
+            minWidth: 20,
+            maxWidth: 48,
+            maxHeight: 38,
+          ),
+          onPressed: () => MacosWindowScope.of(context).toggleSidebar(),
+        ),
+      ),
+      actions: [
+        ToolBarIconButton(
+          label: 'Add item',
+          showLabel: false,
+          icon: const MacosIcon(CupertinoIcons.plus_circle),
+          tooltipMessage: 'Add timesheet item',
+          onPressed: () async {
+            timeTrackerProvider.addItem();
+          },
+        ),
+        mac_toolbar_text_field.ToolbarTextField(
+          controller: _filterController,
+          placeholder: 'Filter',
+          onChanged: timeTrackerProvider.setFilter,
+        ),
+        ToolBarIconButton(
+          label: 'Save to WTM',
+          showLabel: false,
+          icon: const MacosIcon(CupertinoIcons.cloud_upload),
+          tooltipMessage: 'Save timesheet items to WTM',
+          onPressed: () async {
+            await timeTrackerProvider.saveToWTM();
+            await userConfigProvider.loadSubjectsAndCategories();
+          },
+        ),
+        ToolBarIconButton(
+          label: 'Clear timesheet',
+          showLabel: false,
+          icon: const MacosIcon(CupertinoIcons.trash),
+          tooltipMessage: 'Clear all timesheet items',
+          onPressed: () async {
+            Dialog.warningConfirmation(
+              title: 'Warning',
+              message: 'Are you sure you want to delete all items?',
+              confirmText: 'Yes',
+              cancelText: 'No',
+              onResult: (confirmed) {
+                if (confirmed) {
+                  timeTrackerProvider.deleteAll();
+                }
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContentArea(
+    BuildContext context, {
+    required TimetrackerProvider timeTrackerProvider,
+    required SubjectsCategoriesProvider userConfigProvider,
+  }) {
+    return ContentArea(
+      builder: (context, scrollController) {
+        return PinnedFooterLayout(
+          footerHeight: TimetrackerSummaryFooter.reservedHeight,
+          body: _buildItemList(
+            timeTrackerProvider: timeTrackerProvider,
+            userConfigProvider: userConfigProvider,
+          ),
+          footer: _buildFooter(context, timeTrackerProvider),
+        );
+      },
+    );
+  }
+
+  Widget _buildItemList({
+    required TimetrackerProvider timeTrackerProvider,
+    required SubjectsCategoriesProvider userConfigProvider,
+  }) {
+    return ReorderableListView(
+      buildDefaultDragHandles: false,
+      children: [
+        for (int index = 0; index < timeTrackerProvider.items.length; index++)
+          TimetrackerItemRow(
+            key: ValueKey(timeTrackerProvider.items[index].itemIndex),
+            timeTrackerProvider: timeTrackerProvider,
+            userConfigProvider: userConfigProvider,
+            index: index,
+            item: timeTrackerProvider.items[index],
+            canReorder: !timeTrackerProvider.hasFilter,
+          ),
+      ],
+      onReorderItem: (oldIndex, newIndex) async {
+        if (timeTrackerProvider.hasFilter) {
+          return;
+        }
+        await timeTrackerProvider.reorderItems(oldIndex, newIndex);
+      },
+    );
+  }
+
+  Widget _buildFooter(BuildContext context, TimetrackerProvider provider) {
+    final theme = MacosTheme.of(context);
+
+    return TimetrackerSummaryFooter(
+      durationByDate: provider.durationByDate,
+      formatDate: (date) => DateFormat('d.M.').format(date),
+      textStyle: theme.typography.body,
+      emphasisTextStyle: theme.typography.headline,
+      dividerColor: theme.dividerColor,
+    );
+  }
+
+  @override
   void initState() {
     super.initState();
     _filterController.text = context.read<TimetrackerProvider>().filter;
@@ -35,508 +205,5 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   void dispose() {
     _filterController.dispose();
     super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer2<TimetrackerProvider, SubjectsCategoriesProvider>(
-      builder: (context, timeTrackerProvider, userConfigProvider, child) {
-        if (timeTrackerProvider.successMsg != null) {
-          Snackbar.success(timeTrackerProvider.successMsg!);
-          timeTrackerProvider.clearSuccessMsg();
-        }
-        if (timeTrackerProvider.errorMsg != null) {
-          Snackbar.error(timeTrackerProvider.errorMsg!);
-          timeTrackerProvider.clearErrorMsg();
-        }
-        return MacosScaffold(
-          toolBar: ToolBar(
-            title: Text(
-              'Timetracker',
-              style: MacosTheme.of(context).typography.title2,
-            ),
-            titleWidth: 100.0,
-            leading: MacosTooltip(
-              message: 'Toggle Sidebar',
-              useMousePosition: false,
-              child: MacosIconButton(
-                icon: MacosIcon(
-                  CupertinoIcons.sidebar_left,
-                  color: MacosTheme.brightnessOf(context).resolve(
-                    const Color.fromRGBO(0, 0, 0, 0.5),
-                    const Color.fromRGBO(255, 255, 255, 0.5),
-                  ),
-                  size: 20.0,
-                ),
-                boxConstraints: const BoxConstraints(
-                  minHeight: 20,
-                  minWidth: 20,
-                  maxWidth: 48,
-                  maxHeight: 38,
-                ),
-                onPressed: () => MacosWindowScope.of(context).toggleSidebar(),
-              ),
-            ),
-            actions: [
-              ToolBarIconButton(
-                label: 'Add item',
-                showLabel: false,
-                icon: const MacosIcon(CupertinoIcons.plus_circle),
-                tooltipMessage: 'Add timesheet item',
-                onPressed: () async {
-                  timeTrackerProvider.addItem();
-                },
-              ),
-              mac_toolbar_text_field.ToolbarTextField(
-                controller: _filterController,
-                placeholder: 'Filter',
-                onChanged: timeTrackerProvider.setFilter,
-              ),
-              ToolBarIconButton(
-                label: 'Save to WTM',
-                showLabel: false,
-                icon: const MacosIcon(CupertinoIcons.cloud_upload),
-                tooltipMessage: 'Save timesheet items to WTM',
-                onPressed: () async {
-                  await timeTrackerProvider.saveToWTM();
-                  await userConfigProvider.loadSubjectsAndCategories();
-                },
-              ),
-              ToolBarIconButton(
-                label: 'Clear timesheet',
-                showLabel: false,
-                icon: const MacosIcon(CupertinoIcons.trash),
-                tooltipMessage: 'Clear all timesheet items',
-                onPressed: () async {
-                  Dialog.warningConfirmation(
-                    title: 'Warning',
-                    message: 'Are you sure you want to delete all items?',
-                    confirmText: 'Yes',
-                    cancelText: 'No',
-                    onResult: (confirmed) {
-                      if (confirmed) {
-                        timeTrackerProvider.deleteAll();
-                      }
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-          children: [
-            ContentArea(
-              builder: (context, scrollController) {
-                return Column(
-                  children: [
-                    Expanded(
-                      child: ReorderableListView(
-                        buildDefaultDragHandles: false,
-                        children: [
-                          for (
-                            int index = 0;
-                            index < timeTrackerProvider.items.length;
-                            index++
-                          )
-                            _TimetrackerItem(
-                              key: ValueKey(
-                                timeTrackerProvider.items[index].itemIndex,
-                              ),
-                              timeTrackerProvider: timeTrackerProvider,
-                              userConfigProvider: userConfigProvider,
-                              index: index,
-                              item: timeTrackerProvider.items[index],
-                              canReorder: !timeTrackerProvider.hasFilter,
-                            ),
-                        ],
-                        onReorderItem: (oldIndex, newIndex) async {
-                          if (timeTrackerProvider.hasFilter) {
-                            return;
-                          }
-                          await timeTrackerProvider.reorderItems(
-                            oldIndex,
-                            newIndex,
-                          );
-                        },
-                      ),
-                    ),
-                    _buildFooter(context, timeTrackerProvider),
-                  ],
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildFooter(BuildContext context, TimetrackerProvider provider) {
-    final theme = MacosTheme.of(context);
-
-    return DurationFooter(
-      durationByDate: provider.durationByDate,
-      formatDate: (date) => DateFormat('d.M.').format(date),
-      textStyle: theme.typography.body,
-      emphasisTextStyle: theme.typography.headline,
-      dividerColor: theme.dividerColor,
-    );
-  }
-}
-
-class _TimetrackerItem extends StatefulWidget {
-  final TimetrackerProvider timeTrackerProvider;
-  final SubjectsCategoriesProvider userConfigProvider;
-  final int index;
-  final TimetrackerItem item;
-  final bool canReorder;
-
-  const _TimetrackerItem({
-    required super.key,
-    required this.timeTrackerProvider,
-    required this.userConfigProvider,
-    required this.index,
-    required this.item,
-    required this.canReorder,
-  });
-
-  @override
-  State<_TimetrackerItem> createState() => _TimetrackerItemState();
-}
-
-class _TimetrackerItemState extends State<_TimetrackerItem> {
-  static const double _btnPrefW = 30.0;
-  static const double _dayPrefW = 40.0;
-  static const double _timePickerPrefW = 80.0;
-  static const double _workedPrefW = 55.0;
-  static const double _spacingPrefW = 10.0;
-  static const int _spacingCount = 9;
-
-  late TextEditingController _subjectController;
-  late TextEditingController _descriptionController;
-
-  @override
-  void initState() {
-    super.initState();
-    _subjectController = TextEditingController(text: widget.item.subject);
-    _descriptionController = TextEditingController(
-      text: widget.item.description,
-    );
-  }
-
-  @override
-  void didUpdateWidget(_TimetrackerItem oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Only update controllers if the item changed from external source
-    // (not from our own typing)
-    if (widget.item.id != oldWidget.item.id ||
-        widget.item.itemIndex != oldWidget.item.itemIndex) {
-      // Item was replaced (e.g., reordered, deleted and recreated)
-      _subjectController.text = widget.item.subject;
-      _descriptionController.text = widget.item.description;
-    } else {
-      // Check if subject changed externally (not from our controller)
-      if (widget.item.subject != _subjectController.text) {
-        _subjectController.text = widget.item.subject;
-      }
-      // Check if description changed externally (not from our controller)
-      if (widget.item.description != _descriptionController.text) {
-        _descriptionController.text = widget.item.description;
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _subjectController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
-  ({
-    double btnW,
-    double dayW,
-    double timePickerW,
-    double workedW,
-    double spacingW,
-  })
-  _calculateLayoutDimensions(BoxConstraints constraints) {
-    const fixedPrefTotal =
-        _btnPrefW +
-        _dayPrefW +
-        _timePickerPrefW +
-        _timePickerPrefW +
-        _timePickerPrefW +
-        _workedPrefW +
-        _btnPrefW +
-        _btnPrefW +
-        _spacingPrefW * _spacingCount;
-
-    final scale = ((constraints.maxWidth - 0.001) / fixedPrefTotal).clamp(
-      0.0,
-      1.0,
-    );
-
-    return (
-      btnW: _btnPrefW * scale,
-      dayW: _dayPrefW * scale,
-      timePickerW: _timePickerPrefW * scale,
-      workedW: _workedPrefW * scale,
-      spacingW: _spacingPrefW * scale,
-    );
-  }
-
-  Widget _buildWeekdayLabel(
-    BuildContext context,
-    String dayLabel,
-    DateTime date,
-  ) {
-    final backgroundColor = weekdayLabelBackgroundColor(date);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        dayLabel,
-        style: MacosTheme.of(context).typography.title3.copyWith(
-          color: weekdayLabelForegroundColor(backgroundColor),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    const pad = EdgeInsets.all(10);
-    final locale = Localizations.localeOf(context).toString();
-    final dayLabel = DateFormat('EEE', locale).format(widget.item.from);
-
-    return Container(
-      padding: pad,
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: MacosTheme.of(context).dividerColor),
-        ),
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final dimensions = _calculateLayoutDimensions(constraints);
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // --------------------------------------------------
-              // Drag handle
-              // --------------------------------------------------
-              SizedBox(
-                width: dimensions.btnW,
-                child: widget.canReorder
-                    ? ReorderableDragStartListener(
-                        index: widget.index,
-                        child: MacosIcon(
-                          CupertinoIcons.bars,
-                          color: MacosTheme.of(context).primaryColor,
-                        ),
-                      )
-                    : MacosIcon(CupertinoIcons.bars, color: Colors.grey),
-              ),
-              SizedBox(width: dimensions.spacingW),
-              // --------------------------------------------------
-              // Day
-              // --------------------------------------------------
-              SizedBox(
-                width: dimensions.dayW,
-                child: _buildWeekdayLabel(context, dayLabel, widget.item.from),
-              ),
-              SizedBox(width: dimensions.spacingW),
-              // --------------------------------------------------
-              // Date
-              // --------------------------------------------------
-              SizedBox(
-                width: dimensions.timePickerW,
-                child: CupertinoCalendarPickerButton(
-                  firstDayOfWeekIndex: 1,
-                  initialDateTime: widget.item.from,
-                  minimumDateTime: DateTime.now().subtract(Duration(days: 365)),
-                  maximumDateTime: DateTime.now().add(Duration(days: 365)),
-                  formatter: (date) => DateFormat('d.M.').format(date),
-                  onCompleted: (value) async {
-                    if (value == null) {
-                      return;
-                    }
-                    final newFrom = value.copyWith(
-                      hour: widget.item.from.hour,
-                      minute: widget.item.from.minute,
-                      second: widget.item.from.second,
-                    );
-                    final newTo = value.copyWith(
-                      hour: widget.item.to.hour,
-                      minute: widget.item.to.minute,
-                      second: widget.item.to.second,
-                    );
-                    widget.timeTrackerProvider.updateItem(
-                      widget.item.copyWith(from: newFrom, to: newTo),
-                    );
-                  },
-                  buttonDecoration: PickerButtonDecoration(
-                    textStyle: MacosTheme.of(context).typography.title3,
-                  ),
-                ),
-              ),
-              SizedBox(width: dimensions.spacingW),
-              // --------------------------------------------------
-              // From
-              // --------------------------------------------------
-              SizedBox(
-                width: dimensions.timePickerW,
-                child: CupertinoTimePickerButton(
-                  initialTime: TimeOfDay.fromDateTime(widget.item.from),
-                  minuteInterval: 15,
-                  onCompleted: (value) {
-                    if (value == null) {
-                      return;
-                    }
-                    final newFrom = widget.item.from.copyWith(
-                      hour: value.hour,
-                      minute: value.minute,
-                    );
-                    widget.timeTrackerProvider.updateItem(
-                      widget.item.copyWith(from: newFrom),
-                    );
-                  },
-                  buttonDecoration: PickerButtonDecoration(
-                    textStyle: MacosTheme.of(context).typography.title3,
-                  ),
-                ),
-              ),
-              SizedBox(width: dimensions.spacingW),
-              // --------------------------------------------------
-              // To
-              // --------------------------------------------------
-              SizedBox(
-                width: dimensions.timePickerW,
-                child: CupertinoTimePickerButton(
-                  initialTime: TimeOfDay.fromDateTime(widget.item.to),
-                  minuteInterval: 15,
-                  onCompleted: (value) {
-                    if (value == null) {
-                      return;
-                    }
-                    final newTo = widget.item.to.copyWith(
-                      hour: value.hour,
-                      minute: value.minute,
-                    );
-                    widget.timeTrackerProvider.updateItem(
-                      widget.item.copyWith(to: newTo),
-                    );
-                  },
-                  buttonDecoration: PickerButtonDecoration(
-                    textStyle: MacosTheme.of(context).typography.title3,
-                  ),
-                ),
-              ),
-              SizedBox(width: dimensions.spacingW),
-              // --------------------------------------------------
-              // Worked
-              // --------------------------------------------------
-              SizedBox(
-                width: dimensions.workedW,
-                child: Text(
-                  toHmString(widget.item.to.difference(widget.item.from)),
-                ),
-              ),
-              SizedBox(width: dimensions.spacingW),
-              // --------------------------------------------------
-              // Subject
-              // --------------------------------------------------
-              Expanded(
-                child: MacosSearchField(
-                  results: widget.userConfigProvider.subjects
-                      .map(
-                        (e) => SearchResultItem(
-                          e.uri,
-                          child: Text(e.uri, overflow: TextOverflow.ellipsis),
-                        ),
-                      )
-                      .toList(),
-                  maxResultsToShow: 10,
-                  controller: _subjectController,
-                  placeholder: 'Subject',
-                  onChanged: (value) {
-                    widget.timeTrackerProvider.updateItem(
-                      widget.item.copyWith(subject: value),
-                    );
-                  },
-                  onResultSelected: (value) {
-                    widget.timeTrackerProvider.updateItem(
-                      widget.item.copyWith(subject: value.searchKey),
-                    );
-                  },
-                ),
-              ),
-              SizedBox(width: dimensions.spacingW),
-              // --------------------------------------------------
-              // Description
-              // --------------------------------------------------
-              Expanded(
-                child: MacosTextField(
-                  controller: _descriptionController,
-                  placeholder: 'Description',
-                  maxLines: null,
-                  minLines: null,
-                  expands: true,
-                  style: MacosTheme.of(context).typography.title3,
-                  onChanged: (value) async {
-                    widget.timeTrackerProvider.updateItem(
-                      widget.item.copyWith(description: value),
-                    );
-                  },
-                ),
-              ),
-              SizedBox(width: dimensions.spacingW),
-              // --------------------------------------------------
-              // Status
-              // --------------------------------------------------
-              SizedBox(
-                width: dimensions.btnW,
-                child: widget.timeTrackerProvider.isSavingItem(widget.item)
-                    ? const ProgressCircle()
-                    : switch (widget.item.status) {
-                        TimetrackerItemStatus.staged => MacosIcon(
-                          CupertinoIcons.cloud_fill,
-                          color: Colors.grey,
-                        ),
-                        TimetrackerItemStatus.saved => MacosIcon(
-                          CupertinoIcons.cloud_fill,
-                          color: Colors.green,
-                        ),
-                        TimetrackerItemStatus.error => MacosIcon(
-                          CupertinoIcons.cloud_fill,
-                          color: Colors.red,
-                        ),
-                      },
-              ),
-              SizedBox(width: dimensions.spacingW),
-              // --------------------------------------------------
-              // Delete button
-              // --------------------------------------------------
-              SizedBox(
-                width: dimensions.btnW,
-                child: MacosIconButton(
-                  icon: MacosIcon(
-                    CupertinoIcons.delete,
-                    color: MacosTheme.of(context).primaryColor,
-                  ),
-                  onPressed: () async {
-                    widget.timeTrackerProvider.deleteItem(widget.item);
-                  },
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
   }
 }

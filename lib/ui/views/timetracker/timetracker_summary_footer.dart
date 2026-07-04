@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
-class DurationFooter extends StatelessWidget {
-  const DurationFooter({
+class TimetrackerSummaryFooter extends StatelessWidget {
+  const TimetrackerSummaryFooter({
     super.key,
     required this.durationByDate,
     required this.formatDate,
@@ -19,6 +19,8 @@ class DurationFooter extends StatelessWidget {
 
   Duration get _totalDuration =>
       durationByDate.fold(Duration.zero, (sum, entry) => sum + entry.duration);
+
+  static const double reservedHeight = 36.0;
 
   @override
   Widget build(BuildContext context) {
