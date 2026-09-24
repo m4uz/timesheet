@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
+            VALUE "CompanyName", "mauz" "\0"
             VALUE "FileDescription", "timesheet" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "timesheet" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 mauz. All rights reserved." "\0"
             VALUE "OriginalFilename", "timesheet.exe" "\0"
             VALUE "ProductName", "timesheet" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

@@ -1,72 +1,129 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:timesheet/config/oidc_config.dart';
+import 'package:timesheet/models/auth_info.dart';
 import 'package:timesheet/models/result.dart';
 import 'package:timesheet/models/session.dart';
+import 'package:timesheet/providers/auth_ui_delegate.dart';
 import 'package:timesheet/repositories/auth_repository.dart';
 import 'package:timesheet/services/session_manager.dart';
-import 'package:timesheet/ui/macos/dialog.dart' as mac_dialog;
-import 'package:timesheet/ui/macos/snackbar.dart';
-import 'package:timesheet/ui/windows/dialog.dart' as win_dialog;
-import 'package:timesheet/ui/windows/infobar.dart';
+
+enum TokenRefreshResult { success, failed, interactionRequired }
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository;
   final SessionManager _sessionManager;
+  final AuthUiDelegate _ui;
 
   bool _isLoading = false;
-  Timer? _expirationTimer;
+  bool _refreshInProgress = false;
+  bool _autoRefreshTriggered = false;
+  Timer? _sessionMonitorTimer;
   bool _dialogShown = false;
+  Future<TokenRefreshResult>? _ongoingRefresh;
 
   AuthProvider({
-    required AuthRepository authRepository,
-    required SessionManager sessionManager,
-  }) : _authRepository = authRepository,
-       _sessionManager = sessionManager {
+    required this._authRepository,
+    required this._sessionManager,
+    required this._ui,
+  }) {
     _sessionManager.addListener(_onSessionChanged);
-    _startExpirationMonitoring();
+    _startSessionMonitoring();
   }
 
   bool get isLoading => _isLoading;
+  bool get isRefreshing => _refreshInProgress;
   bool get isAuthenticated => _sessionManager.isValid;
   String? get accessToken => _sessionManager.accessToken;
   DateTime? get tokenExpiresAt => _sessionManager.expiresAt;
   String? get userName => _sessionManager.userName;
-  String? get userEmail => _sessionManager.email;
+  String? get uuidentity => _sessionManager.uuidentity;
 
   Future<void> login() async {
     _isLoading = true;
     notifyListeners();
 
-    final result = await _authRepository.authenticate();
+    try {
+      final result = await _authRepository.authenticate();
 
-    switch (result) {
-      case OK():
-        _sessionManager.updateSession(
-          Session(
-            accessToken: result.value.accessToken,
-            expiresAt: result.value.expiresAt,
-            userName: result.value.name,
-            email: result.value.email,
-          ),
-        );
-        _isLoading = false;
-        notifyListeners();
-      case Error():
-        _isLoading = false;
-        notifyListeners();
-        if (Platform.isWindows) {
-          InfoBarManager.error(result.message);
-        } else {
-          SnackBarManager.error(result.message);
-        }
+      switch (result) {
+        case OK():
+          _applyAuthInfo(result.value);
+        case Error():
+          _showError(result.message);
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
-  Future<void> extendSession() async {
-    _dialogShown = false;
-    return await login();
+  Future<TokenRefreshResult> refreshToken({bool showErrors = true}) {
+    if (_sessionManager.isEmpty) {
+      return Future.value(TokenRefreshResult.failed);
+    }
+    if (_ongoingRefresh != null) {
+      return _ongoingRefresh!;
+    }
+
+    final refresh = _doRefreshToken(showErrors);
+    _ongoingRefresh = refresh;
+    return refresh.whenComplete(() {
+      if (identical(_ongoingRefresh, refresh)) {
+        _ongoingRefresh = null;
+      }
+    });
+  }
+
+  Future<bool> refreshTokenForHttp() async {
+    final result = await refreshToken(showErrors: false);
+    if (result == TokenRefreshResult.interactionRequired) {
+      _showReLoginDialog();
+    }
+    return result == TokenRefreshResult.success;
+  }
+
+  Future<TokenRefreshResult> _doRefreshToken(bool showErrors) async {
+    _refreshInProgress = true;
+    notifyListeners();
+
+    try {
+      for (
+        var attempt = 0;
+        attempt < OidcConfig.tokenRefreshRetryCount;
+        attempt++
+      ) {
+        if (attempt > 0) {
+          await Future.delayed(OidcConfig.tokenRefreshRetryInterval);
+        }
+
+        final result = await _authRepository.refreshSession();
+        switch (result) {
+          case OK():
+            _applyAuthInfo(result.value);
+            return TokenRefreshResult.success;
+          case Error(:final message):
+            if (message == OidcConfig.interactionRequiredError) {
+              if (showErrors) {
+                _showReLoginDialog();
+              }
+              return TokenRefreshResult.interactionRequired;
+            }
+            if (attempt == OidcConfig.tokenRefreshRetryCount - 1) {
+              if (showErrors) {
+                _showError(message);
+              }
+              return TokenRefreshResult.failed;
+            }
+        }
+      }
+
+      return TokenRefreshResult.failed;
+    } finally {
+      _refreshInProgress = false;
+      notifyListeners();
+    }
   }
 
   void logout() {
@@ -77,8 +134,20 @@ class AuthProvider extends ChangeNotifier {
   @override
   void dispose() {
     _sessionManager.removeListener(_onSessionChanged);
-    _stopExpirationMonitoring();
+    _stopSessionMonitoring();
     super.dispose();
+  }
+
+  void _applyAuthInfo(AuthInfo authInfo) {
+    _autoRefreshTriggered = false;
+    _sessionManager.updateSession(
+      Session(
+        accessToken: authInfo.accessToken,
+        expiresAt: authInfo.expiresAt,
+        userName: authInfo.name,
+        uuidentity: authInfo.uuidentity,
+      ),
+    );
   }
 
   void _onSessionChanged() {
@@ -86,91 +155,88 @@ class AuthProvider extends ChangeNotifier {
 
     if (session.isValid) {
       _dialogShown = false;
-      _startExpirationMonitoring();
+      _startSessionMonitoring();
     } else {
-      _stopExpirationMonitoring();
+      _stopSessionMonitoring();
       _dialogShown = false;
+      _autoRefreshTriggered = false;
     }
 
     notifyListeners();
   }
 
-  void _startExpirationMonitoring() {
-    _stopExpirationMonitoring();
+  void _startSessionMonitoring() {
+    _stopSessionMonitoring();
 
     final session = _sessionManager.value;
     if (!session.isValid || session.expiresAt == null) {
       return;
     }
 
-    _expirationTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
-      _checkExpiration();
-    });
+    _sessionMonitorTimer = Timer.periodic(
+      OidcConfig.expirationCheckInterval,
+      (_) => _checkTokenRefresh(),
+    );
 
-    _checkExpiration();
+    _checkTokenRefresh();
   }
 
-  void _stopExpirationMonitoring() {
-    _expirationTimer?.cancel();
-    _expirationTimer = null;
+  void _stopSessionMonitoring() {
+    _sessionMonitorTimer?.cancel();
+    _sessionMonitorTimer = null;
   }
 
-  void _checkExpiration() {
+  void _checkTokenRefresh() {
     final session = _sessionManager.value;
 
-    if (!session.isValid) {
-      _dialogShown = false;
+    if (!session.isValid || session.expiresAt == null || _refreshInProgress) {
       return;
     }
 
-    const warningThreshold = Duration(minutes: 5);
-    final expiresWithin = session.expiresWithin(warningThreshold);
+    final needsRefresh = session.expiresWithin(OidcConfig.tokenRefreshLeeway);
+    if (!needsRefresh) {
+      _autoRefreshTriggered = false;
+      return;
+    }
 
-    if (expiresWithin && !_dialogShown) {
-      _dialogShown = true;
-      _showExpirationDialog(session.expiresAt);
-    } else if (!expiresWithin) {
-      _dialogShown = false;
+    if (_autoRefreshTriggered) {
+      return;
+    }
+
+    _autoRefreshTriggered = true;
+    unawaited(_performAutoRefresh());
+  }
+
+  Future<void> _performAutoRefresh() async {
+    final result = await refreshToken(showErrors: false);
+    if (result != TokenRefreshResult.success) {
+      _autoRefreshTriggered = false;
+    }
+    if (result == TokenRefreshResult.interactionRequired) {
+      _showReLoginDialog();
     }
   }
 
-  void _showExpirationDialog(DateTime? expiresAt) {
-    final timeRemaining = expiresAt?.difference(DateTime.now());
-    final minutes = timeRemaining != null
-        ? (timeRemaining.inSeconds / 60).ceil()
-        : 0;
-
-    const title = 'Session Expiring';
-    final message =
-        'Your session will expire in $minutes minute${minutes != 1 ? 's' : ''}. '
-        'Would you like to extend your session?';
-    const confirmText = 'Extend Session';
-    const cancelText = 'Log Out';
-
-    void onResult(bool confirmed) {
-      if (confirmed) {
-        extendSession();
-      } else {
-        logout();
-      }
+  void _showReLoginDialog() {
+    if (_dialogShown) {
+      return;
     }
 
-    if (Platform.isWindows) {
-      win_dialog.DialogManager.warningConfirmation(
-        title: title,
-        message: message,
-        confirmText: confirmText,
-        cancelText: cancelText,
-        onResult: onResult,
-      );
-    } else {
-      mac_dialog.DialogManager.warningConfirmation(
-        title: title,
-        message: message,
-        confirmText: confirmText,
-        cancelText: cancelText,
-        onResult: onResult,
-      );
-    }
+    _dialogShown = true;
+
+    _ui.showSessionExpiredDialog(
+      onResult: (confirmed) {
+        _dialogShown = false;
+        if (confirmed) {
+          login();
+        } else {
+          logout();
+        }
+      },
+    );
+  }
+
+  void _showError(String message) {
+    _ui.notifyError(message);
   }
 }

@@ -7,7 +7,7 @@ import 'package:timesheet/services/wtm_service.dart';
 class TimesheetRepository {
   final IWTMService _service;
 
-  TimesheetRepository({required IWTMService service}) : _service = service;
+  TimesheetRepository({required this._service});
 
   Future<Result<List<TimesheetItem>>> listTimesheetItems(
     DateTime from,
@@ -35,6 +35,7 @@ class TimesheetRepository {
       from: DateTime.parse(dto.datetimeFrom),
       to: DateTime.parse(dto.datetimeTo),
       subject: dto.subject,
+      subjectName: dto.subjectName,
       category: dto.category,
       description: dto.description,
     );

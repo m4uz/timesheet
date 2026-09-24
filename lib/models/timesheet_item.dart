@@ -3,6 +3,7 @@ class TimesheetItem {
   DateTime from;
   DateTime to;
   String subject;
+  String subjectName;
   String category;
   String description;
 
@@ -11,6 +12,7 @@ class TimesheetItem {
     DateTime? from,
     DateTime? to,
     this.subject = '',
+    this.subjectName = '',
     this.category = '',
     this.description = '',
   }) : from = from ?? DateTime.fromMillisecondsSinceEpoch(0),
@@ -21,6 +23,7 @@ class TimesheetItem {
     DateTime? from,
     DateTime? to,
     String? subject,
+    String? subjectName,
     String? category,
     String? description,
   }) {
@@ -29,6 +32,7 @@ class TimesheetItem {
       from: from ?? this.from,
       to: to ?? this.to,
       subject: subject ?? this.subject,
+      subjectName: subjectName ?? this.subjectName,
       category: category ?? this.category,
       description: description ?? this.description,
     );
@@ -42,17 +46,26 @@ class TimesheetItem {
         other.from == from &&
         other.to == to &&
         other.subject == subject &&
+        other.subjectName == subjectName &&
         other.category == category &&
         other.description == description;
   }
 
   @override
   int get hashCode {
-    return Object.hash(wtmId, from, to, subject, category, description);
+    return Object.hash(
+      wtmId,
+      from,
+      to,
+      subject,
+      subjectName,
+      category,
+      description,
+    );
   }
 
   @override
   String toString() {
-    return 'TimesheetItem(wtmId: $wtmId, from: $from, to: $to, subject: $subject, category: $category, description: $description)';
+    return 'TimesheetItem(wtmId: $wtmId, from: $from, to: $to, subject: $subject, subjectName: $subjectName, category: $category, description: $description)';
   }
 }

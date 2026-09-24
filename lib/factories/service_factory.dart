@@ -2,14 +2,18 @@ import 'package:timesheet/config/app_config.dart';
 import 'package:timesheet/http/http_client.dart';
 import 'package:timesheet/services/auth_service.dart';
 import 'package:timesheet/services/auth_service_impl.dart';
+import 'package:timesheet/services/oidc_auth_coordinator.dart';
 import 'package:timesheet/services/timetracker_db_service.dart';
 import 'package:timesheet/services/timetracker_db_service_impl.dart';
 import 'package:timesheet/services/wtm_service.dart';
 import 'package:timesheet/services/wtm_service_impl.dart';
 
 class ServiceFactory {
-  static IAuthService createAuthService() {
+  static IAuthService createAuthService({
+    required OidcAuthCoordinator coordinator,
+  }) {
     return AuthServiceImpl(
+      coordinator: coordinator,
       issuerUrl: AppConfig.oidcIssuerUrl,
       clientId: AppConfig.oidcClientId,
       wtmBaseUrl: AppConfig.wtmBaseUrl,

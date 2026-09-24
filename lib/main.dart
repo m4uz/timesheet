@@ -12,8 +12,7 @@ import 'package:timesheet/providers/auth_provider.dart';
 import 'package:timesheet/providers/config_provider.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
-import 'package:timesheet/providers/subjects_categories_provider.dart';
-import 'package:timesheet/models/session.dart';
+import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/repositories/auth_repository.dart';
 import 'package:timesheet/repositories/config_repository.dart';
 import 'package:timesheet/repositories/timesheet_repository.dart';
@@ -24,31 +23,33 @@ import 'package:timesheet/services/auth_service.dart';
 import 'package:timesheet/services/session_manager.dart';
 import 'package:timesheet/services/timetracker_db_service.dart';
 import 'package:timesheet/services/wtm_service.dart';
+import 'package:timesheet/ui/platform/platform_auth_ui_delegate.dart';
+import 'package:timesheet/ui/views/login/macos/login_view.dart' as mac_login_view;
+import 'package:timesheet/ui/views/login/windows/login_view.dart'
+    as win_login_view;
+import 'package:timesheet/ui/views/menu/macos/menu_view.dart' as mac_menu_view;
+import 'package:timesheet/ui/views/menu/windows/menu_view.dart' as win_menu_view;
 import 'package:timesheet/ui/theme.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:timesheet/ui/macos/dialog.dart' as mac_dialog;
-import 'package:timesheet/ui/macos/macos_timesheet.dart';
-import 'package:timesheet/ui/macos/snackbar.dart';
-import 'package:timesheet/ui/macos/views/login_view.dart';
-import 'package:timesheet/ui/windows/dialog.dart' as windows_dialog;
-import 'package:timesheet/ui/windows/infobar.dart';
-import 'package:timesheet/ui/windows/views/login_view.dart';
-import 'package:timesheet/ui/windows/windows_timesheet.dart';
+import 'package:timesheet/ui/platform/dialog.dart';
+import 'package:timesheet/ui/platform/snackbar.dart';
+import 'package:timesheet/services/oidc_auth_coordinator.dart';
+import 'package:timesheet/ui/platform/macos/oidc_auth_host.dart' as mac_oidc_auth_host;
+import 'package:timesheet/ui/platform/windows/oidc_auth_host.dart' as win_oidc_auth_host;
+import 'package:webview_all/webview_all.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (Platform.isWindows) {
-    InfoBarManager.initialize(navigatorKey);
-    windows_dialog.DialogManager.initialize(navigatorKey);
-  }
+  Dialog.initialize(navigatorKey);
+  Snackbar.initialize(navigatorKey);
 
   if (Platform.isMacOS) {
+    WebViewPlatform.instance = WebKitWebViewPlatform();
     await MacosWindowUtilsConfig().apply();
-    mac_dialog.DialogManager.initialize(navigatorKey);
-    SnackBarManager.initialize(navigatorKey);
   }
 
   await AppConfig.init();
@@ -67,11 +68,14 @@ class TimesheetApp extends StatefulWidget {
 }
 
 class _TimesheetAppState extends State<TimesheetApp> {
-  late final SessionManager sessionManager = SessionManager();
+  final SessionManager sessionManager = SessionManager();
+  final OidcAuthCoordinator oidcAuthCoordinator = OidcAuthCoordinator();
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    oidcAuthCoordinator.dispose();
+    sessionManager.dispose();
+    super.dispose();
   }
 
   @override
@@ -81,10 +85,14 @@ class _TimesheetAppState extends State<TimesheetApp> {
         // **************************************************
         // Setup
         // **************************************************
-        ValueListenableProvider<Session>.value(value: sessionManager),
         ListenableProvider<SessionManager>.value(value: sessionManager),
+        ChangeNotifierProvider<OidcAuthCoordinator>.value(
+          value: oidcAuthCoordinator,
+        ),
         Provider<IAuthService>(
-          create: (_) => ServiceFactory.createAuthService(),
+          create: (_) => ServiceFactory.createAuthService(
+            coordinator: oidcAuthCoordinator,
+          ),
         ),
         Provider<AuthRepository>(
           create: (context) =>
@@ -94,11 +102,17 @@ class _TimesheetAppState extends State<TimesheetApp> {
           create: (context) => AuthProvider(
             authRepository: context.read<AuthRepository>(),
             sessionManager: context.read<SessionManager>(),
+            ui: PlatformAuthUiDelegate(),
           ),
         ),
         Provider<HttpClient>(
-          create: (context) =>
-              HttpClient(sessionManager: context.read<SessionManager>()),
+          create: (context) {
+            final authProvider = context.read<AuthProvider>();
+            return HttpClient(
+              sessionManager: context.read<SessionManager>(),
+              refreshToken: authProvider.refreshTokenForHttp,
+            );
+          },
         ),
         Provider<IWTMService>(
           create: (context) => ServiceFactory.createWTMService(
@@ -152,14 +166,13 @@ class _TimesheetAppState extends State<TimesheetApp> {
           ),
         ),
         ChangeNotifierProvider(
-          create: (context) => SubjectsCategoriesProvider(
+          create: (context) => SubjectsAndCategoriesProvider(
             repository: context.read<SubjectsAndCategoriesRepository>(),
           ),
         ),
       ],
       builder: (context, _) {
         final appTheme = context.watch<AppTheme>();
-        final authProvider = context.watch<AuthProvider>();
 
         if (Platform.isWindows) {
           return FluentApp(
@@ -167,16 +180,22 @@ class _TimesheetAppState extends State<TimesheetApp> {
             title: '🦄⏰💩',
             themeMode: appTheme.mode,
             localizationsDelegates: const [
-              // TODO which ones do we need?
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               FluentLocalizations.delegate,
             ],
             supportedLocales: const [Locale('en')],
             debugShowCheckedModeBanner: !kReleaseMode,
-            home: authProvider.isAuthenticated
-                ? const WindowsTimesheet()
-                : const WinLoginView(),
+            builder: (context, child) {
+              return win_oidc_auth_host.WindowsOidcAuthHost(child: child);
+            },
+            home: Consumer<AuthProvider>(
+              builder: (context, auth, _) {
+                return auth.isAuthenticated
+                    ? const win_menu_view.MenuView()
+                    : const win_login_view.LoginView();
+              },
+            ),
           );
         }
 
@@ -185,16 +204,22 @@ class _TimesheetAppState extends State<TimesheetApp> {
           title: '🦄⏰💩',
           themeMode: appTheme.mode,
           localizationsDelegates: const [
-            // TODO which ones do we need?
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: const [Locale('en')],
           debugShowCheckedModeBanner: !kReleaseMode,
-          home: authProvider.isAuthenticated
-              ? const MacosTimesheet()
-              : const LoginView(),
+          builder: (context, child) {
+            return mac_oidc_auth_host.MacosOidcAuthHost(child: child);
+          },
+          home: Consumer<AuthProvider>(
+            builder: (context, auth, _) {
+              return auth.isAuthenticated
+                  ? const mac_menu_view.MenuView()
+                  : const mac_login_view.LoginView();
+            },
+          ),
         );
       },
     );

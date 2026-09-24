@@ -9,10 +9,9 @@ class TimetrackerRepository {
   final IWTMService _wtmService;
 
   TimetrackerRepository({
-    required TimetrackerDBService dbService,
-    required IWTMService wtmService,
-  }) : _dbService = dbService,
-       _wtmService = wtmService;
+    required this._dbService,
+    required this._wtmService,
+  });
 
   Future<Result<TimetrackerItem>> insert(TimetrackerItem item) async {
     return await _dbService.insert(item);

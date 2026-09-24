@@ -1,3 +1,4 @@
+import 'package:timesheet/dtos/get_subject_configuration_dto.dart';
 import 'package:timesheet/dtos/user_config_dto.dart';
 import 'package:timesheet/models/category.dart';
 import 'package:timesheet/models/result.dart';
@@ -7,8 +8,7 @@ import 'package:timesheet/services/wtm_service.dart';
 class SubjectsAndCategoriesRepository {
   final IWTMService _service;
 
-  SubjectsAndCategoriesRepository({required IWTMService service})
-    : _service = service;
+  SubjectsAndCategoriesRepository({required this._service});
 
   Future<Result<({List<Subject> subjects, List<Category> categories})>>
   loadSubjectsAndCategories() async {
@@ -51,6 +51,25 @@ class SubjectsAndCategoriesRepository {
           subjects: sortedSubjects,
           categories: sortedCategories,
         ));
+      case Error(:final message):
+        return Result.error(message);
+    }
+  }
+
+  Future<Result<Subject>> getSubjectConfiguration(String subject) async {
+    final result = await _service.getSubjectConfiguration(
+      GetSubjectConfigurationRequestDto(subject: subject),
+    );
+
+    switch (result) {
+      case OK(:final value):
+        return Result.ok(
+          Subject(
+            uri: value.subjectUrl,
+            name: value.name,
+            modificationTime: DateTime.now(),
+          ),
+        );
       case Error(:final message):
         return Result.error(message);
     }

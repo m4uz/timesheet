@@ -11,26 +11,58 @@ class TimetrackerProvider extends ChangeNotifier {
   List<TimetrackerItem> _items = [];
   String? _successMsg;
   String? _errorMsg;
+  String _filter = '';
 
-  TimetrackerProvider({required TimetrackerRepository repository})
-    : _repository = repository {
+  TimetrackerProvider({required this._repository}) {
     loadItems();
   }
 
-  List<TimetrackerItem> get items => List.unmodifiable(_items);
+  List<TimetrackerItem> get items {
+    final normalizedFilter = _filter.trim().toLowerCase();
+    if (normalizedFilter.isEmpty) {
+      return List.unmodifiable(_items);
+    }
+
+    return List.unmodifiable(
+      _items.where((item) {
+        return item.subject.trim().toLowerCase().contains(normalizedFilter) ||
+            item.description.trim().toLowerCase().contains(normalizedFilter);
+      }),
+    );
+  }
+
   bool get isLoading => _isLoading;
   String? get successMsg => _successMsg;
   String? get errorMsg => _errorMsg;
-  bool isSavingItem(TimetrackerItem item) => _savingKeys.contains(_itemKey(item));
+  bool isSavingItem(TimetrackerItem item) =>
+      _savingKeys.contains(_itemKey(item));
 
-  int get itemCount => _items.length;
+  String get filter => _filter;
+  bool get hasFilter => _filter.trim().isNotEmpty;
+  int get itemCount => items.length;
 
-  Duration get totalDuration {
-    Duration total = Duration.zero;
-    for (final item in _items) {
-      total += item.to.difference(item.from);
-    }
-    return total;
+  List<({DateTime date, Duration duration})> get durationByDate {
+    return items
+        .map(
+          (item) => (
+            date: DateTime(item.from.year, item.from.month, item.from.day),
+            duration: item.to.difference(item.from),
+          ),
+        )
+        .fold<Map<DateTime, Duration>>({}, (totals, entry) {
+          totals[entry.date] =
+              (totals[entry.date] ?? Duration.zero) + entry.duration;
+          return totals;
+        })
+        .entries
+        .map((entry) => (date: entry.key, duration: entry.value))
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
+  }
+
+  void setFilter(String value) {
+    _filter = value;
+    notifyListeners();
   }
 
   Future<void> loadItems() async {
@@ -145,11 +177,6 @@ class TimetrackerProvider extends ChangeNotifier {
     _errorMsg = null;
     notifyListeners();
 
-    if (oldIndex < newIndex) {
-      newIndex -= 1;
-    }
-
-    // Remove the item from oldIndex and insert it at newIndex
     final item = _items.removeAt(oldIndex);
     _items.insert(newIndex, item);
 

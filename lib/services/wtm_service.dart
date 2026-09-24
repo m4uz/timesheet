@@ -1,4 +1,5 @@
 import 'package:timesheet/dtos/create_timesheet_item_request_dto.dart';
+import 'package:timesheet/dtos/get_subject_configuration_dto.dart';
 import 'package:timesheet/dtos/list_worker_timesheet_items_request_dto.dart';
 import 'package:timesheet/dtos/timesheet_item_dto.dart';
 import 'package:timesheet/dtos/user_config_dto.dart';
@@ -14,7 +15,12 @@ abstract class IWTMService {
   Future<Result<TimesheetItemDto>> createTimesheetItem(
     CreateTimesheetItemRequestDto request,
   );
+
   Future<Result<List<TimesheetItemDto>>> listWorkerTimesheetItemsByTime(
     ListWorkerTimesheetItemsRequestDto request,
+  );
+
+  Future<Result<GetSubjectConfigurationResponseDto>> getSubjectConfiguration(
+    GetSubjectConfigurationRequestDto request,
   );
 }

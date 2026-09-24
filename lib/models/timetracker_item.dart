@@ -9,7 +9,7 @@ enum TimetrackerItemStatus {
   String toString() {
     switch (this) {
       case TimetrackerItemStatus.staged:
-        return 'STA';
+        return 'staged';
       case TimetrackerItemStatus.saved:
         return 'saved';
       case TimetrackerItemStatus.error:
@@ -42,6 +42,7 @@ class TimetrackerItem extends TimesheetItem {
     super.from,
     super.to,
     super.subject,
+    super.subjectName,
     super.category,
     super.description,
     this.id = -1,
@@ -56,6 +57,7 @@ class TimetrackerItem extends TimesheetItem {
     DateTime? from,
     DateTime? to,
     String? subject,
+    String? subjectName,
     String? category,
     String? description,
     int? id,
@@ -68,6 +70,7 @@ class TimetrackerItem extends TimesheetItem {
       from: from ?? this.from,
       to: to ?? this.to,
       subject: subject ?? this.subject,
+      subjectName: subjectName ?? this.subjectName,
       category: category ?? this.category,
       description: description ?? this.description,
       id: id ?? this.id,
@@ -126,17 +129,6 @@ class TimetrackerItem extends TimesheetItem {
         'status: $status, '
         'statusMsg: $statusMsg'
         ')';
-  }
-
-  TimesheetItem toTimesheetItem() {
-    return TimesheetItem(
-      wtmId: wtmId,
-      from: from,
-      to: to,
-      subject: subject,
-      category: category,
-      description: description,
-    );
   }
 
   static DateTime _parseDateTime(dynamic value) {

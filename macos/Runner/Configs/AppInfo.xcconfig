@@ -11,4 +11,4 @@ PRODUCT_NAME = Timesheet
 PRODUCT_BUNDLE_IDENTIFIER = m4uz.timesheet
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 mauz. All rights reserved.
