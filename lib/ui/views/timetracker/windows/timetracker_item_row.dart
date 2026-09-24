@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:intl/intl.dart';
@@ -36,6 +38,7 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
   static const double _spacingW = 8.0;
 
   final _fieldControllers = TimetrackerItemFieldControllers();
+  Timer? _subjectFetchDebounce;
 
   @override
   Widget build(BuildContext context) {
@@ -163,17 +166,12 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
         Expanded(
           child: AutoSuggestBox<String>(
             controller: _fieldControllers.subject,
-            onChanged: (value, _) {
-              // Select-only: typing filters results; do not persist free text.
-              // Allow clearing the field to clear the stored URI.
-              if (value.isEmpty && widget.item.subject.isNotEmpty) {
-                widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(subject: ''),
-                );
-              }
-            },
+            onChanged: (value, _) => _onSubjectChanged(value),
             onSelected: (selected) {
               final uri = selected.value;
+              if (uri == null) {
+                return;
+              }
               widget.timeTrackerProvider.updateItem(
                 widget.item.copyWith(subject: uri),
               );
@@ -241,6 +239,32 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
     );
   }
 
+  void _onSubjectChanged(String value) {
+    if (value.isEmpty && widget.item.subject.isNotEmpty) {
+      widget.timeTrackerProvider.updateItem(
+        widget.item.copyWith(subject: ''),
+      );
+    }
+
+    _subjectFetchDebounce?.cancel();
+    if (!widget.userConfigProvider.isFetchableSubjectUri(value)) {
+      return;
+    }
+    final requested = value.trim();
+    final item = widget.item;
+    final timeTrackerProvider = widget.timeTrackerProvider;
+    final userConfigProvider = widget.userConfigProvider;
+    _subjectFetchDebounce = Timer(const Duration(milliseconds: 400), () async {
+      final subject = await userConfigProvider.ensureSubjectForInput(requested);
+      if (subject == null) {
+        return;
+      }
+      await timeTrackerProvider.updateItem(
+        item.copyWith(subject: subject.uri),
+      );
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -262,6 +286,7 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
 
   @override
   void dispose() {
+    _subjectFetchDebounce?.cancel();
     _fieldControllers.dispose();
     super.dispose();
   }
