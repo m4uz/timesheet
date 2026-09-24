@@ -27,7 +27,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   Widget build(BuildContext context) {
     return Consumer2<TimetrackerProvider, SubjectsCategoriesProvider>(
       builder: (context, timeTrackerProvider, userConfigProvider, child) {
-        _showProviderMessages(timeTrackerProvider);
+        _showProviderMessages(timeTrackerProvider, userConfigProvider);
 
         return MacosScaffold(
           toolBar: _buildToolBar(
@@ -47,14 +47,21 @@ class _TimetrackerViewState extends State<TimetrackerView> {
     );
   }
 
-  void _showProviderMessages(TimetrackerProvider provider) {
-    if (provider.successMsg != null) {
-      Snackbar.success(provider.successMsg!);
-      provider.clearSuccessMsg();
+  void _showProviderMessages(
+    TimetrackerProvider timeTrackerProvider,
+    SubjectsCategoriesProvider userConfigProvider,
+  ) {
+    if (timeTrackerProvider.successMsg != null) {
+      Snackbar.success(timeTrackerProvider.successMsg!);
+      timeTrackerProvider.clearSuccessMsg();
     }
-    if (provider.errorMsg != null) {
-      Snackbar.error(provider.errorMsg!);
-      provider.clearErrorMsg();
+    if (timeTrackerProvider.errorMsg != null) {
+      Snackbar.error(timeTrackerProvider.errorMsg!);
+      timeTrackerProvider.clearErrorMsg();
+    }
+    if (userConfigProvider.errorMsg != null) {
+      Snackbar.error(userConfigProvider.errorMsg!);
+      userConfigProvider.clearErrorMsg();
     }
   }
 
@@ -145,6 +152,9 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   }) {
     return ContentArea(
       builder: (context, scrollController) {
+        if (userConfigProvider.isLoading) {
+          return const Center(child: ProgressCircle());
+        }
         return PinnedFooterLayout(
           footerHeight: TimetrackerSummaryFooter.reservedHeight,
           body: _buildItemList(

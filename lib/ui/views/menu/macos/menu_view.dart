@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show SelectableText;
 import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/providers/auth_provider.dart';
@@ -52,7 +53,7 @@ class _MenuViewState extends State<MenuView> {
               return MacosListTile(
                 leading: const MacosIcon(CupertinoIcons.profile_circled),
                 title: Text(authProvider.userName ?? 'User'),
-                subtitle: Text(authProvider.userEmail ?? ''),
+                subtitle: SelectableText(authProvider.uuidentity ?? ''),
               );
             },
           ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:timesheet/dtos/create_timesheet_item_request_dto.dart';
+import 'package:timesheet/dtos/get_subject_configuration_dto.dart';
 import 'package:timesheet/dtos/list_worker_timesheet_items_request_dto.dart';
 import 'package:timesheet/dtos/timesheet_item_dto.dart';
 import 'package:timesheet/dtos/user_config_dto.dart';
@@ -16,6 +17,7 @@ class WTMServiceImpl implements IWTMService {
   final Uri _updateUserOptionsUrl;
   final Uri _createTimesheetItemUrl;
   final Uri _listWorkerTimesheetItemsByTimeUrl;
+  final Uri _getSubjectConfigurationUrl;
 
   WTMServiceImpl({required this._client, required Uri wtmBaseUrl})
     : _loadConfigAndUserInfoUrl = Uri.parse(
@@ -29,6 +31,9 @@ class WTMServiceImpl implements IWTMService {
       ),
       _listWorkerTimesheetItemsByTimeUrl = Uri.parse(
         '${wtmBaseUrl.toString()}/listWorkerTimesheetItemsByTime',
+      ),
+      _getSubjectConfigurationUrl = Uri.parse(
+        '${wtmBaseUrl.toString()}/getSubjectConfiguration',
       );
 
   @override
@@ -148,6 +153,35 @@ class WTMServiceImpl implements IWTMService {
         _log.fine('Timesheet items loaded.');
       case Error():
         _log.fine('Failed to load timesheet items.');
+    }
+
+    return result;
+  }
+
+  @override
+  Future<Result<GetSubjectConfigurationResponseDto>> getSubjectConfiguration(
+    GetSubjectConfigurationRequestDto request,
+  ) async {
+    _log.fine('Getting subject configuration.');
+
+    final response = await _client.get(
+      _getSubjectConfigurationUrl,
+      body: request.toJson(),
+    );
+
+    if (response == null) {
+      return Result.error('No response from WTM.');
+    }
+
+    final result = _processResponse(
+      response,
+      GetSubjectConfigurationResponseDto.fromJson,
+    );
+    switch (result) {
+      case OK():
+        _log.fine('Subject configuration loaded.');
+      case Error():
+        _log.fine('Failed to load subject configuration.');
     }
 
     return result;

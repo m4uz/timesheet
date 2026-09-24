@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cupertino_calendar_picker/cupertino_calendar_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +51,7 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
   static const double _minRowW = _fixedTotalW + _flexMinW * 2;
 
   final _fieldControllers = TimetrackerItemFieldControllers();
+  Timer? _subjectFetchDebounce;
 
   @override
   Widget build(BuildContext context) {
@@ -189,7 +192,10 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
                   .map(
                     (e) => SearchResultItem(
                       e.uri,
-                      child: Text(e.uri, overflow: TextOverflow.ellipsis),
+                      child: Text(
+                        e.name.isNotEmpty ? e.name : e.uri,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   )
                   .toList(),
@@ -197,15 +203,14 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
               maxResultsToShow: 10,
               controller: _fieldControllers.subject,
               placeholder: 'Subject',
-              onChanged: (value) {
-                widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(subject: value),
-                );
-              },
+              onChanged: _onSubjectChanged,
               onResultSelected: (value) {
+                final uri = value.searchKey;
                 widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(subject: value.searchKey),
+                  widget.item.copyWith(subject: uri),
                 );
+                _fieldControllers.subject.text =
+                    widget.userConfigProvider.labelForUri(uri);
               },
             ),
           ),
@@ -261,20 +266,54 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
     );
   }
 
+  void _onSubjectChanged(String value) {
+    if (value.isEmpty && widget.item.subject.isNotEmpty) {
+      widget.timeTrackerProvider.updateItem(
+        widget.item.copyWith(subject: ''),
+      );
+    }
+
+    _subjectFetchDebounce?.cancel();
+    if (!widget.userConfigProvider.isFetchableSubjectUri(value)) {
+      return;
+    }
+    final requested = value.trim();
+    final item = widget.item;
+    final timeTrackerProvider = widget.timeTrackerProvider;
+    final userConfigProvider = widget.userConfigProvider;
+    _subjectFetchDebounce = Timer(const Duration(milliseconds: 400), () async {
+      final subject = await userConfigProvider.ensureSubjectForInput(requested);
+      if (subject == null) {
+        return;
+      }
+      await timeTrackerProvider.updateItem(
+        item.copyWith(subject: subject.uri),
+      );
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    _fieldControllers.initFrom(widget.item);
+    _fieldControllers.initFrom(
+      widget.item,
+      subjectLabel: widget.userConfigProvider.labelForUri,
+    );
   }
 
   @override
   void didUpdateWidget(TimetrackerItemRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _fieldControllers.syncFrom(widget.item, oldWidget.item);
+    _fieldControllers.syncFrom(
+      widget.item,
+      oldWidget.item,
+      subjectLabel: widget.userConfigProvider.labelForUri,
+    );
   }
 
   @override
   void dispose() {
+    _subjectFetchDebounce?.cancel();
     _fieldControllers.dispose();
     super.dispose();
   }

@@ -35,6 +35,7 @@ class TimesheetRepository {
       from: DateTime.parse(dto.datetimeFrom),
       to: DateTime.parse(dto.datetimeTo),
       subject: dto.subject,
+      subjectName: dto.subjectName,
       category: dto.category,
       description: dto.description,
     );
