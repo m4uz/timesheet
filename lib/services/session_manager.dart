@@ -15,7 +15,7 @@ class SessionManager extends ValueNotifier<Session> {
   String? get accessToken => value.accessToken;
   DateTime? get expiresAt => value.expiresAt;
   String? get userName => value.userName;
-  String? get email => value.email;
+  String? get uuidentity => value.uuidentity;
   bool get isValid => value.isValid;
   bool get isEmpty => value.isEmpty;
 }

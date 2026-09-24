@@ -62,13 +62,13 @@ class OidcFlowHelper {
 
   Future<AuthInfo> toAuthInfo(Credential credential) async {
     final tokenResponse = await credential.getTokenResponse();
-    final userInfo = await credential.getUserInfo();
+    final claims = tokenResponse.idToken.claims;
 
     return AuthInfo(
-      accessToken: tokenResponse.accessToken ?? '',
-      expiresAt: tokenResponse.expiresAt,
-      name: userInfo.name ?? 'Unknown User',
-      email: userInfo.email,
+      accessToken: tokenResponse.idToken.toCompactSerialization(),
+      expiresAt: claims.expiry,
+      name: claims.name ?? 'Unknown User',
+      uuidentity: claims['uuidentity'] as String?,
     );
   }
 }

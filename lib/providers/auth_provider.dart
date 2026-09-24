@@ -37,7 +37,7 @@ class AuthProvider extends ChangeNotifier {
   String? get accessToken => _sessionManager.accessToken;
   DateTime? get tokenExpiresAt => _sessionManager.expiresAt;
   String? get userName => _sessionManager.userName;
-  String? get userEmail => _sessionManager.email;
+  String? get uuidentity => _sessionManager.uuidentity;
 
   Future<void> login() async {
     _isLoading = true;
@@ -149,7 +149,7 @@ class AuthProvider extends ChangeNotifier {
         accessToken: authInfo.accessToken,
         expiresAt: authInfo.expiresAt,
         userName: authInfo.name,
-        email: authInfo.email,
+        uuidentity: authInfo.uuidentity,
       ),
     );
   }
