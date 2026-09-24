@@ -40,6 +40,46 @@ class SubjectsCategoriesProvider extends ChangeNotifier {
     return subject.name.isNotEmpty ? subject.name : subject.uri;
   }
 
+  bool isFetchableSubjectUri(String value) {
+    final trimmed = value.trim();
+    return trimmed.isNotEmpty && trimmed.startsWith('https://');
+  }
+
+  Future<Subject?> ensureSubjectForInput(String input) async {
+    final trimmed = input.trim();
+    if (!isFetchableSubjectUri(trimmed)) {
+      return null;
+    }
+
+    final existingByInput = findByUri(trimmed);
+    if (existingByInput != null) {
+      return existingByInput;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    await WidgetsBinding.instance.endOfFrame;
+
+    _isLoading = true;
+    notifyListeners();
+
+    final result = await _repository.getSubjectConfiguration(trimmed);
+
+    switch (result) {
+      case OK(:final value):
+        final existingBySubjectUrl = findByUri(value.uri);
+        if (existingBySubjectUrl == null) {
+          _subjects = [value, ..._subjects];
+        }
+        _isLoading = false;
+        return existingBySubjectUrl ?? value;
+      case Error(:final message):
+        _errorMsg = message;
+        _isLoading = false;
+        notifyListeners();
+        return null;
+    }
+  }
+
   Future<void> loadSubjectsAndCategories() async {
     _isLoading = true;
     _successMsg = null;

@@ -145,6 +145,9 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   }) {
     return ContentArea(
       builder: (context, scrollController) {
+        if (userConfigProvider.isLoading) {
+          return const Center(child: ProgressCircle());
+        }
         return PinnedFooterLayout(
           footerHeight: TimetrackerSummaryFooter.reservedHeight,
           body: _buildItemList(

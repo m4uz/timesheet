@@ -132,6 +132,9 @@ class _TimetrackerViewState extends State<TimetrackerView> {
     required TimetrackerProvider timeTrackerProvider,
     required SubjectsCategoriesProvider userConfigProvider,
   }) {
+    if (userConfigProvider.isLoading) {
+      return const Center(child: ProgressRing());
+    }
     return PinnedFooterLayout(
       footerHeight: TimetrackerSummaryFooter.reservedHeight,
       body: _buildItemList(
