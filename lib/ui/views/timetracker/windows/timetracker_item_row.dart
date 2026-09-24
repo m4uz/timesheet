@@ -164,20 +164,30 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
           child: AutoSuggestBox<String>(
             controller: _fieldControllers.subject,
             onChanged: (value, _) {
-              widget.timeTrackerProvider.updateItem(
-                widget.item.copyWith(subject: value),
-              );
+              // Select-only: typing filters results; do not persist free text.
+              // Allow clearing the field to clear the stored URI.
+              if (value.isEmpty && widget.item.subject.isNotEmpty) {
+                widget.timeTrackerProvider.updateItem(
+                  widget.item.copyWith(subject: ''),
+                );
+              }
             },
             onSelected: (selected) {
+              final uri = selected.value;
               widget.timeTrackerProvider.updateItem(
-                widget.item.copyWith(subject: selected.value),
+                widget.item.copyWith(subject: uri),
               );
+              _fieldControllers.subject.text =
+                  widget.userConfigProvider.labelForUri(uri);
             },
             clearButtonEnabled: false,
             placeholder: 'Subject',
             items: widget.userConfigProvider.subjects
                 .map(
-                  (s) => AutoSuggestBoxItem<String>(value: s.uri, label: s.uri),
+                  (s) => AutoSuggestBoxItem<String>(
+                    value: s.uri,
+                    label: s.name.isNotEmpty ? s.name : s.uri,
+                  ),
                 )
                 .toList(),
           ),
@@ -234,13 +244,20 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
   @override
   void initState() {
     super.initState();
-    _fieldControllers.initFrom(widget.item);
+    _fieldControllers.initFrom(
+      widget.item,
+      subjectLabel: widget.userConfigProvider.labelForUri,
+    );
   }
 
   @override
   void didUpdateWidget(TimetrackerItemRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _fieldControllers.syncFrom(widget.item, oldWidget.item);
+    _fieldControllers.syncFrom(
+      widget.item,
+      oldWidget.item,
+      subjectLabel: widget.userConfigProvider.labelForUri,
+    );
   }
 
   @override

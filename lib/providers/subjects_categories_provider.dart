@@ -25,6 +25,21 @@ class SubjectsCategoriesProvider extends ChangeNotifier {
   String? get successMsg => _successMsg;
   String? get errorMsg => _errorMsg;
 
+  Subject? findByUri(String uri) {
+    if (uri.isEmpty) return null;
+    for (final subject in _subjects) {
+      if (subject.uri == uri) return subject;
+    }
+    return null;
+  }
+
+  String labelForUri(String uri) {
+    if (uri.isEmpty) return '';
+    final subject = findByUri(uri);
+    if (subject == null) return uri;
+    return subject.name.isNotEmpty ? subject.name : subject.uri;
+  }
+
   Future<void> loadSubjectsAndCategories() async {
     _isLoading = true;
     _successMsg = null;
