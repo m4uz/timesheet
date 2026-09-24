@@ -19,7 +19,6 @@ class Subject {
   factory Subject.fromJson(Map<String, dynamic> json) =>
       _$SubjectFromJson(json);
 
-  // Omit empty name/unitName so legacy subjects round-trip without those keys.
   Map<String, dynamic> toJson() {
     final json = _$SubjectToJson(this);
     if (name.isEmpty) json.remove('name');

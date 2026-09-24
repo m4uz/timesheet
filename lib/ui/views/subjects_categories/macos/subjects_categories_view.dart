@@ -121,7 +121,10 @@ class _SubjectsCategoriesViewState extends State<SubjectsCategoriesView> {
                                 searchController: _subjectsSearchController,
                                 items: provider.subjects,
                                 selectedItems: _selectedSubjects,
-                                itemToString: (subject) => subject.uri,
+                                itemToString: (subject) =>
+                                    subject.name.isNotEmpty
+                                    ? subject.name
+                                    : subject.uri,
                                 isDisabled: provider.isLoading,
                                 onItemToggle: (subject) {
                                   setState(() {
