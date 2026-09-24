@@ -23,6 +23,7 @@ import 'package:timesheet/services/auth_service.dart';
 import 'package:timesheet/services/session_manager.dart';
 import 'package:timesheet/services/timetracker_db_service.dart';
 import 'package:timesheet/services/wtm_service.dart';
+import 'package:timesheet/ui/platform/platform_auth_ui_delegate.dart';
 import 'package:timesheet/ui/views/login/macos/login_view.dart' as mac_login_view;
 import 'package:timesheet/ui/views/login/windows/login_view.dart'
     as win_login_view;
@@ -101,6 +102,7 @@ class _TimesheetAppState extends State<TimesheetApp> {
           create: (context) => AuthProvider(
             authRepository: context.read<AuthRepository>(),
             sessionManager: context.read<SessionManager>(),
+            ui: PlatformAuthUiDelegate(),
           ),
         ),
         Provider<HttpClient>(
