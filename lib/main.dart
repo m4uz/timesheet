@@ -13,7 +13,6 @@ import 'package:timesheet/providers/config_provider.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/providers/subjects_and_categories_provider.dart';
-import 'package:timesheet/models/session.dart';
 import 'package:timesheet/repositories/auth_repository.dart';
 import 'package:timesheet/repositories/config_repository.dart';
 import 'package:timesheet/repositories/timesheet_repository.dart';
@@ -85,7 +84,6 @@ class _TimesheetAppState extends State<TimesheetApp> {
         // **************************************************
         // Setup
         // **************************************************
-        ValueListenableProvider<Session>.value(value: sessionManager),
         ListenableProvider<SessionManager>.value(value: sessionManager),
         ChangeNotifierProvider<OidcAuthCoordinator>.value(
           value: oidcAuthCoordinator,
