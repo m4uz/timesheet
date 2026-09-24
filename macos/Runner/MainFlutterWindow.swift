@@ -12,4 +12,8 @@ class MainFlutterWindow: NSWindow {
 
     super.awakeFromNib()
   }
+
+  override func close() {
+    orderOut(nil)
+  }
 }
