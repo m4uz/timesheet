@@ -1,7 +1,7 @@
 enum MenuDestination {
   timetracker,
   timesheet,
-  subjectsCategories,
+  subjectsAndCategories,
   config,
   debug,
 }
@@ -25,7 +25,7 @@ const menuDestinations = <MenuDestinationDefinition>[
   ),
   MenuDestinationDefinition(id: MenuDestination.timesheet, label: 'Timesheet'),
   MenuDestinationDefinition(
-    id: MenuDestination.subjectsCategories,
+    id: MenuDestination.subjectsAndCategories,
     label: 'Subjects & Categories',
   ),
   MenuDestinationDefinition(id: MenuDestination.config, label: 'Config'),

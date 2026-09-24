@@ -12,7 +12,7 @@ import 'package:timesheet/providers/auth_provider.dart';
 import 'package:timesheet/providers/config_provider.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
-import 'package:timesheet/providers/subjects_categories_provider.dart';
+import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/models/session.dart';
 import 'package:timesheet/repositories/auth_repository.dart';
 import 'package:timesheet/repositories/config_repository.dart';
@@ -166,7 +166,7 @@ class _TimesheetAppState extends State<TimesheetApp> {
           ),
         ),
         ChangeNotifierProvider(
-          create: (context) => SubjectsCategoriesProvider(
+          create: (context) => SubjectsAndCategoriesProvider(
             repository: context.read<SubjectsAndCategoriesRepository>(),
           ),
         ),

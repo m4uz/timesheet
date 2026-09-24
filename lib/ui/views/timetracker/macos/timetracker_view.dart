@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
-import 'package:timesheet/providers/subjects_categories_provider.dart';
+import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/macos/toolbar_text_field.dart'
     as mac_toolbar_text_field;
@@ -25,7 +25,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<TimetrackerProvider, SubjectsCategoriesProvider>(
+    return Consumer2<TimetrackerProvider, SubjectsAndCategoriesProvider>(
       builder: (context, timeTrackerProvider, userConfigProvider, child) {
         _showProviderMessages(timeTrackerProvider, userConfigProvider);
 
@@ -49,7 +49,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
 
   void _showProviderMessages(
     TimetrackerProvider timeTrackerProvider,
-    SubjectsCategoriesProvider userConfigProvider,
+    SubjectsAndCategoriesProvider userConfigProvider,
   ) {
     if (timeTrackerProvider.successMsg != null) {
       Snackbar.success(timeTrackerProvider.successMsg!);
@@ -68,7 +68,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   ToolBar _buildToolBar(
     BuildContext context, {
     required TimetrackerProvider timeTrackerProvider,
-    required SubjectsCategoriesProvider userConfigProvider,
+    required SubjectsAndCategoriesProvider userConfigProvider,
   }) {
     return ToolBar(
       title: Text(
@@ -148,7 +148,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   Widget _buildContentArea(
     BuildContext context, {
     required TimetrackerProvider timeTrackerProvider,
-    required SubjectsCategoriesProvider userConfigProvider,
+    required SubjectsAndCategoriesProvider userConfigProvider,
   }) {
     return ContentArea(
       builder: (context, scrollController) {
@@ -169,7 +169,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
 
   Widget _buildItemList({
     required TimetrackerProvider timeTrackerProvider,
-    required SubjectsCategoriesProvider userConfigProvider,
+    required SubjectsAndCategoriesProvider userConfigProvider,
   }) {
     return ReorderableListView(
       buildDefaultDragHandles: false,

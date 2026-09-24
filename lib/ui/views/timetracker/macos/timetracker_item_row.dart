@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:timesheet/models/timetracker_item.dart';
-import 'package:timesheet/providers/subjects_categories_provider.dart';
+import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/ui/views/timetracker/timetracker_item_field_controllers.dart';
 import 'package:timesheet/ui/widgets/overflow_clip_box.dart';
@@ -24,7 +24,7 @@ class TimetrackerItemRow extends StatefulWidget {
   });
 
   final TimetrackerProvider timeTrackerProvider;
-  final SubjectsCategoriesProvider userConfigProvider;
+  final SubjectsAndCategoriesProvider userConfigProvider;
   final int index;
   final TimetrackerItem item;
   final bool canReorder;

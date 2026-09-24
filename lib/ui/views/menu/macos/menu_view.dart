@@ -8,8 +8,8 @@ import 'package:timesheet/ui/platform/macos/menu_bar.dart' as mac_menu_bar;
 import 'package:timesheet/ui/views/config/macos/config_view.dart' as mac_config_view;
 import 'package:timesheet/ui/views/debug/macos/debug_view.dart' as mac_debug_view;
 import 'package:timesheet/ui/views/menu/destinations.dart';
-import 'package:timesheet/ui/views/subjects_categories/macos/subjects_categories_view.dart'
-    as mac_subjects_categories_view;
+import 'package:timesheet/ui/views/subjects_and_categories/macos/subjects_and_categories_view.dart'
+    as mac_subjects_and_categories_view;
 import 'package:timesheet/ui/views/timesheet/macos/timesheet_view.dart' as mac_timesheet_view;
 import 'package:timesheet/ui/views/timetracker/macos/timetracker_view.dart' as mac_timetracker_view;
 
@@ -69,7 +69,7 @@ class _MenuViewState extends State<MenuView> {
     return switch (destination) {
       MenuDestination.timetracker => CupertinoIcons.stopwatch,
       MenuDestination.timesheet => CupertinoIcons.calendar,
-      MenuDestination.subjectsCategories => CupertinoIcons.list_bullet,
+      MenuDestination.subjectsAndCategories => CupertinoIcons.list_bullet,
       MenuDestination.config => CupertinoIcons.settings,
       MenuDestination.debug => CupertinoIcons.ant,
     };
@@ -79,8 +79,8 @@ class _MenuViewState extends State<MenuView> {
     return switch (destination) {
       MenuDestination.timetracker => const mac_timetracker_view.TimetrackerView(),
       MenuDestination.timesheet => const mac_timesheet_view.TimesheetView(),
-      MenuDestination.subjectsCategories =>
-        const mac_subjects_categories_view.SubjectsCategoriesView(),
+      MenuDestination.subjectsAndCategories =>
+        const mac_subjects_and_categories_view.SubjectsAndCategoriesView(),
       MenuDestination.config => const mac_config_view.ConfigView(),
       MenuDestination.debug => const mac_debug_view.DebugView(),
     };

@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:timesheet/providers/subjects_categories_provider.dart';
+import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
@@ -22,7 +22,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<TimetrackerProvider, SubjectsCategoriesProvider>(
+    return Consumer2<TimetrackerProvider, SubjectsAndCategoriesProvider>(
       builder: (context, timeTrackerProvider, userConfigProvider, _) {
         _showProviderMessages(timeTrackerProvider, userConfigProvider);
 
@@ -44,7 +44,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
 
   void _showProviderMessages(
     TimetrackerProvider timeTrackerProvider,
-    SubjectsCategoriesProvider userConfigProvider,
+    SubjectsAndCategoriesProvider userConfigProvider,
   ) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (timeTrackerProvider.successMsg != null) {
@@ -65,7 +65,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   PageHeader _buildPageHeader(
     BuildContext context, {
     required TimetrackerProvider timeTrackerProvider,
-    required SubjectsCategoriesProvider userConfigProvider,
+    required SubjectsAndCategoriesProvider userConfigProvider,
   }) {
     return PageHeader(
       title: const Text('Timetracker'),
@@ -78,7 +78,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
 
   Widget _buildCommandBar({
     required TimetrackerProvider timeTrackerProvider,
-    required SubjectsCategoriesProvider userConfigProvider,
+    required SubjectsAndCategoriesProvider userConfigProvider,
   }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -137,7 +137,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
   Widget _buildContentArea(
     BuildContext context, {
     required TimetrackerProvider timeTrackerProvider,
-    required SubjectsCategoriesProvider userConfigProvider,
+    required SubjectsAndCategoriesProvider userConfigProvider,
   }) {
     if (userConfigProvider.isLoading) {
       return const Center(child: ProgressRing());
@@ -154,7 +154,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
 
   Widget _buildItemList({
     required TimetrackerProvider timeTrackerProvider,
-    required SubjectsCategoriesProvider userConfigProvider,
+    required SubjectsAndCategoriesProvider userConfigProvider,
   }) {
     return material.ReorderableListView(
       buildDefaultDragHandles: false,

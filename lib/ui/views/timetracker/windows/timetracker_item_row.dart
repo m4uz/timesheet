@@ -4,7 +4,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:intl/intl.dart';
 import 'package:timesheet/models/timetracker_item.dart';
-import 'package:timesheet/providers/subjects_categories_provider.dart';
+import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/ui/views/timetracker/timetracker_item_field_controllers.dart';
 import 'package:timesheet/ui/widgets/weekday_label.dart';
@@ -21,7 +21,7 @@ class TimetrackerItemRow extends StatefulWidget {
   });
 
   final TimetrackerProvider timeTrackerProvider;
-  final SubjectsCategoriesProvider userConfigProvider;
+  final SubjectsAndCategoriesProvider userConfigProvider;
   final int index;
   final TimetrackerItem item;
   final bool canReorder;
