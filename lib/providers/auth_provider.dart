@@ -1,20 +1,20 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart' hide Dialog;
+import 'package:flutter/foundation.dart';
 import 'package:timesheet/config/oidc_config.dart';
 import 'package:timesheet/models/auth_info.dart';
 import 'package:timesheet/models/result.dart';
 import 'package:timesheet/models/session.dart';
+import 'package:timesheet/providers/auth_ui_delegate.dart';
 import 'package:timesheet/repositories/auth_repository.dart';
 import 'package:timesheet/services/session_manager.dart';
-import 'package:timesheet/ui/platform/dialog.dart';
-import 'package:timesheet/ui/platform/snackbar.dart';
 
 enum TokenRefreshResult { success, failed, interactionRequired }
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository;
   final SessionManager _sessionManager;
+  final AuthUiDelegate _ui;
 
   bool _isLoading = false;
   bool _refreshInProgress = false;
@@ -26,6 +26,7 @@ class AuthProvider extends ChangeNotifier {
   AuthProvider({
     required this._authRepository,
     required this._sessionManager,
+    required this._ui,
   }) {
     _sessionManager.addListener(_onSessionChanged);
     _startSessionMonitoring();
@@ -223,30 +224,19 @@ class AuthProvider extends ChangeNotifier {
 
     _dialogShown = true;
 
-    const title = 'Session Expired';
-    const message = 'Your session has expired. Please log in again.';
-    const confirmText = 'Log In';
-    const cancelText = 'Log Out';
-
-    void onResult(bool confirmed) {
-      _dialogShown = false;
-      if (confirmed) {
-        login();
-      } else {
-        logout();
-      }
-    }
-
-    Dialog.warningConfirmation(
-      title: title,
-      message: message,
-      confirmText: confirmText,
-      cancelText: cancelText,
-      onResult: onResult,
+    _ui.showSessionExpiredDialog(
+      onResult: (confirmed) {
+        _dialogShown = false;
+        if (confirmed) {
+          login();
+        } else {
+          logout();
+        }
+      },
     );
   }
 
   void _showError(String message) {
-    Snackbar.error(message);
+    _ui.notifyError(message);
   }
 }
