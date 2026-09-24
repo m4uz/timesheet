@@ -9,7 +9,7 @@ enum TimetrackerItemStatus {
   String toString() {
     switch (this) {
       case TimetrackerItemStatus.staged:
-        return 'STA';
+        return 'staged';
       case TimetrackerItemStatus.saved:
         return 'saved';
       case TimetrackerItemStatus.error:
