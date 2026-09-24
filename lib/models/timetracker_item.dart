@@ -131,18 +131,6 @@ class TimetrackerItem extends TimesheetItem {
         ')';
   }
 
-  TimesheetItem toTimesheetItem() {
-    return TimesheetItem(
-      wtmId: wtmId,
-      from: from,
-      to: to,
-      subject: subject,
-      subjectName: subjectName,
-      category: category,
-      description: description,
-    );
-  }
-
   static DateTime _parseDateTime(dynamic value) {
     if (value == null) {
       return DateTime.fromMillisecondsSinceEpoch(0);

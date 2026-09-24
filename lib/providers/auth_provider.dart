@@ -125,11 +125,6 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> extendSession() async {
-    _dialogShown = false;
-    await refreshToken(showErrors: true);
-  }
-
   void logout() {
     _sessionManager.clearSession();
     notifyListeners();
