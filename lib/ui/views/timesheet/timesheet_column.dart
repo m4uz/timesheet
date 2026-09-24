@@ -45,7 +45,10 @@ enum TimesheetColumn {
         toHmString(item.to.difference(item.from)),
         style: style,
       ),
-      TimesheetColumn.subject => SelectableText(item.subject, style: style),
+      TimesheetColumn.subject => SelectableText(
+        item.subjectName.isNotEmpty ? item.subjectName : item.subject,
+        style: style,
+      ),
       TimesheetColumn.category => SelectableText(item.category, style: style),
       TimesheetColumn.description => SelectableText(
         item.description,

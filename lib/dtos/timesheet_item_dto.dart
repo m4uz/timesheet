@@ -8,6 +8,7 @@ class TimesheetItemDto {
   final String datetimeFrom;
   final String datetimeTo;
   final String subject;
+  final String subjectName;
   final String category;
   final String description;
   final bool highRate;
@@ -15,9 +16,9 @@ class TimesheetItemDto {
   final Map<String, dynamic> data;
   final String workerUuIdentity;
   final String authorUuIdentity;
-  final String subjectOU;
-  final String timesheetOU;
-  final String confirmerRole;
+  final String? subjectOU;
+  final String? timesheetOU;
+  final String? confirmerRole;
   final String confirmerUuIdentity;
   final String timesheetBC;
   final String monthlyEvaluation;
@@ -30,6 +31,7 @@ class TimesheetItemDto {
     required this.datetimeFrom,
     required this.datetimeTo,
     required this.subject,
+    this.subjectName = '',
     required this.category,
     required this.description,
     required this.highRate,
@@ -37,9 +39,9 @@ class TimesheetItemDto {
     required this.data,
     required this.workerUuIdentity,
     required this.authorUuIdentity,
-    required this.subjectOU,
-    required this.timesheetOU,
-    required this.confirmerRole,
+    this.subjectOU,
+    this.timesheetOU,
+    this.confirmerRole,
     required this.confirmerUuIdentity,
     required this.timesheetBC,
     required this.monthlyEvaluation,
@@ -48,7 +50,8 @@ class TimesheetItemDto {
     required this.sys,
   });
 
-  factory TimesheetItemDto.fromJson(Map<String, dynamic> json) => _$TimesheetItemDtoFromJson(json);
+  factory TimesheetItemDto.fromJson(Map<String, dynamic> json) =>
+      _$TimesheetItemDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$TimesheetItemDtoToJson(this);
 }
