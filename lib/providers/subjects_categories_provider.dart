@@ -60,6 +60,7 @@ class SubjectsCategoriesProvider extends ChangeNotifier {
     await WidgetsBinding.instance.endOfFrame;
 
     _isLoading = true;
+    _errorMsg = null;
     notifyListeners();
 
     final result = await _repository.getSubjectConfiguration(trimmed);
