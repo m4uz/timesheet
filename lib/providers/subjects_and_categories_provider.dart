@@ -4,7 +4,7 @@ import 'package:timesheet/models/result.dart';
 import 'package:timesheet/models/subject.dart';
 import 'package:timesheet/repositories/subjects_and_categories_repository.dart';
 
-class SubjectsCategoriesProvider extends ChangeNotifier {
+class SubjectsAndCategoriesProvider extends ChangeNotifier {
   final SubjectsAndCategoriesRepository _repository;
 
   bool _isLoading = false;
@@ -13,7 +13,7 @@ class SubjectsCategoriesProvider extends ChangeNotifier {
   String? _successMsg;
   String? _errorMsg;
 
-  SubjectsCategoriesProvider({
+  SubjectsAndCategoriesProvider({
     required this._repository,
   }) {
     loadSubjectsAndCategories();

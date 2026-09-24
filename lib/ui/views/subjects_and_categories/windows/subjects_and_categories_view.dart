@@ -2,17 +2,17 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/models/category.dart';
 import 'package:timesheet/models/subject.dart';
-import 'package:timesheet/providers/subjects_categories_provider.dart';
+import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
 
-class SubjectsCategoriesView extends StatefulWidget {
-  const SubjectsCategoriesView({super.key});
+class SubjectsAndCategoriesView extends StatefulWidget {
+  const SubjectsAndCategoriesView({super.key});
 
   @override
-  State<SubjectsCategoriesView> createState() => _SubjectsCategoriesViewState();
+  State<SubjectsAndCategoriesView> createState() => _SubjectsAndCategoriesViewState();
 }
 
-class _SubjectsCategoriesViewState extends State<SubjectsCategoriesView> {
+class _SubjectsAndCategoriesViewState extends State<SubjectsAndCategoriesView> {
   final TextEditingController _subjectsSearchController =
       TextEditingController();
   final TextEditingController _categoriesSearchController =
@@ -37,7 +37,7 @@ class _SubjectsCategoriesViewState extends State<SubjectsCategoriesView> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SubjectsCategoriesProvider>(
+    return Consumer<SubjectsAndCategoriesProvider>(
       builder: (context, provider, _) {
         final successMsg = provider.successMsg;
         final errorMsg = provider.errorMsg;

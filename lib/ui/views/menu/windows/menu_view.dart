@@ -5,8 +5,8 @@ import 'package:timesheet/providers/auth_provider.dart';
 import 'package:timesheet/ui/views/config/windows/config_view.dart' as win_config_view;
 import 'package:timesheet/ui/views/debug/windows/debug_view.dart' as win_debug_view;
 import 'package:timesheet/ui/views/menu/destinations.dart';
-import 'package:timesheet/ui/views/subjects_categories/windows/subjects_categories_view.dart'
-    as win_subjects_categories_view;
+import 'package:timesheet/ui/views/subjects_and_categories/windows/subjects_and_categories_view.dart'
+    as win_subjects_and_categories_view;
 import 'package:timesheet/ui/views/timesheet/windows/timesheet_view.dart' as win_timesheet_view;
 import 'package:timesheet/ui/views/timetracker/windows/timetracker_view.dart' as win_timetracker_view;
 
@@ -55,7 +55,7 @@ class _MenuViewState extends State<MenuView> {
     return switch (destination) {
       MenuDestination.timetracker => WindowsIcons.stopwatch,
       MenuDestination.timesheet => WindowsIcons.calendar,
-      MenuDestination.subjectsCategories => WindowsIcons.bulleted_list,
+      MenuDestination.subjectsAndCategories => WindowsIcons.bulleted_list,
       MenuDestination.config => WindowsIcons.settings,
       MenuDestination.debug => WindowsIcons.bug,
     };
@@ -65,8 +65,8 @@ class _MenuViewState extends State<MenuView> {
     return switch (destination) {
       MenuDestination.timetracker => const win_timetracker_view.TimetrackerView(),
       MenuDestination.timesheet => const win_timesheet_view.TimesheetView(),
-      MenuDestination.subjectsCategories =>
-        const win_subjects_categories_view.SubjectsCategoriesView(),
+      MenuDestination.subjectsAndCategories =>
+        const win_subjects_and_categories_view.SubjectsAndCategoriesView(),
       MenuDestination.config => const win_config_view.ConfigView(),
       MenuDestination.debug => const win_debug_view.DebugView(),
     };
