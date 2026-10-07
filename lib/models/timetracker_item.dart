@@ -87,6 +87,7 @@ class TimetrackerItem extends TimesheetItem {
       'datetimeFrom': from.toIso8601String(),
       'datetimeTo': to.toIso8601String(),
       'subject': subject,
+      'subjectName': subjectName,
       'category': category,
       'description': description,
       'status': status.toString(),
@@ -108,6 +109,7 @@ class TimetrackerItem extends TimesheetItem {
       from: _parseDateTime(map['datetimeFrom']),
       to: _parseDateTime(map['datetimeTo']),
       subject: (map['subject'] as String?) ?? '',
+      subjectName: (map['subjectName'] as String?) ?? '',
       category: (map['category'] as String?) ?? '',
       description: (map['description'] as String?) ?? '',
       status: TimetrackerItemStatus.fromString(map['status'] as String?),
@@ -124,6 +126,7 @@ class TimetrackerItem extends TimesheetItem {
         'from: $from, '
         'to: $to, '
         'subject: $subject, '
+        'subjectName: $subjectName, '
         'category: $category, '
         'description: $description, '
         'status: $status, '
