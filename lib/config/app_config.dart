@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 class AppConfig {
   static const _assetPath = 'assets/config.json';
   static const _fileName = 'config.json';
+  static const _timetrackerDbFileName = 'timetracker_v2.db';
 
   static late Map<String, dynamic> _config;
   static late Directory _appSupportDir;
@@ -28,7 +29,7 @@ class AppConfig {
   }
 
   static String get timetrackerDB =>
-      p.join(_appSupportDir.path, _config['timetrackerDB'] as String);
+      p.join(_appSupportDir.path, _timetrackerDbFileName);
   static Uri get oidcIssuerUrl => Uri.parse(_config['oidcIssuerUrl'] as String);
   static String get oidcClientId => _config['oidcClientId'] as String;
   static Uri get wtmBaseUrl => Uri.parse(_config['wtmBaseUrl'] as String);
