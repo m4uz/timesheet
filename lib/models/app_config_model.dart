@@ -23,7 +23,7 @@ class AppConfigModel {
     return AppConfigModel(
       logFile: (json['logFile'] as String?) ?? 'timesheet.log',
       logLevel: (json['logLevel'] as String?) ?? 'INFO',
-      timetrackerDB: (json['timetrackerDB'] as String?) ?? 'timetracker.db',
+      timetrackerDB: (json['timetrackerDB'] as String?) ?? 'timetracker_v2.db',
       oidcIssuerUrl: (json['oidcIssuerUrl'] as String?) ?? '',
       oidcClientId: (json['oidcClientId'] as String?) ?? '',
       wtmBaseUrl: (json['wtmBaseUrl'] as String?) ?? '',
