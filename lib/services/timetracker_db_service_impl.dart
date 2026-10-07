@@ -59,6 +59,7 @@ class TimetrackerDBServiceImpl implements TimetrackerDBService {
                                   datetimeFrom  TEXT,
                                   datetimeTo    TEXT,
                                   subject       TEXT,
+                                  subjectName   TEXT,
                                   category      TEXT,
                                   description   TEXT,
                                   status        TEXT,
@@ -66,7 +67,7 @@ class TimetrackerDBServiceImpl implements TimetrackerDBService {
                               )
                               """);
           },
-          version: 1,
+          version: 2,
         ),
       );
 

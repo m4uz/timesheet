@@ -1,7 +1,6 @@
 class AppConfigModel {
   final String logFile;
   final String logLevel;
-  final String timetrackerDB;
   final String oidcIssuerUrl;
   final String oidcClientId;
   final String wtmBaseUrl;
@@ -11,7 +10,6 @@ class AppConfigModel {
   const AppConfigModel({
     required this.logFile,
     required this.logLevel,
-    required this.timetrackerDB,
     required this.oidcIssuerUrl,
     required this.oidcClientId,
     required this.wtmBaseUrl,
@@ -23,7 +21,6 @@ class AppConfigModel {
     return AppConfigModel(
       logFile: (json['logFile'] as String?) ?? 'timesheet.log',
       logLevel: (json['logLevel'] as String?) ?? 'INFO',
-      timetrackerDB: (json['timetrackerDB'] as String?) ?? 'timetracker.db',
       oidcIssuerUrl: (json['oidcIssuerUrl'] as String?) ?? '',
       oidcClientId: (json['oidcClientId'] as String?) ?? '',
       wtmBaseUrl: (json['wtmBaseUrl'] as String?) ?? '',
@@ -36,7 +33,6 @@ class AppConfigModel {
     return {
       'logFile': logFile,
       'logLevel': logLevel,
-      'timetrackerDB': timetrackerDB,
       'oidcIssuerUrl': oidcIssuerUrl,
       'oidcClientId': oidcClientId,
       'wtmBaseUrl': wtmBaseUrl,
@@ -48,7 +44,6 @@ class AppConfigModel {
   AppConfigModel copyWith({
     String? logFile,
     String? logLevel,
-    String? timetrackerDB,
     String? oidcIssuerUrl,
     String? oidcClientId,
     String? wtmBaseUrl,
@@ -58,7 +53,6 @@ class AppConfigModel {
     return AppConfigModel(
       logFile: logFile ?? this.logFile,
       logLevel: logLevel ?? this.logLevel,
-      timetrackerDB: timetrackerDB ?? this.timetrackerDB,
       oidcIssuerUrl: oidcIssuerUrl ?? this.oidcIssuerUrl,
       oidcClientId: oidcClientId ?? this.oidcClientId,
       wtmBaseUrl: wtmBaseUrl ?? this.wtmBaseUrl,

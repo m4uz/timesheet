@@ -26,7 +26,6 @@ class ConfigView extends StatefulWidget {
 
 class _ConfigViewState extends State<ConfigView> {
   late TextEditingController _logFileController;
-  late TextEditingController _timetrackerDbController;
   late TextEditingController _oidcIssuerUrlController;
   late TextEditingController _oidcClientIdController;
   late TextEditingController _wtmBaseUrlController;
@@ -41,7 +40,6 @@ class _ConfigViewState extends State<ConfigView> {
   void initState() {
     super.initState();
     _logFileController = TextEditingController();
-    _timetrackerDbController = TextEditingController();
     _oidcIssuerUrlController = TextEditingController();
     _oidcClientIdController = TextEditingController();
     _wtmBaseUrlController = TextEditingController();
@@ -52,7 +50,6 @@ class _ConfigViewState extends State<ConfigView> {
   @override
   void dispose() {
     _logFileController.dispose();
-    _timetrackerDbController.dispose();
     _oidcIssuerUrlController.dispose();
     _oidcClientIdController.dispose();
     _wtmBaseUrlController.dispose();
@@ -64,7 +61,6 @@ class _ConfigViewState extends State<ConfigView> {
   void _loadFromConfig(AppConfigModel config) {
     _logFileController.text = config.logFile;
     _logLevel = config.logLevel;
-    _timetrackerDbController.text = config.timetrackerDB;
     _oidcIssuerUrlController.text = config.oidcIssuerUrl;
     _oidcClientIdController.text = config.oidcClientId;
     _wtmBaseUrlController.text = config.wtmBaseUrl;
@@ -76,7 +72,6 @@ class _ConfigViewState extends State<ConfigView> {
     return [
       config.logFile,
       config.logLevel,
-      config.timetrackerDB,
       config.oidcIssuerUrl,
       config.oidcClientId,
       config.wtmBaseUrl,
@@ -90,7 +85,6 @@ class _ConfigViewState extends State<ConfigView> {
     return current.copyWith(
       logFile: _logFileController.text.trim(),
       logLevel: _logLevel.trim(),
-      timetrackerDB: _timetrackerDbController.text.trim(),
       oidcIssuerUrl: _oidcIssuerUrlController.text.trim(),
       oidcClientId: _oidcClientIdController.text.trim(),
       wtmBaseUrl: _wtmBaseUrlController.text.trim(),
@@ -250,17 +244,6 @@ class _ConfigViewState extends State<ConfigView> {
                           },
                           isExpanded: true,
                         ),
-                      ),
-                      const Divider(),
-                      const SizedBox(height: 16),
-                      // --------------------------------------------------
-                      // Storage
-                      // --------------------------------------------------
-                      _buildSectionTitle(context, 'Storage'),
-                      _buildRow(
-                        context: context,
-                        label: 'Timetracker DB',
-                        value: TextBox(controller: _timetrackerDbController),
                       ),
                       const Divider(),
                       const SizedBox(height: 16),

@@ -22,11 +22,13 @@ void main() {
   });
 
   test('Test DB insert', () async {
-    final mockWtmId = '692f253a389b31000c5ce028';
+    final mockWtmId = '654f253a389b31000c5ce028';
     final mockItemIndex = 0;
     final mockFrom = DateTime.now();
     final mockTo = DateTime.now().add(Duration(hours: 3));
-    final mockSubject = 'vdt:VMH-AU:BYD.SO84.AKE~UE';
+    final mockSubject =
+        'https://plus4u.net/territory/a1b2c3d4e5f6789012345678abcdef01/userGate/artifactDetail?id=abcdef0123456789abcdef01';
+    final mockSubjectName = 'Mock subject';
     final mockCategory = 'PROJECT';
     final mockDescription = 'Work is the curse of the drinking classes.';
     final mockStatus = TimetrackerItemStatus.staged;
@@ -38,6 +40,7 @@ void main() {
       from: mockFrom,
       to: mockTo,
       subject: mockSubject,
+      subjectName: mockSubjectName,
       category: mockCategory,
       description: mockDescription,
       status: mockStatus,
@@ -62,6 +65,7 @@ void main() {
         expect(insertedItem.from, equals(mockFrom));
         expect(insertedItem.to, equals(mockTo));
         expect(insertedItem.subject, equals(mockSubject));
+        expect(insertedItem.subjectName, equals(mockSubjectName));
         expect(insertedItem.category, equals(mockCategory));
         expect(insertedItem.description, equals(mockDescription));
         expect(insertedItem.status, equals(mockStatus));
@@ -80,11 +84,13 @@ void main() {
     // Get existing item
     // --------------------------------------------------
 
-    final mockWtmId = '692f253a389b31000c5ce028';
+    final mockWtmId = '654f253a389b31000c5ce028';
     final mockItemIndex = 0;
     final mockFrom = DateTime.now();
     final mockTo = DateTime.now().add(Duration(hours: 3));
-    final mockSubject = 'vdt:VMH-AU:BYD.SO84.AKE~UE';
+    final mockSubject =
+        'https://plus4u.net/territory/a1b2c3d4e5f6789012345678abcdef01/userGate/artifactDetail?id=abcdef0123456789abcdef01';
+    final mockSubjectName = 'Mock subject';
     final mockCategory = 'PROJECT';
     final mockDescription = 'Work is the curse of the drinking classes.';
     final mockStatus = TimetrackerItemStatus.staged;
@@ -96,6 +102,7 @@ void main() {
       from: mockFrom,
       to: mockTo,
       subject: mockSubject,
+      subjectName: mockSubjectName,
       category: mockCategory,
       description: mockDescription,
       status: mockStatus,
@@ -123,6 +130,7 @@ void main() {
         expect(retrievedItem.from, equals(mockFrom));
         expect(retrievedItem.to, equals(mockTo));
         expect(retrievedItem.subject, equals(mockSubject));
+        expect(retrievedItem.subjectName, equals(mockSubjectName));
         expect(retrievedItem.category, equals(mockCategory));
         expect(retrievedItem.description, equals(mockDescription));
         expect(retrievedItem.status, equals(mockStatus));
@@ -169,11 +177,13 @@ void main() {
     // Get all saved items
     // --------------------------------------------------
 
-    final mockWtmId1 = '692f253a389b31000c5ce028';
-    final mockWtmId2 = '692f253a389b31000c5ce029';
+    final mockWtmId1 = '654f253a389b31000c5ce028';
+    final mockWtmId2 = '654f253a389b31000c5ce029';
     final mockFrom = DateTime.now();
     final mockTo = DateTime.now().add(Duration(hours: 3));
-    final mockSubject = 'vdt:VMH-AU:BYD.SO84.AKE~UE';
+    final mockSubject =
+        'https://plus4u.net/territory/a1b2c3d4e5f6789012345678abcdef01/userGate/artifactDetail?id=abcdef0123456789abcdef01';
+    final mockSubjectName = 'Mock subject';
     final mockCategory = 'PROJECT';
     final mockDescription = 'Work is the curse of the drinking classes.';
     final mockStatus = TimetrackerItemStatus.staged;
@@ -185,6 +195,7 @@ void main() {
       from: mockFrom,
       to: mockTo,
       subject: mockSubject,
+      subjectName: mockSubjectName,
       category: mockCategory,
       description: mockDescription,
       status: mockStatus,
@@ -197,6 +208,7 @@ void main() {
       from: mockFrom.add(Duration(hours: 3)),
       to: mockTo.add(Duration(hours: 3)),
       subject: mockSubject,
+      subjectName: mockSubjectName,
       category: mockCategory,
       description: mockDescription,
       status: TimetrackerItemStatus.saved,
@@ -225,12 +237,14 @@ void main() {
     // Insert batch of items
     // --------------------------------------------------
 
-    final mockWtmId1 = '692f253a389b31000c5ce028';
-    final mockWtmId2 = '692f253a389b31000c5ce029';
-    final mockWtmId3 = '692f253a389b31000c5ce030';
+    final mockWtmId1 = '654f253a389b31000c5ce028';
+    final mockWtmId2 = '654f253a389b31000c5ce029';
+    final mockWtmId3 = '654f253a389b31000c5ce030';
     final mockFrom = DateTime.now();
     final mockTo = DateTime.now().add(Duration(hours: 3));
-    final mockSubject = 'vdt:VMH-AU:BYD.SO84.AKE~UE';
+    final mockSubject =
+        'https://plus4u.net/territory/a1b2c3d4e5f6789012345678abcdef01/userGate/artifactDetail?id=abcdef0123456789abcdef01';
+    final mockSubjectName = 'Mock subject';
     final mockCategory = 'PROJECT';
     final mockDescription = 'Work is the curse of the drinking classes.';
     final mockStatus = TimetrackerItemStatus.staged;
@@ -243,6 +257,7 @@ void main() {
         from: mockFrom,
         to: mockTo,
         subject: mockSubject,
+        subjectName: mockSubjectName,
         category: mockCategory,
         description: mockDescription,
         status: mockStatus,
@@ -254,6 +269,7 @@ void main() {
         from: mockFrom.add(Duration(hours: 3)),
         to: mockTo.add(Duration(hours: 3)),
         subject: mockSubject,
+        subjectName: mockSubjectName,
         category: mockCategory,
         description: mockDescription,
         status: TimetrackerItemStatus.saved,
@@ -265,6 +281,7 @@ void main() {
         from: mockFrom.add(Duration(hours: 6)),
         to: mockTo.add(Duration(hours: 6)),
         subject: mockSubject,
+        subjectName: mockSubjectName,
         category: mockCategory,
         description: mockDescription,
         status: TimetrackerItemStatus.staged,
@@ -294,6 +311,7 @@ void main() {
           expect(insertedItem.from, equals(originalItem.from));
           expect(insertedItem.to, equals(originalItem.to));
           expect(insertedItem.subject, equals(originalItem.subject));
+          expect(insertedItem.subjectName, equals(originalItem.subjectName));
           expect(insertedItem.category, equals(originalItem.category));
           expect(insertedItem.description, equals(originalItem.description));
           expect(insertedItem.status, equals(originalItem.status));
@@ -335,12 +353,14 @@ void main() {
     // Update batch of items
     // --------------------------------------------------
 
-    final mockWtmId1 = '692f253a389b31000c5ce028';
-    final mockWtmId2 = '692f253a389b31000c5ce029';
-    final mockWtmId3 = '692f253a389b31000c5ce030';
+    final mockWtmId1 = '654f253a389b31000c5ce028';
+    final mockWtmId2 = '654f253a389b31000c5ce029';
+    final mockWtmId3 = '654f253a389b31000c5ce030';
     final mockFrom = DateTime.now();
     final mockTo = DateTime.now().add(Duration(hours: 3));
-    final mockSubject = 'vdt:VMH-AU:BYD.SO84.AKE~UE';
+    final mockSubject =
+        'https://plus4u.net/territory/a1b2c3d4e5f6789012345678abcdef01/userGate/artifactDetail?id=abcdef0123456789abcdef01';
+    final mockSubjectName = 'Mock subject';
     final mockCategory = 'PROJECT';
     final mockDescription = 'Work is the curse of the drinking classes.';
     final mockStatus = TimetrackerItemStatus.staged;
@@ -353,6 +373,7 @@ void main() {
         from: mockFrom,
         to: mockTo,
         subject: mockSubject,
+        subjectName: mockSubjectName,
         category: mockCategory,
         description: mockDescription,
         status: mockStatus,
@@ -364,6 +385,7 @@ void main() {
         from: mockFrom.add(Duration(hours: 3)),
         to: mockTo.add(Duration(hours: 3)),
         subject: mockSubject,
+        subjectName: mockSubjectName,
         category: mockCategory,
         description: mockDescription,
         status: TimetrackerItemStatus.saved,
@@ -375,6 +397,7 @@ void main() {
         from: mockFrom.add(Duration(hours: 6)),
         to: mockTo.add(Duration(hours: 6)),
         subject: mockSubject,
+        subjectName: mockSubjectName,
         category: mockCategory,
         description: mockDescription,
         status: TimetrackerItemStatus.staged,
@@ -396,7 +419,9 @@ void main() {
     final updatedTo1 = mockTo.add(Duration(hours: 1));
     final updatedTo2 = mockTo.add(Duration(hours: 4));
     final updatedTo3 = mockTo.add(Duration(hours: 7));
-    final updatedSubject = 'Updated subject';
+    final updatedSubject =
+        'https://plus4u.net/territory/f0e1d2c3b4a5968778695a4b3c2d1e0f/userGate/artifactDetail?id=fedcba9876543210fedcba98';
+    final updatedSubjectName = 'Updated mock subject';
     final updatedDescription = 'Updated description';
     final updatedStatus = TimetrackerItemStatus.saved;
     final updatedStatusMsg = 'Updated status message';
@@ -405,6 +430,7 @@ void main() {
       insertedItems[0].copyWith(
         to: updatedTo1,
         subject: updatedSubject,
+        subjectName: updatedSubjectName,
         description: updatedDescription,
         status: updatedStatus,
         statusMsg: updatedStatusMsg,
@@ -412,6 +438,7 @@ void main() {
       insertedItems[1].copyWith(
         to: updatedTo2,
         subject: updatedSubject,
+        subjectName: updatedSubjectName,
         description: updatedDescription,
         status: updatedStatus,
         statusMsg: updatedStatusMsg,
@@ -419,6 +446,7 @@ void main() {
       insertedItems[2].copyWith(
         to: updatedTo3,
         subject: updatedSubject,
+        subjectName: updatedSubjectName,
         description: updatedDescription,
         status: updatedStatus,
         statusMsg: updatedStatusMsg,
@@ -443,6 +471,7 @@ void main() {
           expect(updatedItem.from, equals(expectedItem.from));
           expect(updatedItem.to, equals(expectedItem.to));
           expect(updatedItem.subject, equals(expectedItem.subject));
+          expect(updatedItem.subjectName, equals(expectedItem.subjectName));
           expect(updatedItem.category, equals(expectedItem.category));
           expect(updatedItem.description, equals(expectedItem.description));
           expect(updatedItem.status, equals(expectedItem.status));
@@ -463,6 +492,7 @@ void main() {
               expect(item.from, equals(expectedItem.from));
               expect(item.to, equals(expectedItem.to));
               expect(item.subject, equals(expectedItem.subject));
+              expect(item.subjectName, equals(expectedItem.subjectName));
               expect(item.category, equals(expectedItem.category));
               expect(item.description, equals(expectedItem.description));
               expect(item.status, equals(expectedItem.status));
@@ -504,6 +534,7 @@ void main() {
       from: mockFrom,
       to: mockTo,
       subject: mockSubject,
+      subjectName: mockSubjectName,
       category: mockCategory,
       description: mockDescription,
       status: mockStatus,
@@ -527,11 +558,13 @@ void main() {
     // Update existing item
     // --------------------------------------------------
 
-    final mockWtmId = '692f253a389b31000c5ce028';
+    final mockWtmId = '654f253a389b31000c5ce028';
     final mockItemIndex = 0;
     final mockFrom = DateTime.now();
     final mockTo = DateTime.now().add(Duration(hours: 3));
-    final mockSubject = 'vdt:VMH-AU:BYD.SO84.AKE~UE';
+    final mockSubject =
+        'https://plus4u.net/territory/a1b2c3d4e5f6789012345678abcdef01/userGate/artifactDetail?id=abcdef0123456789abcdef01';
+    final mockSubjectName = 'Mock subject';
     final mockCategory = 'PROJECT';
     final mockDescription = 'Work is the curse of the drinking classes.';
     final mockStatus = TimetrackerItemStatus.staged;
@@ -543,6 +576,7 @@ void main() {
       from: mockFrom,
       to: mockTo,
       subject: mockSubject,
+      subjectName: mockSubjectName,
       category: mockCategory,
       description: mockDescription,
       status: mockStatus,
@@ -559,7 +593,9 @@ void main() {
     }
 
     final updatedTo = mockTo.add(Duration(hours: 1));
-    final updatedSubject = 'Updated subject';
+    final updatedSubject =
+        'https://plus4u.net/territory/f0e1d2c3b4a5968778695a4b3c2d1e0f/userGate/artifactDetail?id=fedcba9876543210fedcba98';
+    final updatedSubjectName = 'Updated mock subject';
     final updatedDescription = 'Updated description';
     final updatedStatus = TimetrackerItemStatus.saved;
     final updatedStatusMsg = 'Updated status message';
@@ -567,6 +603,7 @@ void main() {
     item = insertResult.value;
     item.to = updatedTo;
     item.subject = updatedSubject;
+    item.subjectName = updatedSubjectName;
     item.description = updatedDescription;
     item.status = updatedStatus;
     item.statusMsg = updatedStatusMsg;
@@ -583,6 +620,7 @@ void main() {
         expect(updatedItem.from, equals(mockFrom));
         expect(updatedItem.to, equals(updatedTo));
         expect(updatedItem.subject, equals(updatedSubject));
+        expect(updatedItem.subjectName, equals(updatedSubjectName));
         expect(updatedItem.category, equals(mockCategory));
         expect(updatedItem.description, equals(updatedDescription));
         expect(updatedItem.status, equals(updatedStatus));
@@ -605,6 +643,7 @@ void main() {
       from: mockFrom,
       to: mockTo,
       subject: mockSubject,
+      subjectName: mockSubjectName,
       category: mockCategory,
       description: mockDescription,
       status: mockStatus,
@@ -628,11 +667,13 @@ void main() {
     // Delete existing item
     // --------------------------------------------------
 
-    final mockWtmId = '692f253a389b31000c5ce028';
+    final mockWtmId = '654f253a389b31000c5ce028';
     final mockItemIndex = 0;
     final mockFrom = DateTime.now();
     final mockTo = DateTime.now().add(Duration(hours: 3));
-    final mockSubject = 'vdt:VMH-AU:BYD.SO84.AKE~UE';
+    final mockSubject =
+        'https://plus4u.net/territory/a1b2c3d4e5f6789012345678abcdef01/userGate/artifactDetail?id=abcdef0123456789abcdef01';
+    final mockSubjectName = 'Mock subject';
     final mockCategory = 'PROJECT';
     final mockDescription = 'Work is the curse of the drinking classes.';
     final mockStatus = TimetrackerItemStatus.staged;
@@ -644,6 +685,7 @@ void main() {
       from: mockFrom,
       to: mockTo,
       subject: mockSubject,
+      subjectName: mockSubjectName,
       category: mockCategory,
       description: mockDescription,
       status: mockStatus,
