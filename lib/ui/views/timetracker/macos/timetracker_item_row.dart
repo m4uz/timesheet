@@ -206,11 +206,16 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
               onChanged: _onSubjectChanged,
               onResultSelected: (value) {
                 final uri = value.searchKey;
+                final subject = widget.userConfigProvider.findByUri(uri);
+                final subjectName = subject?.name ?? '';
                 widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(subject: uri),
+                  widget.item.copyWith(
+                    subject: uri,
+                    subjectName: subjectName,
+                  ),
                 );
                 _fieldControllers.subject.text =
-                    widget.userConfigProvider.labelForUri(uri);
+                    subjectName.isNotEmpty ? subjectName : uri;
               },
             ),
           ),
@@ -267,9 +272,10 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
   }
 
   void _onSubjectChanged(String value) {
-    if (value.isEmpty && widget.item.subject.isNotEmpty) {
+    if (value.isEmpty &&
+        (widget.item.subject.isNotEmpty || widget.item.subjectName.isNotEmpty)) {
       widget.timeTrackerProvider.updateItem(
-        widget.item.copyWith(subject: ''),
+        widget.item.copyWith(subject: '', subjectName: ''),
       );
     }
 
@@ -287,7 +293,7 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
         return;
       }
       await timeTrackerProvider.updateItem(
-        item.copyWith(subject: subject.uri),
+        item.copyWith(subject: subject.uri, subjectName: subject.name),
       );
     });
   }
@@ -295,20 +301,13 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
   @override
   void initState() {
     super.initState();
-    _fieldControllers.initFrom(
-      widget.item,
-      subjectLabel: widget.userConfigProvider.labelForUri,
-    );
+    _fieldControllers.initFrom(widget.item);
   }
 
   @override
   void didUpdateWidget(TimetrackerItemRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _fieldControllers.syncFrom(
-      widget.item,
-      oldWidget.item,
-      subjectLabel: widget.userConfigProvider.labelForUri,
-    );
+    _fieldControllers.syncFrom(widget.item, oldWidget.item);
   }
 
   @override
