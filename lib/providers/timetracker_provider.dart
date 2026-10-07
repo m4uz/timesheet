@@ -26,6 +26,7 @@ class TimetrackerProvider extends ChangeNotifier {
     return List.unmodifiable(
       _items.where((item) {
         return item.subject.trim().toLowerCase().contains(normalizedFilter) ||
+            item.subjectName.trim().toLowerCase().contains(normalizedFilter) ||
             item.description.trim().toLowerCase().contains(normalizedFilter);
       }),
     );
