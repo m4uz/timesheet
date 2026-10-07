@@ -10,7 +10,9 @@ class TimesheetSummaryFooter extends StatelessWidget {
     required this.dividerColor,
   });
 
-  static const double reservedHeight = 36.0;
+  // Match TimetrackerSummaryFooter: padding (8×2) + text line must fit inside
+  // PinnedFooterLayout's fixed height without clipping glyphs.
+  static const double reservedHeight = 48.0;
 
   final int itemCount;
   final Duration totalDuration;
