@@ -125,6 +125,11 @@ class _SubjectsAndCategoriesViewState extends State<SubjectsAndCategoriesView> {
                                     subject.name.isNotEmpty
                                     ? subject.name
                                     : subject.uri,
+                                matchesSearch: (subject, query) =>
+                                    subject.name.toLowerCase().contains(
+                                      query,
+                                    ) ||
+                                    subject.uri.toLowerCase().contains(query),
                                 isDisabled: provider.isLoading,
                                 onItemToggle: (subject) {
                                   setState(() {
@@ -243,6 +248,7 @@ class ListPanel<T> extends StatelessWidget {
     required this.selectedItems,
     required this.itemToString,
     required this.onItemToggle,
+    this.matchesSearch,
     this.isDisabled = false,
     this.onSelectAll,
     this.onDeleteSelected,
@@ -254,6 +260,7 @@ class ListPanel<T> extends StatelessWidget {
   final List<T> items;
   final Set<T> selectedItems;
   final String Function(T) itemToString;
+  final bool Function(T item, String query)? matchesSearch;
   final Function(T) onItemToggle;
   final bool isDisabled;
   final Function(List<T>)? onSelectAll;
@@ -266,9 +273,12 @@ class ListPanel<T> extends StatelessWidget {
     final filteredItems = searchText.isEmpty
         ? items
         : items
-              .where(
-                (item) => itemToString(item).toLowerCase().contains(searchText),
-              )
+              .where((item) {
+                if (matchesSearch != null) {
+                  return matchesSearch!(item, searchText);
+                }
+                return itemToString(item).toLowerCase().contains(searchText);
+              })
               .toList();
 
     return Container(

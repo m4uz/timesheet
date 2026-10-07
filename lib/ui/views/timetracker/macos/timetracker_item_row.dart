@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:macos_ui/macos_ui.dart';
+import 'package:timesheet/models/subject.dart';
 import 'package:timesheet/models/timetracker_item.dart';
 import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
@@ -191,7 +192,8 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
               results: widget.userConfigProvider.subjects
                   .map(
                     (e) => SearchResultItem(
-                      e.uri,
+                      // Include name and URI so MacosSearchField matches either.
+                      e.name.isNotEmpty ? '${e.name} ${e.uri}' : e.uri,
                       child: Text(
                         e.name.isNotEmpty ? e.name : e.uri,
                         overflow: TextOverflow.ellipsis,
@@ -205,17 +207,25 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
               placeholder: 'Subject',
               onChanged: _onSubjectChanged,
               onResultSelected: (value) {
-                final uri = value.searchKey;
-                final subject = widget.userConfigProvider.findByUri(uri);
-                final subjectName = subject?.name ?? '';
+                Subject? subject;
+                for (final s in widget.userConfigProvider.subjects) {
+                  if (value.searchKey.contains(s.uri)) {
+                    subject = s;
+                    break;
+                  }
+                }
+                if (subject == null) {
+                  return;
+                }
+                final subjectName = subject.name;
                 widget.timeTrackerProvider.updateItem(
                   widget.item.copyWith(
-                    subject: uri,
+                    subject: subject.uri,
                     subjectName: subjectName,
                   ),
                 );
                 _fieldControllers.subject.text =
-                    subjectName.isNotEmpty ? subjectName : uri;
+                    subjectName.isNotEmpty ? subjectName : subject.uri;
               },
             ),
           ),

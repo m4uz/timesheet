@@ -185,6 +185,17 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
             },
             clearButtonEnabled: false,
             placeholder: 'Subject',
+            sorter: (text, items) {
+              final query = text.trim().toLowerCase();
+              if (query.isEmpty) {
+                return items;
+              }
+              return items.where((item) {
+                final label = item.label.toLowerCase();
+                final uri = (item.value ?? '').toLowerCase();
+                return label.contains(query) || uri.contains(query);
+              }).toList();
+            },
             items: widget.userConfigProvider.subjects
                 .map(
                   (s) => AutoSuggestBoxItem<String>(
