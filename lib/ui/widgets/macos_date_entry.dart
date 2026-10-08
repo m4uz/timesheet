@@ -1,9 +1,10 @@
 import 'package:cupertino_calendar_picker/cupertino_calendar_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:macos_ui/macos_ui.dart';
-import 'package:timesheet/ui/widgets/segmented_entry/entry_segment.dart';
+import 'package:timesheet/ui/widgets/segmented_entry/date_entry_controller.dart';
 import 'package:timesheet/ui/widgets/segmented_entry/macos_segmented_field_chrome.dart';
 import 'package:timesheet/ui/widgets/segmented_entry/segmented_entry.dart';
+import 'package:timesheet/ui/widgets/segmented_entry/segmented_field_metrics.dart';
 
 /// A compact macOS-styled date entry: typeable `d.M` segments plus a calendar
 /// button that opens the existing Cupertino calendar overlay.
@@ -44,10 +45,7 @@ class MacosDateEntryState extends State<MacosDateEntry> {
   final GlobalKey<SegmentedEntryState> _segmentedKey =
       GlobalKey<SegmentedEntryState>();
 
-  late NumericSegment _daySegment;
-  late NumericSegment _monthSegment;
-  SegmentedEntryController? _entryController;
-  bool _cancelOnChanged = false;
+  late final DateEntryController _controller;
 
   /// Focus the day segment (`DD`).
   void focusDaySegment() => _segmentedKey.currentState?.focusSegment(0);
@@ -58,154 +56,21 @@ class MacosDateEntryState extends State<MacosDateEntry> {
   @override
   void initState() {
     super.initState();
-    _createSegments();
+    _controller = DateEntryController(initialDate: widget.date);
   }
 
   @override
   void didUpdateWidget(covariant MacosDateEntry oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!_isSameDate(oldWidget.date, widget.date)) {
-      _syncFromDate(widget.date);
+    if (!DateEntryController.isSameDate(oldWidget.date, widget.date)) {
+      _controller.syncFromDate(widget.date);
     }
   }
 
   @override
   void dispose() {
-    _daySegment.dispose();
-    _monthSegment.dispose();
-    _entryController?.dispose();
+    _controller.dispose();
     super.dispose();
-  }
-
-  bool _isSameDate(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
-
-  void _createSegments() {
-    _daySegment = NumericSegment.fixed(
-      length: 2,
-      initialValue: widget.date.day,
-      placeholderLetter: '-',
-      minValue: 1,
-      maxValue: 31,
-      arrowStep: 1,
-      onValueChange: _onDayValueChange,
-      onInputCallback: _onDayDigitInput,
-      onUpArrowKeyCallback: _onDayArrow,
-      onDownArrowKeyCallback: _onDayArrow,
-    );
-
-    _monthSegment = NumericSegment.fixed(
-      length: 2,
-      initialValue: widget.date.month,
-      placeholderLetter: '-',
-      minValue: 1,
-      maxValue: 12,
-      arrowStep: 1,
-      onValueChange: clampSegment(1, 12),
-      onInputCallback: _onMonthDigitInput,
-    );
-
-    _entryController = SegmentedEntryController(length: 2);
-  }
-
-  /// Allow transient `0` while the day segment is still being typed.
-  int? _onDayValueChange(String? input, int? value, int? oldValue) {
-    if (value == null) return oldValue ?? 1;
-    if (value > 31) return 31;
-    if (value < 1) {
-      if (input != null && input.length < 2) return value;
-      return 1;
-    }
-    return value;
-  }
-
-  int? _onDayDigitInput(String? input, int? value, int? oldValue) {
-    if (value == null) return oldValue;
-    if (value > 31) return 31;
-    if (value < 1) {
-      if (input != null && input.length < 2) return value;
-      return 1;
-    }
-    if (input?.length == 1 && value > 3 && value < 10) {
-      _entryController?.maybeSelectNextSegment();
-    }
-    return value;
-  }
-
-  int? _onMonthDigitInput(String? input, int? value, int? oldValue) {
-    if (value == null) return oldValue;
-    if (value > 12) return 12;
-    if (value < 1) {
-      if (input != null && input.length < 2) return value;
-      return 1;
-    }
-    if (input?.length == 1 && value > 1 && value < 10) {
-      _entryController?.maybeSelectNextSegment();
-    }
-    return value;
-  }
-
-  int? _onDayArrow(String? input, int? value, int? oldValue) {
-    if (value == null) return oldValue ?? 1;
-    final month = _monthSegment.value ?? widget.date.month;
-    final year = widget.date.year;
-    final maxDay = DateTime(year, month + 1, 0).day;
-    if (value > maxDay) return 1;
-    if (value < 1) return maxDay;
-    return value;
-  }
-
-  void _syncFromDate(DateTime date) {
-    _cancelOnChanged = true;
-    _daySegment.value = date.day;
-    _monthSegment.value = date.month;
-    _cancelOnChanged = false;
-  }
-
-  DateTime? _tryParse() {
-    final day = _daySegment.value;
-    final month = _monthSegment.value;
-    if (day == null || month == null) return null;
-    // Incomplete typing (e.g. day still "0") — do not emit yet.
-    if (day < 1 || month < 1) return null;
-
-    final year = widget.date.year;
-    final maxDay = DateTime(year, month + 1, 0).day;
-    final safeDay = day.clamp(1, maxDay);
-
-    final candidate = DateTime(year, month, safeDay);
-    if (candidate.isBefore(_dateOnly(widget.minimumDate)) ||
-        candidate.isAfter(_dateOnly(widget.maximumDate))) {
-      return null;
-    }
-    return candidate;
-  }
-
-  DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
-
-  DateTime _withPreservedTime(DateTime date) => date.copyWith(
-    hour: widget.date.hour,
-    minute: widget.date.minute,
-    second: widget.date.second,
-    millisecond: widget.date.millisecond,
-    microsecond: widget.date.microsecond,
-  );
-
-  void _emitChanged() {
-    if (_cancelOnChanged) return;
-    final parsed = _tryParse();
-    if (parsed == null) return;
-
-    // Keep the day segment in sync if we clamped for month length.
-    if (_daySegment.value != parsed.day) {
-      _cancelOnChanged = true;
-      _daySegment.value = parsed.day;
-      _cancelOnChanged = false;
-    }
-
-    if (_isSameDate(parsed, widget.date)) return;
-
-    widget.onChanged?.call(_withPreservedTime(parsed));
   }
 
   Future<void> _openCalendar() async {
@@ -220,13 +85,12 @@ class MacosDateEntryState extends State<MacosDateEntry> {
       mode: CupertinoCalendarMode.date,
     );
     if (selected == null || !mounted) return;
-    if (_isSameDate(selected, widget.date)) return;
-
-    _syncFromDate(selected);
-    widget.onChanged?.call(_withPreservedTime(selected));
+    _controller.applyPickedDate(
+      selected,
+      currentDate: widget.date,
+      onChanged: widget.onChanged,
+    );
   }
-
-  String get _fieldValue => '${_daySegment.text}.${_monthSegment.text}.';
 
   @override
   Widget build(BuildContext context) {
@@ -237,18 +101,23 @@ class MacosDateEntryState extends State<MacosDateEntry> {
       key: _anchorKey,
       enabled: widget.enabled,
       semanticLabel: widget.semanticLabel,
-      fieldValue: _fieldValue,
-      fieldWidth: MacosSegmentedFieldChrome.dateSegmentClusterWidth,
+      fieldValue: _controller.fieldValue,
+      fieldWidth: SegmentedFieldMetrics.dateSegmentClusterWidth,
       buttonSemanticLabel: widget.calendarSemanticLabel,
       buttonIcon: CupertinoIcons.calendar,
       onButtonPressed: _openCalendar,
       segmentedField: SegmentedEntry(
         key: _segmentedKey,
-        controller: _entryController,
-        segments: [_daySegment, _monthSegment],
+        controller: _controller.entryController,
+        segments: _controller.segments,
         delimiters: const ['.', '.'],
         style: fieldStyle,
-        onChanged: (_) => _emitChanged(),
+        onChanged: (_) => _controller.emitChanged(
+          currentDate: widget.date,
+          minimumDate: widget.minimumDate,
+          maximumDate: widget.maximumDate,
+          onChanged: widget.onChanged,
+        ),
       ),
     );
   }

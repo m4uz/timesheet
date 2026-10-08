@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:timesheet/models/subject.dart';
@@ -10,10 +9,11 @@ import 'package:timesheet/models/timetracker_item.dart';
 import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/ui/views/timetracker/timetracker_item_field_controllers.dart';
+import 'package:timesheet/ui/views/timetracker/timetracker_tab_navigation.dart';
 import 'package:timesheet/ui/widgets/macos_date_entry.dart';
 import 'package:timesheet/ui/widgets/macos_time_entry.dart';
 import 'package:timesheet/ui/widgets/overflow_clip_box.dart';
-import 'package:timesheet/ui/widgets/segmented_entry/macos_segmented_field_chrome.dart';
+import 'package:timesheet/ui/widgets/segmented_entry/segmented_field_metrics.dart';
 import 'package:timesheet/ui/widgets/weekday_label.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
@@ -44,10 +44,8 @@ class TimetrackerItemRow extends StatefulWidget {
 class TimetrackerItemRowState extends State<TimetrackerItemRow> {
   static const double _btnPrefW = 30.0;
   static const double _dayPrefW = 40.0;
-  static const double _datePickerPrefW =
-      MacosSegmentedFieldChrome.dateColumnWidth;
-  static const double _timePickerPrefW =
-      MacosSegmentedFieldChrome.timeColumnWidth;
+  static const double _datePickerPrefW = SegmentedFieldMetrics.dateColumnWidth;
+  static const double _timePickerPrefW = SegmentedFieldMetrics.timeColumnWidth;
   static const double _workedPrefW = 55.0;
   static const double _spacingPrefW = 8.0;
   static const double _flexMinW = 120.0;
@@ -67,7 +65,8 @@ class TimetrackerItemRowState extends State<TimetrackerItemRow> {
   late final FocusNode _descriptionFocusNode;
   Timer? _subjectFetchDebounce;
 
-  /// Focus the month segment of this row's date field.
+  /// Focus the month segment (`MM`) — used when Tabbing from the previous
+  /// row's description so the caret lands mid-date for quick edits.
   void focusDateMonth() {
     final state = _dateEntryKey.currentState;
     if (state == null) return;
@@ -83,19 +82,10 @@ class TimetrackerItemRowState extends State<TimetrackerItemRow> {
   }
 
   KeyEventResult _onDescriptionKey(FocusNode node, KeyEvent event) {
-    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
-      return KeyEventResult.ignored;
-    }
-    if (event.logicalKey != LogicalKeyboardKey.tab) {
-      return KeyEventResult.ignored;
-    }
-    if (HardwareKeyboard.instance.isShiftPressed) {
-      return KeyEventResult.ignored;
-    }
-    final handler = widget.onTabFromDescription;
-    if (handler == null) return KeyEventResult.ignored;
-    unawaited(handler());
-    return KeyEventResult.handled;
+    return onDescriptionTabKeyEvent(
+      event,
+      onTabFromDescription: widget.onTabFromDescription,
+    );
   }
 
   @override

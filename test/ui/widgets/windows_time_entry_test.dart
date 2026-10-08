@@ -1,42 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart' show TextField, TimeOfDay;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:macos_ui/macos_ui.dart';
-import 'package:timesheet/ui/widgets/macos_time_entry.dart';
-import 'package:timesheet/utils/time_of_day_utils.dart';
+import 'package:timesheet/ui/widgets/windows_time_entry.dart';
 
 void main() {
-  group('snapTimeToMinuteInterval', () {
-    test('returns time unchanged when interval is 1', () {
-      const time = TimeOfDay(hour: 8, minute: 7);
-      expect(snapTimeToMinuteInterval(time, 1), time);
-    });
-
-    test('snaps to nearest 15-minute step', () {
-      expect(
-        snapTimeToMinuteInterval(const TimeOfDay(hour: 8, minute: 7), 15),
-        const TimeOfDay(hour: 8, minute: 0),
-      );
-      expect(
-        snapTimeToMinuteInterval(const TimeOfDay(hour: 8, minute: 8), 15),
-        const TimeOfDay(hour: 8, minute: 15),
-      );
-    });
-  });
-
-  group('MacosTimeEntry', () {
+  group('WindowsTimeEntry', () {
     Widget wrap(Widget child) {
-      return MacosApp(
-        home: MacosWindow(
-          child: MacosScaffold(
-            children: [
-              ContentArea(
-                builder: (context, _) => Center(child: child),
-              ),
-            ],
-          ),
-        ),
-      );
+      return FluentApp(home: ScaffoldPage(content: Center(child: child)));
     }
 
     testWidgets('renders initial time', (tester) async {
@@ -44,7 +15,7 @@ void main() {
         wrap(
           const SizedBox(
             width: 100,
-            child: MacosTimeEntry(time: TimeOfDay(hour: 14, minute: 30)),
+            child: WindowsTimeEntry(time: TimeOfDay(hour: 14, minute: 30)),
           ),
         ),
       );
@@ -57,7 +28,7 @@ void main() {
         wrap(
           const SizedBox(
             width: 100,
-            child: MacosTimeEntry(
+            child: WindowsTimeEntry(
               time: TimeOfDay(hour: 14, minute: 30),
               semanticLabel: 'Start time',
               pickerSemanticLabel: 'Open start time picker',
@@ -88,7 +59,7 @@ void main() {
         wrap(
           SizedBox(
             width: 100,
-            child: MacosTimeEntry(
+            child: WindowsTimeEntry(
               time: const TimeOfDay(hour: 14, minute: 30),
               onChanged: (_) => calls++,
             ),
@@ -97,7 +68,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byType(MacosTimeEntry));
+      await tester.tap(find.byType(WindowsTimeEntry));
       await tester.pumpAndSettle();
       expect(calls, 0);
     });
@@ -108,7 +79,7 @@ void main() {
         wrap(
           SizedBox(
             width: 100,
-            child: MacosTimeEntry(
+            child: WindowsTimeEntry(
               time: const TimeOfDay(hour: 10, minute: 0),
               minuteInterval: 15,
               onChanged: (t) => emitted = t,

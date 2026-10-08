@@ -1,19 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart' show TextField;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:macos_ui/macos_ui.dart';
-import 'package:timesheet/ui/widgets/macos_date_entry.dart';
+import 'package:timesheet/ui/widgets/windows_date_entry.dart';
 
 void main() {
   Widget wrap(Widget child) {
-    return MacosApp(
-      home: MacosWindow(
-        child: MacosScaffold(
-          children: [
-            ContentArea(builder: (context, _) => Center(child: child)),
-          ],
-        ),
-      ),
-    );
+    return FluentApp(home: ScaffoldPage(content: Center(child: child)));
   }
 
   testWidgets('renders day.month from initial date', (tester) async {
@@ -21,7 +13,7 @@ void main() {
       wrap(
         SizedBox(
           width: 120,
-          child: MacosDateEntry(
+          child: WindowsDateEntry(
             date: DateTime(2026, 10, 7),
             minimumDate: DateTime(2025, 1, 1),
             maximumDate: DateTime(2027, 12, 31),
@@ -40,7 +32,7 @@ void main() {
       wrap(
         SizedBox(
           width: 120,
-          child: MacosDateEntry(
+          child: WindowsDateEntry(
             date: DateTime(2026, 10, 7),
             minimumDate: DateTime(2025, 1, 1),
             maximumDate: DateTime(2027, 12, 31),
@@ -73,7 +65,7 @@ void main() {
       wrap(
         SizedBox(
           width: 120,
-          child: MacosDateEntry(
+          child: WindowsDateEntry(
             date: DateTime(2026, 10, 7),
             minimumDate: DateTime(2025, 1, 1),
             maximumDate: DateTime(2027, 12, 31),

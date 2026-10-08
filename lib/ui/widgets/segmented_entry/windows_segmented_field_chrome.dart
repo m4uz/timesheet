@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:macos_ui/macos_ui.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart' show Theme, TextSelectionThemeData;
 import 'package:timesheet/ui/widgets/segmented_entry/segmented_field_metrics.dart';
 
-/// Shared visual chrome for macOS segmented date/time entries.
-class MacosSegmentedFieldChrome extends StatelessWidget {
-  const MacosSegmentedFieldChrome({
+/// Shared visual chrome for Windows segmented date/time entries.
+class WindowsSegmentedFieldChrome extends StatelessWidget {
+  const WindowsSegmentedFieldChrome({
     super.key,
     required this.child,
     this.enabled = true,
@@ -24,22 +24,18 @@ class MacosSegmentedFieldChrome extends StatelessWidget {
   final bool enabled;
   final EdgeInsetsGeometry padding;
 
-  static Color borderColor(MacosThemeData theme) =>
-      theme.brightness == Brightness.dark
-      ? const Color(0xFF3F3F3F)
-      : const Color(0xFFD0D0D0);
+  static Color borderColor(FluentThemeData theme) =>
+      theme.resources.controlStrokeColorDefault;
 
-  static Color fillColor(MacosThemeData theme) =>
-      theme.brightness == Brightness.dark
-      ? const Color(0xFF2B2B2B)
-      : const Color(0xFFF5F5F5);
+  static Color fillColor(FluentThemeData theme) =>
+      theme.resources.controlFillColorDefault;
 
-  static Color selectionColor(MacosThemeData theme) =>
-      theme.primaryColor.withValues(alpha: 0.35);
+  static Color selectionColor(FluentThemeData theme) =>
+      theme.accentColor.withValues(alpha: 0.35);
 
   @override
   Widget build(BuildContext context) {
-    final theme = MacosTheme.of(context);
+    final theme = FluentTheme.of(context);
 
     return Opacity(
       opacity: enabled ? 1 : 0.5,
@@ -49,8 +45,8 @@ class MacosSegmentedFieldChrome extends StatelessWidget {
           padding: padding,
           decoration: BoxDecoration(
             color: fillColor(theme),
-            borderRadius: BorderRadius.circular(5),
-            border: Border.all(color: borderColor(theme)),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: borderColor(theme), width: 0.5),
           ),
           child: child,
         ),
@@ -60,8 +56,11 @@ class MacosSegmentedFieldChrome extends StatelessWidget {
 }
 
 /// Typed segmented cluster + pointer-only overlay button (calendar/clock).
-class MacosSegmentedFieldWithButton extends StatelessWidget {
-  const MacosSegmentedFieldWithButton({
+///
+/// Uses [HoverButton] instead of Fluent [IconButton]/[BaseButton] so the
+/// control stays safe under Material [ReorderableListView] drag proxies.
+class WindowsSegmentedFieldWithButton extends StatelessWidget {
+  const WindowsSegmentedFieldWithButton({
     super.key,
     required this.enabled,
     required this.semanticLabel,
@@ -84,12 +83,12 @@ class MacosSegmentedFieldWithButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = MacosTheme.of(context);
-    final selectionColor = MacosSegmentedFieldChrome.selectionColor(theme);
+    final theme = FluentTheme.of(context);
+    final selectionColor = WindowsSegmentedFieldChrome.selectionColor(theme);
 
-    return MacosSegmentedFieldChrome(
+    return WindowsSegmentedFieldChrome(
       enabled: enabled,
-      padding: MacosSegmentedFieldChrome.fieldWithButtonPadding,
+      padding: WindowsSegmentedFieldChrome.fieldWithButtonPadding,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -115,21 +114,25 @@ class MacosSegmentedFieldWithButton extends StatelessWidget {
           ),
           // Mouse/pointer only — keep Tab cycling through typed fields.
           ExcludeFocus(
-            child: MacosIconButton(
-              backgroundColor: MacosColors.transparent,
-              hoverColor: theme.primaryColor.withValues(alpha: 0.15),
-              padding: const EdgeInsets.all(2),
-              boxConstraints: const BoxConstraints.tightFor(
-                width: 22,
-                height: 22,
+            child: Semantics(
+              button: true,
+              enabled: enabled,
+              label: buttonSemanticLabel,
+              child: HoverButton(
+                onPressed: enabled ? onButtonPressed : null,
+                builder: (context, states) {
+                  final resources = theme.resources;
+                  final color = !enabled
+                      ? resources.textFillColorDisabled
+                      : states.isHovered || states.isPressed
+                      ? theme.accentColor
+                      : resources.textFillColorSecondary;
+                  return Padding(
+                    padding: const EdgeInsets.all(2),
+                    child: Icon(buttonIcon, size: 14, color: color),
+                  );
+                },
               ),
-              semanticLabel: buttonSemanticLabel,
-              icon: MacosIcon(
-                buttonIcon,
-                size: 14,
-                color: theme.primaryColor,
-              ),
-              onPressed: onButtonPressed,
             ),
           ),
         ],

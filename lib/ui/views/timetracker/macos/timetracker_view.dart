@@ -11,6 +11,7 @@ import 'package:timesheet/ui/platform/macos/toolbar_text_field.dart'
 import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/ui/views/timetracker/macos/timetracker_item_row.dart';
 import 'package:timesheet/ui/views/timetracker/timetracker_summary_footer.dart';
+import 'package:timesheet/ui/views/timetracker/timetracker_tab_navigation.dart';
 import 'package:timesheet/ui/widgets/pinned_footer_layout.dart';
 
 class TimetrackerView extends StatefulWidget {
@@ -22,33 +23,20 @@ class TimetrackerView extends StatefulWidget {
 
 class _TimetrackerViewState extends State<TimetrackerView> {
   final TextEditingController _filterController = TextEditingController();
-  final Map<int, GlobalKey<TimetrackerItemRowState>> _rowKeys = {};
-
-  GlobalKey<TimetrackerItemRowState> _rowKeyFor(int itemId) {
-    return _rowKeys.putIfAbsent(
-      itemId,
-      () => GlobalKey<TimetrackerItemRowState>(),
-    );
-  }
+  final _rowKeys = TimetrackerRowKeyMap<TimetrackerItemRowState>();
 
   Future<void> _onTabFromDescription({
     required TimetrackerProvider provider,
     required int index,
-  }) async {
-    final isLast = index >= provider.items.length - 1;
-    if (isLast) {
-      final beforeCount = provider.items.length;
-      await provider.addItem();
-      if (!mounted || provider.items.length <= beforeCount) return;
-      final newItem = provider.items.last;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _rowKeyFor(newItem.id).currentState?.focusDateMonth();
-      });
-      return;
-    }
-
-    final nextItem = provider.items[index + 1];
-    _rowKeyFor(nextItem.id).currentState?.focusDateMonth();
+  }) {
+    return handleTimetrackerTabFromDescription(
+      provider: provider,
+      index: index,
+      isMounted: () => mounted,
+      focusDateMonth: (itemId) {
+        _rowKeys.forId(itemId).currentState?.focusDateMonth();
+      },
+    );
   }
 
   @override
@@ -199,15 +187,14 @@ class _TimetrackerViewState extends State<TimetrackerView> {
     required TimetrackerProvider timeTrackerProvider,
     required SubjectsAndCategoriesProvider userConfigProvider,
   }) {
-    final itemIds = timeTrackerProvider.items.map((e) => e.id).toSet();
-    _rowKeys.removeWhere((id, _) => !itemIds.contains(id));
+    _rowKeys.pruneTo(timeTrackerProvider.items.map((e) => e.id));
 
     return ReorderableListView(
       buildDefaultDragHandles: false,
       children: [
         for (int index = 0; index < timeTrackerProvider.items.length; index++)
           TimetrackerItemRow(
-            key: _rowKeyFor(timeTrackerProvider.items[index].id),
+            key: _rowKeys.forId(timeTrackerProvider.items[index].id),
             timeTrackerProvider: timeTrackerProvider,
             userConfigProvider: userConfigProvider,
             index: index,

@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:timesheet/ui/widgets/macos_date_entry.dart';
-import 'package:timesheet/ui/widgets/segmented_entry/macos_segmented_field_chrome.dart';
+import 'package:timesheet/ui/widgets/segmented_entry/segmented_field_metrics.dart';
 
 class CalendarToolbarButton extends ToolbarItem {
   const CalendarToolbarButton({
@@ -36,7 +36,7 @@ class CalendarToolbarButton extends ToolbarItem {
             const SizedBox(width: 8.0),
           ],
           SizedBox(
-            width: MacosSegmentedFieldChrome.dateColumnWidth,
+            width: SegmentedFieldMetrics.dateColumnWidth,
             child: MacosDateEntry(
               date: date,
               minimumDate: minimumDate,
