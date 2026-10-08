@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:macos_ui/macos_ui.dart';
+import 'package:timesheet/ui/platform/macos/macos_layout.dart';
 import 'package:timesheet/ui/widgets/macos_date_entry.dart';
 import 'package:timesheet/ui/widgets/segmented_entry/segmented_field_metrics.dart';
 
@@ -22,7 +23,7 @@ class CalendarToolbarButton extends ToolbarItem {
   @override
   Widget build(BuildContext context, ToolbarItemDisplayMode displayMode) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: MacosLayout.toolbarItemPadding,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -33,7 +34,7 @@ class CalendarToolbarButton extends ToolbarItem {
                 color: MacosColors.systemGrayColor,
               ),
             ),
-            const SizedBox(width: 8.0),
+            const SizedBox(width: MacosLayout.space8),
           ],
           SizedBox(
             width: SegmentedFieldMetrics.dateColumnWidth,

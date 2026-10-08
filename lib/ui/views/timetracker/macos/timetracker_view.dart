@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
+import 'package:timesheet/ui/platform/macos/macos_layout.dart';
 import 'package:timesheet/ui/platform/macos/toolbar_text_field.dart'
     as mac_toolbar_text_field;
 import 'package:timesheet/ui/platform/snackbar.dart';
@@ -91,28 +92,8 @@ class _TimetrackerViewState extends State<TimetrackerView> {
         'Timetracker',
         style: MacosTheme.of(context).typography.title2,
       ),
-      titleWidth: 100.0,
-      leading: MacosTooltip(
-        message: 'Toggle Sidebar',
-        useMousePosition: false,
-        child: MacosIconButton(
-          icon: MacosIcon(
-            CupertinoIcons.sidebar_left,
-            color: MacosTheme.brightnessOf(context).resolve(
-              const Color.fromRGBO(0, 0, 0, 0.5),
-              const Color.fromRGBO(255, 255, 255, 0.5),
-            ),
-            size: 20.0,
-          ),
-          boxConstraints: const BoxConstraints(
-            minHeight: 20,
-            minWidth: 20,
-            maxWidth: 48,
-            maxHeight: 38,
-          ),
-          onPressed: () => MacosWindowScope.of(context).toggleSidebar(),
-        ),
-      ),
+      titleWidth: MacosLayout.toolbarTitleWidthShort,
+      leading: const MacosSidebarToggle(),
       actions: [
         ToolBarIconButton(
           label: 'Add item',

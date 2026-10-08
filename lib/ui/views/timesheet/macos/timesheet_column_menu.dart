@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' show Colors;
 import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
+import 'package:timesheet/ui/platform/macos/macos_layout.dart';
 import 'package:timesheet/ui/views/timesheet/timesheet_column.dart';
 
 Future<void> showTimesheetColumnMenu(
@@ -48,9 +49,9 @@ class _TimesheetColumnMenu extends StatelessWidget {
 
                 return MacosOverlayFilter(
                   color: pulldownTheme.pulldownColor?.withValues(alpha: 0.25),
-                  borderRadius: BorderRadius.circular(5),
+                  borderRadius: BorderRadius.circular(MacosLayout.fieldRadius),
                   child: Padding(
-                    padding: const EdgeInsets.all(6),
+                    padding: MacosLayout.menuPadding,
                     child: IntrinsicWidth(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -110,28 +111,30 @@ class _MenuItemState extends State<_MenuItem> {
         onTap: widget.onTap,
         behavior: HitTestBehavior.opaque,
         child: Container(
-          height: 20,
-          padding: const EdgeInsets.symmetric(horizontal: 6),
+          height: MacosLayout.menuItemHeight,
+          padding: const EdgeInsets.symmetric(horizontal: MacosLayout.space6),
           alignment: AlignmentDirectional.centerStart,
           decoration: BoxDecoration(
             color: _hovered ? highlightColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(MacosLayout.menuItemRadius),
           ),
           child: Row(
             children: [
               SizedBox(
-                width: 18,
+                width: MacosLayout.menuCheckSlotWidth,
                 child: widget.checked
                     ? MacosIcon(
                         CupertinoIcons.checkmark_alt,
-                        size: 16,
+                        size: MacosLayout.menuCheckIconSize,
                         color: textColor,
                       )
                     : null,
               ),
               Text(
                 widget.label,
-                style: TextStyle(fontSize: 13, color: textColor),
+                style: MacosTheme.of(context).typography.callout.copyWith(
+                  color: textColor,
+                ),
               ),
             ],
           ),
