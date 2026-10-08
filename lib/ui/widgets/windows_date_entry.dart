@@ -124,14 +124,21 @@ class WindowsDateEntryState extends State<WindowsDateEntry> {
         fieldWidth: SegmentedFieldMetrics.dateSegmentClusterWidth,
         buttonSemanticLabel: widget.calendarSemanticLabel,
         buttonIcon: FluentIcons.calendar,
-        onButtonPressed: _openCalendar,
+        onButtonPressed: widget.enabled ? _openCalendar : null,
         segmentedField: SegmentedEntry(
           key: _segmentedKey,
           controller: _controller.entryController,
           segments: _controller.segments,
           delimiters: const ['.', '.'],
           style: fieldStyle,
+          enabled: widget.enabled,
           onChanged: (_) => _controller.emitChanged(
+            currentDate: widget.date,
+            minimumDate: widget.minimumDate,
+            maximumDate: widget.maximumDate,
+            onChanged: widget.onChanged,
+          ),
+          onFocusLost: () => _controller.commitOrRestore(
             currentDate: widget.date,
             minimumDate: widget.minimumDate,
             maximumDate: widget.maximumDate,

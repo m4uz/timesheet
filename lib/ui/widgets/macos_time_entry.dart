@@ -109,13 +109,18 @@ class _MacosTimeEntryState extends State<MacosTimeEntry> {
       fieldWidth: SegmentedFieldMetrics.segmentClusterWidth,
       buttonSemanticLabel: widget.pickerSemanticLabel,
       buttonIcon: CupertinoIcons.clock,
-      onButtonPressed: _openTimePicker,
+      onButtonPressed: widget.enabled ? _openTimePicker : null,
       segmentedField: SegmentedEntry(
         controller: _controller.entryController,
         segments: _controller.segments,
         delimiters: const [':'],
         style: fieldStyle,
+        enabled: widget.enabled,
         onChanged: (_) => _controller.emitChanged(
+          currentTime: widget.time,
+          onChanged: widget.onChanged,
+        ),
+        onFocusLost: () => _controller.commitOrRestore(
           currentTime: widget.time,
           onChanged: widget.onChanged,
         ),

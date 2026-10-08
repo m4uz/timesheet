@@ -51,7 +51,8 @@ KeyEventResult onDescriptionTabKeyEvent(
   KeyEvent event, {
   required Future<void> Function()? onTabFromDescription,
 }) {
-  if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+  // KeyDown only — KeyRepeat would spam addItem on the last row.
+  if (event is! KeyDownEvent) {
     return KeyEventResult.ignored;
   }
   if (event.logicalKey != LogicalKeyboardKey.tab) {

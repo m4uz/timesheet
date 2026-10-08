@@ -80,7 +80,7 @@ class MacosSegmentedFieldWithButton extends StatelessWidget {
   final Widget segmentedField;
   final String buttonSemanticLabel;
   final IconData buttonIcon;
-  final VoidCallback onButtonPressed;
+  final VoidCallback? onButtonPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +129,7 @@ class MacosSegmentedFieldWithButton extends StatelessWidget {
                 size: 14,
                 color: theme.primaryColor,
               ),
-              onPressed: onButtonPressed,
+              onPressed: enabled ? onButtonPressed : null,
             ),
           ),
         ],

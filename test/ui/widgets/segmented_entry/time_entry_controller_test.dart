@@ -63,6 +63,64 @@ void main() {
       controller.dispose();
     });
 
+    test('emitChanged skips mid-digit hour typing', () {
+      final controller = TimeEntryController(
+        initialTime: const TimeOfDay(hour: 14, minute: 30),
+      );
+      var calls = 0;
+      final hour = controller.hourSegment;
+      hour.onSelect(true);
+      hour.onInput('1');
+      controller.emitChanged(
+        currentTime: const TimeOfDay(hour: 14, minute: 30),
+        onChanged: (_) => calls++,
+      );
+      expect(calls, 0);
+      expect(controller.hasIncompleteInput, isTrue);
+
+      hour.onInput('5');
+      controller.emitChanged(
+        currentTime: const TimeOfDay(hour: 14, minute: 30),
+        onChanged: (_) => calls++,
+      );
+      expect(calls, 1);
+      controller.dispose();
+    });
+
+    test('emitChanged snaps typed minutes to interval', () {
+      final controller = TimeEntryController(
+        initialTime: const TimeOfDay(hour: 10, minute: 15),
+        minuteInterval: 15,
+      );
+      TimeOfDay? emitted;
+      controller.minuteSegment.value = 7;
+      controller.emitChanged(
+        currentTime: const TimeOfDay(hour: 10, minute: 15),
+        onChanged: (t) => emitted = t,
+      );
+      expect(emitted, const TimeOfDay(hour: 10, minute: 0));
+      expect(controller.minuteSegment.value, 0);
+      controller.dispose();
+    });
+
+    test('commitOrRestore restores cleared segments', () {
+      final controller = TimeEntryController(
+        initialTime: const TimeOfDay(hour: 14, minute: 30),
+      );
+      var calls = 0;
+      controller.hourSegment.onSelect(true);
+      controller.hourSegment.onBackspaceKey();
+      expect(controller.hourSegment.value, isNull);
+
+      controller.commitOrRestore(
+        currentTime: const TimeOfDay(hour: 14, minute: 30),
+        onChanged: (_) => calls++,
+      );
+      expect(calls, 0);
+      expect(controller.fieldValue, '14:30');
+      controller.dispose();
+    });
+
     test('clamps typed hour above 23', () {
       final controller = TimeEntryController(
         initialTime: const TimeOfDay(hour: 0, minute: 0),

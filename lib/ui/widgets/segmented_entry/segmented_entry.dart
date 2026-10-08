@@ -18,7 +18,9 @@ class SegmentedEntry extends StatefulWidget {
     this.style,
     this.cursorColor,
     this.onChanged,
+    this.onFocusLost,
     this.keyboardType,
+    this.enabled = true,
   }) : assert(
          delimiters.length == segments.length - 1 ||
              delimiters.length == segments.length ||
@@ -37,7 +39,11 @@ class SegmentedEntry extends StatefulWidget {
   final TextStyle? style;
   final Color? cursorColor;
   final ValueChanged<String>? onChanged;
+
+  /// Called when the field loses focus (commit / restore hook).
+  final VoidCallback? onFocusLost;
   final TextInputType? keyboardType;
+  final bool enabled;
 
   @override
   SegmentedEntryState createState() => SegmentedEntryState();
@@ -90,6 +96,9 @@ class SegmentedEntryState extends State<SegmentedEntry> {
     if (widget.focusNode != oldWidget.focusNode) {
       _detachFocusNode(oldWidget.focusNode);
       _attachFocusNode();
+    } else if (widget.enabled != oldWidget.enabled) {
+      _focusNode.canRequestFocus = widget.enabled;
+      _focusNode.skipTraversal = !widget.enabled;
     }
 
     if (widget.segments.length != oldWidget.segments.length ||
@@ -110,6 +119,8 @@ class SegmentedEntryState extends State<SegmentedEntry> {
     for (final segment in widget.segments) {
       segment.removeListener(_segmentCallback);
     }
+    _textEditingController.removeListener(_textEditingControllerCallback);
+    _controller.removeListener(_controllerCallback);
     _textEditingController.dispose();
     _detachFocusNode(widget.focusNode);
     _internalFocusNode?.dispose();
@@ -137,10 +148,21 @@ class SegmentedEntryState extends State<SegmentedEntry> {
       _internalFocusNode = null;
     }
     _focusNode.onKeyEvent = _onKeyEvent;
+    _focusNode.addListener(_onFocusChanged);
+    _focusNode.canRequestFocus = widget.enabled;
+    _focusNode.skipTraversal = !widget.enabled;
   }
 
   void _detachFocusNode(FocusNode? external) {
-    (external ?? _internalFocusNode)?.onKeyEvent = null;
+    final node = external ?? _internalFocusNode;
+    node?.onKeyEvent = null;
+    node?.removeListener(_onFocusChanged);
+  }
+
+  void _onFocusChanged() {
+    if (!_focusNode.hasFocus) {
+      widget.onFocusLost?.call();
+    }
   }
 
   void _attachController() {
@@ -362,12 +384,14 @@ class SegmentedEntryState extends State<SegmentedEntry> {
           child: TextField(
             focusNode: _focusNode,
             autofocus: widget.autofocus,
+            enabled: widget.enabled,
+            readOnly: !widget.enabled,
             controller: _textEditingController,
             style: effectiveStyle,
             cursorColor: widget.cursorColor,
             keyboardType: widget.keyboardType ?? TextInputType.datetime,
             showCursor: false,
-            enableInteractiveSelection: true,
+            enableInteractiveSelection: widget.enabled,
             mouseCursor: _initialized ? SystemMouseCursors.basic : null,
             decoration: const InputDecoration(
               isDense: true,

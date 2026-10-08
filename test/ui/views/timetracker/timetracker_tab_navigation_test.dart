@@ -74,6 +74,22 @@ void main() {
       );
       expect(result, KeyEventResult.ignored);
     });
+
+    test('ignores KeyRepeat so holding Tab cannot spam addItem', () {
+      var called = 0;
+      final result = onDescriptionTabKeyEvent(
+        const KeyRepeatEvent(
+          physicalKey: PhysicalKeyboardKey.tab,
+          logicalKey: LogicalKeyboardKey.tab,
+          timeStamp: Duration.zero,
+        ),
+        onTabFromDescription: () async {
+          called++;
+        },
+      );
+      expect(result, KeyEventResult.ignored);
+      expect(called, 0);
+    });
   });
 }
 

@@ -79,7 +79,7 @@ class WindowsSegmentedFieldWithButton extends StatelessWidget {
   final Widget segmentedField;
   final String buttonSemanticLabel;
   final IconData buttonIcon;
-  final VoidCallback onButtonPressed;
+  final VoidCallback? onButtonPressed;
 
   @override
   Widget build(BuildContext context) {

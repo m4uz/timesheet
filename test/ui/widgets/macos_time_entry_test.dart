@@ -3,8 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:timesheet/ui/widgets/macos_time_entry.dart';
-import 'package:timesheet/utils/time_of_day_utils.dart';
-
 void main() {
   group('snapTimeToMinuteInterval', () {
     test('returns time unchanged when interval is 1', () {

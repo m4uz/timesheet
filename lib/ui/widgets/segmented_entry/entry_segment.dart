@@ -25,10 +25,11 @@ abstract interface class EntrySegment implements Listenable {
 typedef NumericSegmentCallback =
     int? Function(String? input, int? value, int? oldValue)?;
 
-/// Clamps segment values into [[min], [max]], falling back to [min] when null.
+/// Clamps segment values into [[min], [max]]. Null clears the segment
+/// (placeholder) so focus-loss can restore from the bound model value.
 NumericSegmentCallback clampSegment(int min, int max) {
   return (_, value, oldValue) {
-    if (value == null) return oldValue ?? min;
+    if (value == null) return null;
     if (value < min) return min;
     if (value > max) return max;
     return value;

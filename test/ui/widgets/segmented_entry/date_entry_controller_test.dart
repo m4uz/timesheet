@@ -95,5 +95,51 @@ void main() {
       expect(emitted, DateTime(2026, 11, 1, 14, 15));
       controller.dispose();
     });
+
+    test('emitChanged skips mid-digit day typing', () {
+      final current = DateTime(2026, 10, 7, 9, 30);
+      final controller = DateEntryController(initialDate: current);
+      var calls = 0;
+      final day = controller.daySegment;
+      day.onSelect(true);
+      day.onInput('1');
+      controller.emitChanged(
+        currentDate: current,
+        minimumDate: DateTime(2025, 1, 1),
+        maximumDate: DateTime(2027, 12, 31),
+        onChanged: (_) => calls++,
+      );
+      expect(calls, 0);
+      expect(controller.hasIncompleteInput, isTrue);
+
+      day.onInput('5');
+      controller.emitChanged(
+        currentDate: current,
+        minimumDate: DateTime(2025, 1, 1),
+        maximumDate: DateTime(2027, 12, 31),
+        onChanged: (_) => calls++,
+      );
+      expect(calls, 1);
+      controller.dispose();
+    });
+
+    test('commitOrRestore restores cleared segments', () {
+      final current = DateTime(2026, 10, 7, 9, 30);
+      final controller = DateEntryController(initialDate: current);
+      var calls = 0;
+      controller.daySegment.onSelect(true);
+      controller.daySegment.onBackspaceKey();
+      expect(controller.daySegment.value, isNull);
+
+      controller.commitOrRestore(
+        currentDate: current,
+        minimumDate: DateTime(2025, 1, 1),
+        maximumDate: DateTime(2027, 12, 31),
+        onChanged: (_) => calls++,
+      );
+      expect(calls, 0);
+      expect(controller.fieldValue, '07.10.');
+      controller.dispose();
+    });
   });
 }

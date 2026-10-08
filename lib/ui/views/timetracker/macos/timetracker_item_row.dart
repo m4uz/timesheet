@@ -11,6 +11,7 @@ import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/ui/views/timetracker/timetracker_item_field_controllers.dart';
 import 'package:timesheet/ui/views/timetracker/timetracker_tab_navigation.dart';
 import 'package:timesheet/ui/widgets/macos_date_entry.dart';
+import 'package:timesheet/ui/widgets/macos_keyboard_search_field.dart';
 import 'package:timesheet/ui/widgets/macos_time_entry.dart';
 import 'package:timesheet/ui/widgets/overflow_clip_box.dart';
 import 'package:timesheet/ui/widgets/segmented_entry/segmented_field_metrics.dart';
@@ -62,6 +63,7 @@ class TimetrackerItemRowState extends State<TimetrackerItemRow> {
 
   final _fieldControllers = TimetrackerItemFieldControllers();
   final _dateEntryKey = GlobalKey<MacosDateEntryState>();
+  late final FocusNode _subjectFocusNode;
   late final FocusNode _descriptionFocusNode;
   Timer? _subjectFetchDebounce;
 
@@ -227,44 +229,33 @@ class TimetrackerItemRowState extends State<TimetrackerItemRow> {
               width: flexW,
               child: FocusTraversalOrder(
                 order: const NumericFocusOrder(4),
-                child: MacosSearchField(
+                child: MacosKeyboardSearchField(
                   results: widget.userConfigProvider.subjects
                       .map(
                         (e) => SearchResultItem(
-                          // Include name and URI so MacosSearchField matches either.
+                          // Include name and URI so filtering matches either.
                           e.name.isNotEmpty ? '${e.name} ${e.uri}' : e.uri,
                           child: Text(
                             e.name.isNotEmpty ? e.name : e.uri,
                             overflow: TextOverflow.ellipsis,
                           ),
+                          onSelected: () => _onSubjectSelected(e),
                         ),
                       )
                       .toList(),
                   maxLines: 1,
                   maxResultsToShow: 10,
                   controller: _fieldControllers.subject,
+                  focusNode: _subjectFocusNode,
                   placeholder: 'Subject',
                   onChanged: _onSubjectChanged,
-                  onResultSelected: (value) {
-                    Subject? subject;
-                    for (final s in widget.userConfigProvider.subjects) {
-                      if (value.searchKey.contains(s.uri)) {
-                        subject = s;
-                        break;
-                      }
-                    }
-                    if (subject == null) {
-                      return;
-                    }
-                    final subjectName = subject.name;
-                    widget.timeTrackerProvider.updateItem(
-                      widget.item.copyWith(
-                        subject: subject.uri,
-                        subjectName: subjectName,
-                      ),
-                    );
-                    _fieldControllers.subject.text =
-                        subjectName.isNotEmpty ? subjectName : subject.uri;
+                  onResultSelected: (_) {
+                    // URI-keyed select runs via SearchResultItem.onSelected;
+                    // advance focus like Windows AutoSuggestBox.
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!mounted) return;
+                      _descriptionFocusNode.requestFocus();
+                    });
                   },
                 ),
               ),
@@ -328,6 +319,17 @@ class TimetrackerItemRowState extends State<TimetrackerItemRow> {
     );
   }
 
+  void _onSubjectSelected(Subject subject) {
+    final subjectName = subject.name;
+    final display = subjectName.isNotEmpty ? subjectName : subject.uri;
+    widget.timeTrackerProvider.updateItem(
+      widget.item.copyWith(subject: subject.uri, subjectName: subjectName),
+    );
+    if (_fieldControllers.subject.text != display) {
+      _fieldControllers.subject.text = display;
+    }
+  }
+
   void _onSubjectChanged(String value) {
     if (value.isEmpty &&
         (widget.item.subject.isNotEmpty || widget.item.subjectName.isNotEmpty)) {
@@ -359,6 +361,7 @@ class TimetrackerItemRowState extends State<TimetrackerItemRow> {
   void initState() {
     super.initState();
     _fieldControllers.initFrom(widget.item);
+    _subjectFocusNode = FocusNode();
     _descriptionFocusNode = FocusNode(onKeyEvent: _onDescriptionKey);
   }
 
@@ -371,6 +374,7 @@ class TimetrackerItemRowState extends State<TimetrackerItemRow> {
   @override
   void dispose() {
     _subjectFetchDebounce?.cancel();
+    _subjectFocusNode.dispose();
     _descriptionFocusNode.dispose();
     _fieldControllers.dispose();
     super.dispose();
