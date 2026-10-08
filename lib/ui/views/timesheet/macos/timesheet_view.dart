@@ -97,26 +97,22 @@ class _TimesheetViewState extends State<TimesheetView> {
       actions: [
         mac_calendar_toolbar_button.CalendarToolbarButton(
           label: 'From',
-          initialDateTime: provider.fromDate,
-          minimumDateTime: DateTime.now().subtract(const Duration(days: 365)),
-          maximumDateTime: DateTime.now().add(const Duration(days: 365)),
-          onCompleted: (value) {
-            if (value != null) {
-              provider.setFromDate(value);
-              provider.loadTimesheetItems();
-            }
+          date: provider.fromDate,
+          minimumDate: DateTime.now().subtract(const Duration(days: 365)),
+          maximumDate: DateTime.now().add(const Duration(days: 365)),
+          onChanged: (value) {
+            provider.setFromDate(value);
+            provider.loadTimesheetItems();
           },
         ),
         mac_calendar_toolbar_button.CalendarToolbarButton(
           label: 'To',
-          initialDateTime: provider.toDate,
-          minimumDateTime: DateTime.now().subtract(const Duration(days: 365)),
-          maximumDateTime: DateTime.now().add(const Duration(days: 365)),
-          onCompleted: (value) {
-            if (value != null) {
-              provider.setToDate(value);
-              provider.loadTimesheetItems();
-            }
+          date: provider.toDate,
+          minimumDate: DateTime.now().subtract(const Duration(days: 365)),
+          maximumDate: DateTime.now().add(const Duration(days: 365)),
+          onChanged: (value) {
+            provider.setToDate(value);
+            provider.loadTimesheetItems();
           },
         ),
         mac_toolbar_text_field.ToolbarTextField(

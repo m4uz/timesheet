@@ -22,6 +22,34 @@ class TimetrackerView extends StatefulWidget {
 
 class _TimetrackerViewState extends State<TimetrackerView> {
   final TextEditingController _filterController = TextEditingController();
+  final Map<int, GlobalKey<TimetrackerItemRowState>> _rowKeys = {};
+
+  GlobalKey<TimetrackerItemRowState> _rowKeyFor(int itemId) {
+    return _rowKeys.putIfAbsent(
+      itemId,
+      () => GlobalKey<TimetrackerItemRowState>(),
+    );
+  }
+
+  Future<void> _onTabFromDescription({
+    required TimetrackerProvider provider,
+    required int index,
+  }) async {
+    final isLast = index >= provider.items.length - 1;
+    if (isLast) {
+      final beforeCount = provider.items.length;
+      await provider.addItem();
+      if (!mounted || provider.items.length <= beforeCount) return;
+      final newItem = provider.items.last;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _rowKeyFor(newItem.id).currentState?.focusDateMonth();
+      });
+      return;
+    }
+
+    final nextItem = provider.items[index + 1];
+    _rowKeyFor(nextItem.id).currentState?.focusDateMonth();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,17 +199,24 @@ class _TimetrackerViewState extends State<TimetrackerView> {
     required TimetrackerProvider timeTrackerProvider,
     required SubjectsAndCategoriesProvider userConfigProvider,
   }) {
+    final itemIds = timeTrackerProvider.items.map((e) => e.id).toSet();
+    _rowKeys.removeWhere((id, _) => !itemIds.contains(id));
+
     return ReorderableListView(
       buildDefaultDragHandles: false,
       children: [
         for (int index = 0; index < timeTrackerProvider.items.length; index++)
           TimetrackerItemRow(
-            key: ValueKey(timeTrackerProvider.items[index].itemIndex),
+            key: _rowKeyFor(timeTrackerProvider.items[index].id),
             timeTrackerProvider: timeTrackerProvider,
             userConfigProvider: userConfigProvider,
             index: index,
             item: timeTrackerProvider.items[index],
             canReorder: !timeTrackerProvider.hasFilter,
+            onTabFromDescription: () => _onTabFromDescription(
+              provider: timeTrackerProvider,
+              index: index,
+            ),
           ),
       ],
       onReorderItem: (oldIndex, newIndex) async {

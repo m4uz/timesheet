@@ -1,25 +1,23 @@
-import 'package:cupertino_calendar_picker/cupertino_calendar_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:macos_ui/macos_ui.dart';
+import 'package:timesheet/ui/widgets/macos_date_entry.dart';
+import 'package:timesheet/ui/widgets/segmented_entry/macos_segmented_field_chrome.dart';
 
 class CalendarToolbarButton extends ToolbarItem {
   const CalendarToolbarButton({
     super.key,
     required this.label,
-    required this.initialDateTime,
-    required this.minimumDateTime,
-    required this.maximumDateTime,
-    this.onCompleted,
-    this.buttonDecoration,
+    required this.date,
+    required this.minimumDate,
+    required this.maximumDate,
+    this.onChanged,
   });
 
   final String label;
-  final DateTime initialDateTime;
-  final DateTime minimumDateTime;
-  final DateTime maximumDateTime;
-  final ValueChanged<DateTime?>? onCompleted;
-  final PickerButtonDecoration? buttonDecoration;
+  final DateTime date;
+  final DateTime minimumDate;
+  final DateTime maximumDate;
+  final ValueChanged<DateTime>? onChanged;
 
   @override
   Widget build(BuildContext context, ToolbarItemDisplayMode displayMode) {
@@ -38,15 +36,13 @@ class CalendarToolbarButton extends ToolbarItem {
             const SizedBox(width: 8.0),
           ],
           SizedBox(
-            height: 30,
-            width: 140,
-            child: CupertinoCalendarPickerButton(
-              initialDateTime: initialDateTime,
-              minimumDateTime: minimumDateTime,
-              maximumDateTime: maximumDateTime,
-              onCompleted: onCompleted,
-              buttonDecoration: buttonDecoration,
-              firstDayOfWeekIndex: 1,
+            width: MacosSegmentedFieldChrome.dateColumnWidth,
+            child: MacosDateEntry(
+              date: date,
+              minimumDate: minimumDate,
+              maximumDate: maximumDate,
+              semanticLabel: label.isEmpty ? 'Date' : label,
+              onChanged: onChanged,
             ),
           ),
         ],
