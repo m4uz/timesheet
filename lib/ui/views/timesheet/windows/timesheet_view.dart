@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
+import 'package:timesheet/ui/platform/windows/command_bar_icon_button.dart';
 import 'package:timesheet/ui/views/timesheet/timesheet_summary_footer.dart';
 import 'package:timesheet/ui/views/timesheet/windows/timesheet_table.dart';
 import 'package:timesheet/ui/widgets/pinned_footer_layout.dart';
@@ -116,14 +117,12 @@ class _TimesheetViewState extends State<TimesheetView> {
           ),
         ),
         const SizedBox(width: 8),
-        Tooltip(
+        CommandBarIconButton(
           message: 'Refresh timesheet items',
-          child: IconButton(
-            icon: const Icon(FluentIcons.refresh),
-            onPressed: provider.isLoading
-                ? null
-                : () => provider.loadTimesheetItems(forceReload: true),
-          ),
+          icon: FluentIcons.refresh,
+          onPressed: provider.isLoading
+              ? null
+              : () => provider.loadTimesheetItems(forceReload: true),
         ),
       ],
     );
