@@ -1,3 +1,5 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:intl/intl.dart';
@@ -156,8 +158,37 @@ class _TimetrackerViewState extends State<TimetrackerView> {
     required TimetrackerProvider timeTrackerProvider,
     required SubjectsAndCategoriesProvider userConfigProvider,
   }) {
+    final theme = FluentTheme.of(context);
     return material.ReorderableListView(
       buildDefaultDragHandles: false,
+      // Skip Material's default proxy (wraps in Material + inherit:true
+      // DefaultTextStyle). Keep FluentTheme and a light lift shadow instead.
+      proxyDecorator: (child, index, animation) {
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) {
+            final t = Curves.easeInOut.transform(animation.value);
+            final elevation = lerpDouble(0, 8, t)!;
+            return FluentTheme(
+              data: theme,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: theme.scaffoldBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: material.Colors.black.withValues(alpha: 0.18 * t),
+                      blurRadius: elevation,
+                      offset: Offset(0, elevation / 2),
+                    ),
+                  ],
+                ),
+                child: child,
+              ),
+            );
+          },
+          child: child,
+        );
+      },
       onReorderItem: (oldIndex, newIndex) async {
         if (timeTrackerProvider.hasFilter) {
           return;
