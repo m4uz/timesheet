@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:timesheet/models/app_config_model.dart';
 import 'package:timesheet/providers/config_provider.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
+import 'package:timesheet/ui/platform/windows/command_bar_icon_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const _logLevels = [
@@ -140,37 +141,33 @@ class _ConfigViewState extends State<ConfigView> {
                 // --------------------------------------------------
                 // Reload config
                 // --------------------------------------------------
-                Tooltip(
+                CommandBarIconButton(
                   message: 'Reload config',
-                  child: IconButton(
-                    icon: const Icon(FluentIcons.refresh),
-                    onPressed: provider.isLoading
-                        ? null
-                        : () => provider.loadConfig(),
-                  ),
+                  icon: FluentIcons.refresh,
+                  onPressed: provider.isLoading
+                      ? null
+                      : () => provider.loadConfig(),
                 ),
                 const SizedBox(width: 8),
                 // --------------------------------------------------
                 // Save config
                 // --------------------------------------------------
-                Tooltip(
+                CommandBarIconButton(
                   message: 'Save config',
-                  child: FilledButton(
-                    onPressed: provider.isLoading || config == null
-                        ? null
-                        : () {
-                            final portError = _validatePort(
-                              _proxyPortController.text,
-                            );
-                            if (portError != null) {
-                              Snackbar.error(portError);
-                              return;
-                            }
-                            final updated = _buildConfigFromForm(config);
-                            provider.saveConfig(updated);
-                          },
-                    child: const Text('Save'),
-                  ),
+                  icon: FluentIcons.cloud_upload,
+                  onPressed: provider.isLoading || config == null
+                      ? null
+                      : () {
+                          final portError = _validatePort(
+                            _proxyPortController.text,
+                          );
+                          if (portError != null) {
+                            Snackbar.error(portError);
+                            return;
+                          }
+                          final updated = _buildConfigFromForm(config);
+                          provider.saveConfig(updated);
+                        },
                 ),
               ],
             ),

@@ -4,6 +4,7 @@ import 'package:timesheet/models/category.dart';
 import 'package:timesheet/models/subject.dart';
 import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
+import 'package:timesheet/ui/platform/windows/command_bar_icon_button.dart';
 
 class SubjectsAndCategoriesView extends StatefulWidget {
   const SubjectsAndCategoriesView({super.key});
@@ -63,27 +64,23 @@ class _SubjectsAndCategoriesViewState extends State<SubjectsAndCategoriesView> {
                 // --------------------------------------------------
                 // Refresh data
                 // --------------------------------------------------
-                Tooltip(
+                CommandBarIconButton(
                   message: 'Refresh subjects and categories',
-                  child: IconButton(
-                    icon: const Icon(FluentIcons.refresh),
-                    onPressed: provider.isLoading
-                        ? null
-                        : () => provider.loadSubjectsAndCategories(),
-                  ),
+                  icon: FluentIcons.refresh,
+                  onPressed: provider.isLoading
+                      ? null
+                      : () => provider.loadSubjectsAndCategories(),
                 ),
                 const SizedBox(width: 8),
                 // --------------------------------------------------
                 // Save changes
                 // --------------------------------------------------
-                Tooltip(
+                CommandBarIconButton(
                   message: 'Save subjects and categories',
-                  child: FilledButton(
-                    onPressed: provider.isLoading
-                        ? null
-                        : () => provider.updateSubjectsAndCategories(),
-                    child: const Text('Save'),
-                  ),
+                  icon: FluentIcons.cloud_upload,
+                  onPressed: provider.isLoading
+                      ? null
+                      : () => provider.updateSubjectsAndCategories(),
                 ),
               ],
             ),
