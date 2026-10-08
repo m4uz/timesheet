@@ -5,6 +5,7 @@ import 'package:timesheet/models/subject.dart';
 import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/ui/platform/windows/command_bar_icon_button.dart';
+import 'package:timesheet/ui/platform/windows/windows_layout.dart';
 
 class SubjectsAndCategoriesView extends StatefulWidget {
   const SubjectsAndCategoriesView({super.key});
@@ -71,7 +72,7 @@ class _SubjectsAndCategoriesViewState extends State<SubjectsAndCategoriesView> {
                       ? null
                       : () => provider.loadSubjectsAndCategories(),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: WindowsLayout.space8),
                 // --------------------------------------------------
                 // Save changes
                 // --------------------------------------------------
@@ -88,7 +89,7 @@ class _SubjectsAndCategoriesViewState extends State<SubjectsAndCategoriesView> {
           content: provider.isLoading
               ? const Center(child: ProgressRing())
               : SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+                  padding: WindowsLayout.pagePadding,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -147,7 +148,7 @@ class _SubjectsAndCategoriesViewState extends State<SubjectsAndCategoriesView> {
                           },
                         ),
                       ),
-                      const SizedBox(width: 24),
+                      const SizedBox(width: WindowsLayout.space20),
                       // --------------------------------------------------
                       // Categories panel
                       // --------------------------------------------------
@@ -236,6 +237,8 @@ class _ListPanel<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = FluentTheme.of(context);
+    final dividerColor = theme.resources.dividerStrokeColorDefault;
     final searchText = searchController.text.toLowerCase();
     final filteredItems = searchText.isEmpty
         ? items
@@ -249,10 +252,10 @@ class _ListPanel<T> extends StatelessWidget {
               .toList();
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: WindowsLayout.panelPadding,
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFE1E1E1), width: 1),
-        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: dividerColor),
+        borderRadius: BorderRadius.circular(WindowsLayout.fieldRadius),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -261,41 +264,49 @@ class _ListPanel<T> extends StatelessWidget {
           // --------------------------------------------------
           // Panel title + controls
           // --------------------------------------------------
-          Text(
-            title,
-            style: FluentTheme.of(
-              context,
-            ).typography.title?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
+          Text(title, style: WindowsLayout.panelTitleStyle(theme)),
+          const SizedBox(height: WindowsLayout.space8),
           _buildHeader(context, filteredItems),
-          const SizedBox(height: 16),
+          const SizedBox(height: WindowsLayout.space16),
           // --------------------------------------------------
           // Panel rows
           // --------------------------------------------------
           ...filteredItems.map((item) {
             final isSelected = selectedItems.contains(item);
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+            return Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: WindowsLayout.space8,
+              ),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: dividerColor,
+                    width: WindowsLayout.rowDividerWidth,
+                  ),
+                ),
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
                     child: SelectableText(
                       itemToString(item),
-                      style: FluentTheme.of(context).typography.body,
+                      style: theme.typography.body,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: WindowsLayout.space8),
                   Checkbox(
                     checked: isSelected,
                     onChanged: isDisabled ? null : (_) => onItemToggle(item),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: WindowsLayout.space8),
                   Tooltip(
                     message: 'Delete ${itemToString(item)}',
                     child: IconButton(
-                      icon: const Icon(FluentIcons.delete),
+                      icon: const Icon(
+                        FluentIcons.delete,
+                        size: WindowsLayout.rowIconSize,
+                      ),
                       onPressed: (isDisabled || onDeleteItem == null)
                           ? null
                           : () => onDeleteItem!(item),
@@ -323,7 +334,7 @@ class _ListPanel<T> extends StatelessWidget {
             placeholder: 'Search $title',
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: WindowsLayout.space8),
         Tooltip(
           message: 'Select all',
           child: Checkbox(
@@ -333,11 +344,14 @@ class _ListPanel<T> extends StatelessWidget {
                 : (_) => onSelectAll!(filteredItems),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: WindowsLayout.space8),
         Tooltip(
           message: 'Delete selected',
           child: IconButton(
-            icon: const Icon(FluentIcons.delete),
+            icon: const Icon(
+              FluentIcons.delete,
+              size: WindowsLayout.rowIconSize,
+            ),
             onPressed: isDisabled ? null : onDeleteSelected,
           ),
         ),
