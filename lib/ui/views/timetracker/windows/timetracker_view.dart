@@ -9,6 +9,7 @@ import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/ui/platform/windows/command_bar_icon_button.dart';
+import 'package:timesheet/ui/platform/windows/windows_layout.dart';
 import 'package:timesheet/ui/views/timetracker/timetracker_tab_navigation.dart';
 import 'package:timesheet/ui/views/timetracker/windows/timetracker_item_row.dart';
 import 'package:timesheet/ui/views/timetracker/timetracker_summary_footer.dart';
@@ -107,16 +108,16 @@ class _TimetrackerViewState extends State<TimetrackerView> {
           icon: FluentIcons.add,
           onPressed: () => timeTrackerProvider.addItem(),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: WindowsLayout.space8),
         SizedBox(
-          width: 160,
+          width: WindowsLayout.toolbarFilterWidth,
           child: TextBox(
             controller: _filterController,
             placeholder: 'Filter',
             onChanged: timeTrackerProvider.setFilter,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: WindowsLayout.space8),
         CommandBarIconButton(
           message: 'Send timesheet items to WTM',
           icon: FluentIcons.cloud_upload,
@@ -125,7 +126,7 @@ class _TimetrackerViewState extends State<TimetrackerView> {
             await userConfigProvider.loadSubjectsAndCategories();
           },
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: WindowsLayout.space8),
         CommandBarIconButton(
           message: 'Clear all timesheet items',
           icon: FluentIcons.delete,

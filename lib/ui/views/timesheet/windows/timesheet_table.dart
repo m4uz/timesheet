@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:timesheet/models/timesheet_item.dart';
+import 'package:timesheet/ui/platform/windows/windows_layout.dart';
 import 'package:timesheet/ui/views/timesheet/timesheet_column.dart';
 import 'package:timesheet/ui/views/timesheet/timesheet_table_body.dart';
 
@@ -23,10 +24,8 @@ class TimesheetTable extends StatelessWidget {
       items: items,
       visibleColumns: visibleColumns,
       scrollController: scrollController,
-      cellStyle: theme.typography.body ?? const TextStyle(),
-      headerStyle:
-          theme.typography.bodyStrong ??
-          const TextStyle(fontWeight: FontWeight.w600),
+      cellStyle: WindowsLayout.tableCellStyle(theme),
+      headerStyle: WindowsLayout.tableHeaderStyle(theme),
       stripeColor: theme.brightness == Brightness.light
           ? const Color.fromRGBO(0, 0, 0, 0.04)
           : const Color.fromRGBO(255, 255, 255, 0.04),

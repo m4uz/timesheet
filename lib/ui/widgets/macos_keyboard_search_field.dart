@@ -381,8 +381,7 @@ class _ResultRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           alignment: Alignment.centerLeft,
           child: DefaultTextStyle(
-            style: TextStyle(
-              fontSize: 13.0,
+            style: MacosTheme.of(context).typography.callout.copyWith(
               color: highlighted
                   ? MacosColors.white
                   : brightness.resolve(MacosColors.black, MacosColors.white),

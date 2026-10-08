@@ -8,6 +8,7 @@ import 'package:timesheet/models/subject.dart';
 import 'package:timesheet/models/timetracker_item.dart';
 import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
+import 'package:timesheet/ui/platform/macos/macos_layout.dart';
 import 'package:timesheet/ui/views/timetracker/timetracker_item_field_controllers.dart';
 import 'package:timesheet/ui/views/timetracker/timetracker_tab_navigation.dart';
 import 'package:timesheet/ui/widgets/macos_date_entry.dart';
@@ -43,13 +44,13 @@ class TimetrackerItemRow extends StatefulWidget {
 }
 
 class TimetrackerItemRowState extends State<TimetrackerItemRow> {
-  static const double _btnPrefW = 30.0;
-  static const double _dayPrefW = 40.0;
+  static const double _btnPrefW = MacosLayout.rowActionWidth;
+  static const double _dayPrefW = MacosLayout.dayColumnWidth;
   static const double _datePickerPrefW = SegmentedFieldMetrics.dateColumnWidth;
   static const double _timePickerPrefW = SegmentedFieldMetrics.timeColumnWidth;
-  static const double _workedPrefW = 55.0;
-  static const double _spacingPrefW = 8.0;
-  static const double _flexMinW = 120.0;
+  static const double _workedPrefW = MacosLayout.workedColumnWidth;
+  static const double _spacingPrefW = MacosLayout.space8;
+  static const double _flexMinW = MacosLayout.flexFieldMinWidth;
 
   static const double _fixedTotalW =
       _btnPrefW * 3 + // drag, status, delete
@@ -92,12 +93,11 @@ class TimetrackerItemRowState extends State<TimetrackerItemRow> {
 
   @override
   Widget build(BuildContext context) {
-    const pad = EdgeInsets.all(10);
     final locale = Localizations.localeOf(context).toString();
     final dayLabel = DateFormat('EEE', locale).format(widget.item.from);
 
     return Container(
-      padding: pad,
+      padding: MacosLayout.rowCellPadding,
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(color: MacosTheme.of(context).dividerColor),
@@ -223,6 +223,7 @@ class TimetrackerItemRowState extends State<TimetrackerItemRow> {
               width: _workedPrefW,
               child: Text(
                 toHmString(widget.item.to.difference(widget.item.from)),
+                style: fieldStyle,
               ),
             ),
             SizedBox(
@@ -238,6 +239,7 @@ class TimetrackerItemRowState extends State<TimetrackerItemRow> {
                           child: Text(
                             e.name.isNotEmpty ? e.name : e.uri,
                             overflow: TextOverflow.ellipsis,
+                            style: fieldStyle,
                           ),
                           onSelected: () => _onSubjectSelected(e),
                         ),
@@ -247,6 +249,7 @@ class TimetrackerItemRowState extends State<TimetrackerItemRow> {
                   maxResultsToShow: 10,
                   controller: _fieldControllers.subject,
                   focusNode: _subjectFocusNode,
+                  style: fieldStyle,
                   placeholder: 'Subject',
                   onChanged: _onSubjectChanged,
                   onResultSelected: (_) {

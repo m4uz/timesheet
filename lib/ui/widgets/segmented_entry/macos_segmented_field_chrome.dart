@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:macos_ui/macos_ui.dart';
+import 'package:timesheet/ui/platform/macos/macos_layout.dart';
 import 'package:timesheet/ui/widgets/segmented_entry/segmented_field_metrics.dart';
 
 /// Shared visual chrome for macOS segmented date/time entries.
@@ -8,7 +9,10 @@ class MacosSegmentedFieldChrome extends StatelessWidget {
     super.key,
     required this.child,
     this.enabled = true,
-    this.padding = const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+    this.padding = const EdgeInsets.symmetric(
+      horizontal: MacosLayout.space6,
+      vertical: MacosLayout.space4,
+    ),
   });
 
   static const double segmentClusterWidth =
@@ -49,7 +53,7 @@ class MacosSegmentedFieldChrome extends StatelessWidget {
           padding: padding,
           decoration: BoxDecoration(
             color: fillColor(theme),
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(MacosLayout.fieldRadius),
             border: Border.all(color: borderColor(theme)),
           ),
           child: child,
@@ -118,15 +122,15 @@ class MacosSegmentedFieldWithButton extends StatelessWidget {
             child: MacosIconButton(
               backgroundColor: MacosColors.transparent,
               hoverColor: theme.primaryColor.withValues(alpha: 0.15),
-              padding: const EdgeInsets.all(2),
+              padding: const EdgeInsets.all(MacosLayout.space2),
               boxConstraints: const BoxConstraints.tightFor(
-                width: 22,
-                height: 22,
+                width: MacosLayout.overlayButtonSize,
+                height: MacosLayout.overlayButtonSize,
               ),
               semanticLabel: buttonSemanticLabel,
               icon: MacosIcon(
                 buttonIcon,
-                size: 14,
+                size: MacosLayout.overlayButtonIconSize,
                 color: theme.primaryColor,
               ),
               onPressed: enabled ? onButtonPressed : null,

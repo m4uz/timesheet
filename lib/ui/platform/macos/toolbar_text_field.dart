@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart' hide OverlayVisibilityMode;
 import 'package:macos_ui/macos_ui.dart';
+import 'package:timesheet/ui/platform/macos/macos_layout.dart';
 
 class ToolbarTextField extends ToolbarItem {
   final TextEditingController controller;
@@ -11,18 +12,18 @@ class ToolbarTextField extends ToolbarItem {
     required this.controller,
     required this.onChanged,
     this.placeholder = 'Filter',
-    this.width = 140,
+    this.width = MacosLayout.toolbarFilterWidth,
     super.key,
   });
 
   @override
   Widget build(BuildContext context, ToolbarItemDisplayMode displayMode) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: MacosLayout.toolbarItemPadding,
       child: SizedBox(
         width: width,
         child: MacosTextField(
-          prefix: MacosIcon(CupertinoIcons.search),
+          prefix: const MacosIcon(CupertinoIcons.search),
           clearButtonMode: OverlayVisibilityMode.always,
           controller: controller,
           placeholder: placeholder,

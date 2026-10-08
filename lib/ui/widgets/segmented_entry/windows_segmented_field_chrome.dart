@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' show Theme, TextSelectionThemeData;
+import 'package:timesheet/ui/platform/windows/windows_layout.dart';
 import 'package:timesheet/ui/widgets/segmented_entry/segmented_field_metrics.dart';
 
 /// Shared visual chrome for Windows segmented date/time entries.
@@ -8,7 +9,10 @@ class WindowsSegmentedFieldChrome extends StatelessWidget {
     super.key,
     required this.child,
     this.enabled = true,
-    this.padding = const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+    this.padding = const EdgeInsets.symmetric(
+      horizontal: WindowsLayout.space6,
+      vertical: WindowsLayout.space4,
+    ),
   });
 
   static const double segmentClusterWidth =
@@ -45,8 +49,8 @@ class WindowsSegmentedFieldChrome extends StatelessWidget {
           padding: padding,
           decoration: BoxDecoration(
             color: fillColor(theme),
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: borderColor(theme), width: 0.5),
+            borderRadius: BorderRadius.circular(WindowsLayout.fieldRadius),
+            border: Border.all(color: borderColor(theme)),
           ),
           child: child,
         ),
@@ -124,12 +128,23 @@ class WindowsSegmentedFieldWithButton extends StatelessWidget {
                   final resources = theme.resources;
                   final color = !enabled
                       ? resources.textFillColorDisabled
-                      : states.isHovered || states.isPressed
-                      ? theme.accentColor
-                      : resources.textFillColorSecondary;
-                  return Padding(
-                    padding: const EdgeInsets.all(2),
-                    child: Icon(buttonIcon, size: 14, color: color),
+                      : theme.accentColor;
+                  final hoverWash = states.isHovered || states.isPressed
+                      ? theme.accentColor.withValues(alpha: 0.15)
+                      : Colors.transparent;
+                  return Container(
+                    width: WindowsLayout.overlayButtonSize,
+                    height: WindowsLayout.overlayButtonSize,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: hoverWash,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Icon(
+                      buttonIcon,
+                      size: WindowsLayout.overlayButtonIconSize,
+                      color: color,
+                    ),
                   );
                 },
               ),
