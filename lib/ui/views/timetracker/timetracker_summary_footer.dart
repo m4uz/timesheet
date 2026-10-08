@@ -20,7 +20,9 @@ class TimetrackerSummaryFooter extends StatelessWidget {
   Duration get _totalDuration =>
       durationByDate.fold(Duration.zero, (sum, entry) => sum + entry.duration);
 
-  static const double reservedHeight = 36.0;
+  // Padding (8×2) + label/value line (~20–22) + segment padding; keep above
+  // that so PinnedFooterLayout's fixed height does not clip glyphs.
+  static const double reservedHeight = 48.0;
 
   @override
   Widget build(BuildContext context) {
@@ -50,22 +52,21 @@ class TimetrackerSummaryFooter extends StatelessWidget {
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           reverse: true,
-          child: IntrinsicHeight(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (int i = 0; i < segments.length; i++) ...[
-                  if (i > 0)
-                    VerticalDivider(
-                      width: 17,
-                      thickness: 1,
-                      color: dividerColor,
-                    ),
-                  segments[i],
-                ],
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              for (int i = 0; i < segments.length; i++) ...[
+                if (i > 0)
+                  Container(
+                    width: 1,
+                    height: 16,
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    color: dividerColor,
+                  ),
+                segments[i],
               ],
-            ),
+            ],
           ),
         ),
       ),

@@ -85,34 +85,9 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
         ),
         SizedBox(
           width: _timeW,
-          child: CalendarDatePicker(
-            initialStart: widget.item.from,
-            onSelectionChanged: (calendarSelection) {
-              final date = calendarSelection.startDate!;
-              final newFrom = DateTime(
-                date.year,
-                date.month,
-                date.day,
-                widget.item.from.hour,
-                widget.item.from.minute,
-                widget.item.from.second,
-              );
-              final newTo = DateTime(
-                date.year,
-                date.month,
-                date.day,
-                widget.item.to.hour,
-                widget.item.to.minute,
-                widget.item.to.second,
-              );
-              widget.timeTrackerProvider.updateItem(
-                widget.item.copyWith(from: newFrom, to: newTo),
-              );
-            },
-            minDate: DateTime.now().subtract(const Duration(days: 365)),
-            maxDate: DateTime.now().add(const Duration(days: 365)),
-            firstDayOfWeek: 1,
-            dateFormatter: DateFormat('d.M.'),
+          child: _DateFlyoutButton(
+            date: widget.item.from,
+            onDateSelected: _onDateSelected,
           ),
         ),
         SizedBox(
@@ -122,16 +97,13 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
             minuteIncrement: 15,
             hourFormat: material.HourFormat.HH,
             onChanged: (time) {
-              final newFrom = DateTime(
-                widget.item.from.year,
-                widget.item.from.month,
-                widget.item.from.day,
-                time.hour,
-                time.minute,
-                widget.item.from.second,
-              );
               widget.timeTrackerProvider.updateItem(
-                widget.item.copyWith(from: newFrom),
+                widget.item.copyWith(
+                  from: widget.item.from.copyWith(
+                    hour: time.hour,
+                    minute: time.minute,
+                  ),
+                ),
               );
             },
           ),
@@ -143,16 +115,13 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
             minuteIncrement: 15,
             hourFormat: material.HourFormat.HH,
             onChanged: (time) {
-              final newTo = DateTime(
-                widget.item.to.year,
-                widget.item.to.month,
-                widget.item.to.day,
-                time.hour,
-                time.minute,
-                widget.item.to.second,
-              );
               widget.timeTrackerProvider.updateItem(
-                widget.item.copyWith(to: newTo),
+                widget.item.copyWith(
+                  to: widget.item.to.copyWith(
+                    hour: time.hour,
+                    minute: time.minute,
+                  ),
+                ),
               );
             },
           ),
@@ -185,6 +154,17 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
             },
             clearButtonEnabled: false,
             placeholder: 'Subject',
+            sorter: (text, items) {
+              final query = text.trim().toLowerCase();
+              if (query.isEmpty) {
+                return items;
+              }
+              return items.where((item) {
+                final label = item.label.toLowerCase();
+                final uri = (item.value ?? '').toLowerCase();
+                return label.contains(query) || uri.contains(query);
+              }).toList();
+            },
             items: widget.userConfigProvider.subjects
                 .map(
                   (s) => AutoSuggestBoxItem<String>(
@@ -210,10 +190,10 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
         SizedBox(
           width: _btnW,
           child: widget.timeTrackerProvider.isSavingItem(widget.item)
-              ? Center(
+              ? const Center(
                   child: SizedBox.square(
                     dimension: 16,
-                    child: const ProgressRing(strokeWidth: 3),
+                    child: ProgressRing(strokeWidth: 3),
                   ),
                 )
               : switch (widget.item.status) {
@@ -233,14 +213,43 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
         ),
         SizedBox(
           width: _btnW,
-          child: IconButton(
-            icon: const Icon(FluentIcons.delete, size: 16),
-            onPressed: () {
-              widget.timeTrackerProvider.deleteItem(widget.item);
+          // HoverButton avoids Fluent BaseButton's AnimatedDefaultTextStyle,
+          // which asserts under Material ReorderableListView drag proxies.
+          child: HoverButton(
+            onPressed: () =>
+                widget.timeTrackerProvider.deleteItem(widget.item),
+            builder: (context, states) {
+              final resources = FluentTheme.of(context).resources;
+              final color = states.isDisabled
+                  ? resources.textFillColorDisabled
+                  : states.isHovered || states.isPressed
+                  ? FluentTheme.of(context).accentColor
+                  : resources.textFillColorPrimary;
+              return Padding(
+                padding: const EdgeInsets.all(6),
+                child: Icon(FluentIcons.delete, size: 16, color: color),
+              );
             },
           ),
         ),
       ],
+    );
+  }
+
+  void _onDateSelected(DateTime date) {
+    widget.timeTrackerProvider.updateItem(
+      widget.item.copyWith(
+        from: widget.item.from.copyWith(
+          year: date.year,
+          month: date.month,
+          day: date.day,
+        ),
+        to: widget.item.to.copyWith(
+          year: date.year,
+          month: date.month,
+          day: date.day,
+        ),
+      ),
     );
   }
 
@@ -288,5 +297,95 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
     _subjectFetchDebounce?.cancel();
     _fieldControllers.dispose();
     super.dispose();
+  }
+}
+
+/// Date trigger for reorderable rows. Uses [HoverButton] instead of
+/// [CalendarDatePicker] (Fluent [Button]/[BaseButton]) to avoid text-style
+/// lerp asserts while dragging.
+class _DateFlyoutButton extends StatefulWidget {
+  const _DateFlyoutButton({
+    required this.date,
+    required this.onDateSelected,
+  });
+
+  final DateTime date;
+  final ValueChanged<DateTime> onDateSelected;
+
+  @override
+  State<_DateFlyoutButton> createState() => _DateFlyoutButtonState();
+}
+
+class _DateFlyoutButtonState extends State<_DateFlyoutButton> {
+  final _flyoutController = FlyoutController();
+
+  @override
+  void dispose() {
+    _flyoutController.dispose();
+    super.dispose();
+  }
+
+  void _showFlyout() {
+    _flyoutController.showFlyout<void>(
+      barrierColor: Colors.transparent,
+      additionalOffset: 8,
+      builder: (context) {
+        final theme = FluentTheme.of(context);
+        return Mica(
+          borderRadius: BorderRadius.circular(6),
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 350, maxWidth: 320),
+            decoration: BoxDecoration(
+              color: theme.resources.controlFillColorDefault,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: CalendarView(
+              initialStart: widget.date,
+              minDate: DateTime.now().subtract(const Duration(days: 365)),
+              maxDate: DateTime.now().add(const Duration(days: 365)),
+              firstDayOfWeek: 1,
+              onSelectionChanged: (selection) {
+                final date = selection.startDate;
+                if (date == null) {
+                  return;
+                }
+                widget.onDateSelected(date);
+                _flyoutController.close();
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FlyoutTarget(
+      controller: _flyoutController,
+      child: HoverButton(
+        onPressed: _showFlyout,
+        builder: (context, states) {
+          final resources = FluentTheme.of(context).resources;
+          final color = states.isDisabled
+              ? resources.textFillColorDisabled
+              : resources.textFillColorSecondary;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 4,
+              children: [
+                Text(
+                  DateFormat('d.M.').format(widget.date),
+                  style: TextStyle(color: color),
+                ),
+                Icon(FluentIcons.calendar, size: 12, color: color),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 }
