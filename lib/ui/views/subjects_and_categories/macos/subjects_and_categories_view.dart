@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:timesheet/models/category.dart';
 import 'package:timesheet/models/subject.dart';
 import 'package:timesheet/providers/subjects_and_categories_provider.dart';
+import 'package:timesheet/ui/platform/macos/macos_layout.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
 
 class SubjectsAndCategoriesView extends StatefulWidget {
@@ -61,22 +62,7 @@ class _SubjectsAndCategoriesViewState extends State<SubjectsAndCategoriesView> {
               style: MacosTheme.of(context).typography.title2,
             ),
             titleWidth: 250.0,
-            leading: MacosTooltip(
-              message: 'Toggle Sidebar',
-              child: MacosIconButton(
-                icon: MacosIcon(
-                  CupertinoIcons.sidebar_left,
-                  color: CupertinoColors.inactiveGray,
-                ),
-                boxConstraints: const BoxConstraints(
-                  minHeight: 20,
-                  minWidth: 20,
-                  maxWidth: 32,
-                  maxHeight: 32,
-                ),
-                onPressed: () => MacosWindowScope.of(context).toggleSidebar(),
-              ),
-            ),
+            leading: const MacosSidebarToggle(),
             actions: [
               ToolBarIconButton(
                 label: 'Refresh',
@@ -109,7 +95,7 @@ class _SubjectsAndCategoriesViewState extends State<SubjectsAndCategoriesView> {
                   return Center(child: ProgressCircle());
                 } else {
                   return SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
+                    padding: MacosLayout.pagePadding,
                     child: Column(
                       children: [
                         Row(
@@ -281,47 +267,46 @@ class ListPanel<T> extends StatelessWidget {
               })
               .toList();
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: MacosTheme.of(context).typography.headline),
-              const SizedBox(height: 8),
-              _buildHeader(context, filteredItems),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Column(
-            children: filteredItems.map((item) {
-              final isSelected = selectedItems.contains(item);
-              return Container(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: MacosTheme.of(context).dividerColor,
-                      width: 0.5,
-                    ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: MacosTheme.of(context).typography.headline),
+            const SizedBox(height: MacosLayout.space8),
+            _buildHeader(context, filteredItems),
+          ],
+        ),
+        const SizedBox(height: MacosLayout.space16),
+        Column(
+          children: filteredItems.map((item) {
+            final isSelected = selectedItems.contains(item);
+            return Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: MacosLayout.space8,
+              ),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: MacosTheme.of(context).dividerColor,
+                    width: 0.5,
                   ),
                 ),
-                child: _buildItemRow(
-                  context: context,
-                  item: item,
-                  isSelected: isSelected,
-                  onItemToggle: onItemToggle,
-                  items: items,
-                  selectedItems: selectedItems,
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
+              ),
+              child: _buildItemRow(
+                context: context,
+                item: item,
+                isSelected: isSelected,
+                onItemToggle: onItemToggle,
+                items: items,
+                selectedItems: selectedItems,
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -338,7 +323,7 @@ class ListPanel<T> extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: MacosLayout.space8),
         Flexible(
           flex: 0,
           child: MacosCheckbox(
@@ -350,7 +335,7 @@ class ListPanel<T> extends StatelessWidget {
                 : (value) => onSelectAll!(filteredItems),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: MacosLayout.space8),
         Flexible(
           flex: 0,
           child: MacosTooltip(
@@ -383,7 +368,7 @@ class ListPanel<T> extends StatelessWidget {
             style: MacosTheme.of(context).typography.body,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: MacosLayout.space8),
         Flexible(
           flex: 0,
           child: MacosCheckbox(
@@ -391,7 +376,7 @@ class ListPanel<T> extends StatelessWidget {
             onChanged: isDisabled ? null : (value) => onItemToggle(item),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: MacosLayout.space8),
         Flexible(
           flex: 0,
           child: MacosTooltip(

@@ -4,6 +4,7 @@ import 'package:macos_ui/macos_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/models/app_config_model.dart';
 import 'package:timesheet/providers/config_provider.dart';
+import 'package:timesheet/ui/platform/macos/macos_layout.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -24,7 +25,7 @@ class _ConfigViewState extends State<ConfigView> {
 
   String _logLevel = 'INFO';
   String? _loadedConfigKey;
-  static const double _labelWidth = 160.0;
+  static const double _labelWidth = MacosLayout.formLabelWidth;
 
   @override
   void initState() {
@@ -116,23 +117,8 @@ class _ConfigViewState extends State<ConfigView> {
               'Config',
               style: MacosTheme.of(context).typography.title2,
             ),
-            titleWidth: 100.0,
-            leading: MacosTooltip(
-              message: 'Toggle Sidebar',
-              child: MacosIconButton(
-                icon: MacosIcon(
-                  CupertinoIcons.sidebar_left,
-                  color: CupertinoColors.inactiveGray,
-                ),
-                boxConstraints: const BoxConstraints(
-                  minHeight: 20,
-                  minWidth: 20,
-                  maxWidth: 32,
-                  maxHeight: 32,
-                ),
-                onPressed: () => MacosWindowScope.of(context).toggleSidebar(),
-              ),
-            ),
+            titleWidth: MacosLayout.toolbarTitleWidthShort,
+            leading: const MacosSidebarToggle(),
             actions: [
               ToolBarIconButton(
                 label: 'Refresh',
@@ -184,7 +170,7 @@ class _ConfigViewState extends State<ConfigView> {
 
                 return SingleChildScrollView(
                   controller: scrollController,
-                  padding: const EdgeInsets.all(20),
+                  padding: MacosLayout.pagePadding,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -210,7 +196,7 @@ class _ConfigViewState extends State<ConfigView> {
                         ),
                       ),
                       const Divider(),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: MacosLayout.space16),
                       _buildSectionTitle(context, 'Logging'),
                       _buildRow(
                         context: context,
@@ -242,7 +228,7 @@ class _ConfigViewState extends State<ConfigView> {
                         ),
                       ),
                       const Divider(),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: MacosLayout.space16),
                       _buildSectionTitle(context, 'Authentication'),
                       _buildRow(
                         context: context,
@@ -259,7 +245,7 @@ class _ConfigViewState extends State<ConfigView> {
                         ),
                       ),
                       const Divider(),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: MacosLayout.space16),
                       _buildSectionTitle(context, 'WTM'),
                       _buildRow(
                         context: context,
@@ -269,7 +255,7 @@ class _ConfigViewState extends State<ConfigView> {
                         ),
                       ),
                       const Divider(),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: MacosLayout.space16),
                       _buildSectionTitle(context, 'Proxy'),
                       _buildRow(
                         context: context,
@@ -310,12 +296,10 @@ class _ConfigViewState extends State<ConfigView> {
 
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: MacosLayout.space8),
       child: Text(
         title,
-        style: MacosTheme.of(
-          context,
-        ).typography.title2.copyWith(fontWeight: FontWeight.bold),
+        style: MacosTheme.of(context).typography.headline,
       ),
     );
   }
@@ -327,7 +311,7 @@ class _ConfigViewState extends State<ConfigView> {
     Widget? action,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: MacosLayout.space10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -335,9 +319,9 @@ class _ConfigViewState extends State<ConfigView> {
             width: _labelWidth,
             child: Text(label, style: MacosTheme.of(context).typography.title3),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: MacosLayout.space12),
           Expanded(child: value),
-          const SizedBox(width: 12),
+          const SizedBox(width: MacosLayout.space12),
           SizedBox(child: action ?? const SizedBox.shrink()),
         ],
       ),

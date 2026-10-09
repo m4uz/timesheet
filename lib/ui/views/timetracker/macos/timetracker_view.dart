@@ -6,11 +6,13 @@ import 'package:provider/provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
+import 'package:timesheet/ui/platform/macos/macos_layout.dart';
 import 'package:timesheet/ui/platform/macos/toolbar_text_field.dart'
     as mac_toolbar_text_field;
 import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/ui/views/timetracker/macos/timetracker_item_row.dart';
 import 'package:timesheet/ui/views/timetracker/timetracker_summary_footer.dart';
+import 'package:timesheet/ui/views/timetracker/timetracker_tab_navigation.dart';
 import 'package:timesheet/ui/widgets/pinned_footer_layout.dart';
 
 class TimetrackerView extends StatefulWidget {
@@ -22,6 +24,21 @@ class TimetrackerView extends StatefulWidget {
 
 class _TimetrackerViewState extends State<TimetrackerView> {
   final TextEditingController _filterController = TextEditingController();
+  final _rowKeys = TimetrackerRowKeyMap<TimetrackerItemRowState>();
+
+  Future<void> _onTabFromDescription({
+    required TimetrackerProvider provider,
+    required int index,
+  }) {
+    return handleTimetrackerTabFromDescription(
+      provider: provider,
+      index: index,
+      isMounted: () => mounted,
+      focusDateMonth: (itemId) {
+        _rowKeys.forId(itemId).currentState?.focusDateMonth();
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,28 +92,8 @@ class _TimetrackerViewState extends State<TimetrackerView> {
         'Timetracker',
         style: MacosTheme.of(context).typography.title2,
       ),
-      titleWidth: 100.0,
-      leading: MacosTooltip(
-        message: 'Toggle Sidebar',
-        useMousePosition: false,
-        child: MacosIconButton(
-          icon: MacosIcon(
-            CupertinoIcons.sidebar_left,
-            color: MacosTheme.brightnessOf(context).resolve(
-              const Color.fromRGBO(0, 0, 0, 0.5),
-              const Color.fromRGBO(255, 255, 255, 0.5),
-            ),
-            size: 20.0,
-          ),
-          boxConstraints: const BoxConstraints(
-            minHeight: 20,
-            minWidth: 20,
-            maxWidth: 48,
-            maxHeight: 38,
-          ),
-          onPressed: () => MacosWindowScope.of(context).toggleSidebar(),
-        ),
-      ),
+      titleWidth: MacosLayout.toolbarTitleWidthShort,
+      leading: const MacosSidebarToggle(),
       actions: [
         ToolBarIconButton(
           label: 'Add item',
@@ -171,17 +168,23 @@ class _TimetrackerViewState extends State<TimetrackerView> {
     required TimetrackerProvider timeTrackerProvider,
     required SubjectsAndCategoriesProvider userConfigProvider,
   }) {
+    _rowKeys.pruneTo(timeTrackerProvider.items.map((e) => e.id));
+
     return ReorderableListView(
       buildDefaultDragHandles: false,
       children: [
         for (int index = 0; index < timeTrackerProvider.items.length; index++)
           TimetrackerItemRow(
-            key: ValueKey(timeTrackerProvider.items[index].itemIndex),
+            key: _rowKeys.forId(timeTrackerProvider.items[index].id),
             timeTrackerProvider: timeTrackerProvider,
             userConfigProvider: userConfigProvider,
             index: index,
             item: timeTrackerProvider.items[index],
             canReorder: !timeTrackerProvider.hasFilter,
+            onTabFromDescription: () => _onTabFromDescription(
+              provider: timeTrackerProvider,
+              index: index,
+            ),
           ),
       ],
       onReorderItem: (oldIndex, newIndex) async {

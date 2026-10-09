@@ -1,11 +1,14 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:timesheet/providers/timesheet_provider.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
+import 'package:timesheet/ui/platform/windows/command_bar_icon_button.dart';
+import 'package:timesheet/ui/platform/windows/windows_layout.dart';
 import 'package:timesheet/ui/views/timesheet/timesheet_summary_footer.dart';
 import 'package:timesheet/ui/views/timesheet/windows/timesheet_table.dart';
 import 'package:timesheet/ui/widgets/pinned_footer_layout.dart';
+import 'package:timesheet/ui/widgets/segmented_entry/segmented_field_metrics.dart';
+import 'package:timesheet/ui/widgets/windows_date_entry.dart';
 
 class TimesheetView extends StatefulWidget {
   const TimesheetView({super.key});
@@ -63,67 +66,65 @@ class _TimesheetViewState extends State<TimesheetView> {
   }
 
   Widget _buildCommandBar(TimesheetProvider provider) {
+    final theme = FluentTheme.of(context);
+    final labelStyle = WindowsLayout.toolbarLabelStyle(theme);
+    final minimumDate = DateTime.now().subtract(const Duration(days: 365));
+    final maximumDate = DateTime.now().add(const Duration(days: 365));
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('From'),
-        const SizedBox(width: 8),
+        Text('From', style: labelStyle),
+        const SizedBox(width: WindowsLayout.space8),
         SizedBox(
-          width: 120,
-          child: CalendarDatePicker(
-            initialStart: provider.fromDate,
-            onSelectionChanged: (calendarSelection) {
-              final date = calendarSelection.startDate;
-              if (date == null || date.isAtSameMomentAs(provider.fromDate)) {
-                return;
-              }
-              provider.setFromDate(date);
+          width: SegmentedFieldMetrics.dateColumnWidth,
+          child: WindowsDateEntry(
+            date: provider.fromDate,
+            minimumDate: minimumDate,
+            maximumDate: maximumDate,
+            style: WindowsLayout.rowFieldStyle(theme),
+            semanticLabel: 'From',
+            calendarSemanticLabel: 'Open from calendar',
+            onChanged: (value) {
+              provider.setFromDate(value);
               provider.loadTimesheetItems();
             },
-            minDate: DateTime.now().subtract(const Duration(days: 365)),
-            firstDayOfWeek: DateTime.monday,
-            closeOnSelection: false,
-            dateFormatter: DateFormat('d.M.yyyy'),
           ),
         ),
-        const SizedBox(width: 8),
-        const Text('To'),
-        const SizedBox(width: 8),
+        const SizedBox(width: WindowsLayout.space8),
+        Text('To', style: labelStyle),
+        const SizedBox(width: WindowsLayout.space8),
         SizedBox(
-          width: 120,
-          child: CalendarDatePicker(
-            initialStart: provider.toDate,
-            onSelectionChanged: (calendarSelection) {
-              final date = calendarSelection.startDate;
-              if (date == null || date.isAtSameMomentAs(provider.toDate)) {
-                return;
-              }
-              provider.setToDate(date);
+          width: SegmentedFieldMetrics.dateColumnWidth,
+          child: WindowsDateEntry(
+            date: provider.toDate,
+            minimumDate: minimumDate,
+            maximumDate: maximumDate,
+            style: WindowsLayout.rowFieldStyle(theme),
+            semanticLabel: 'To',
+            calendarSemanticLabel: 'Open to calendar',
+            onChanged: (value) {
+              provider.setToDate(value);
               provider.loadTimesheetItems();
             },
-            firstDayOfWeek: DateTime.monday,
-            closeOnSelection: false,
-            dateFormatter: DateFormat('d.M.yyyy'),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: WindowsLayout.space8),
         SizedBox(
-          width: 160,
+          width: WindowsLayout.toolbarFilterWidth,
           child: TextBox(
             controller: _filterController,
             placeholder: 'Filter',
             onChanged: provider.setFilter,
           ),
         ),
-        const SizedBox(width: 8),
-        Tooltip(
+        const SizedBox(width: WindowsLayout.space8),
+        CommandBarIconButton(
           message: 'Refresh timesheet items',
-          child: IconButton(
-            icon: const Icon(FluentIcons.refresh),
-            onPressed: provider.isLoading
-                ? null
-                : () => provider.loadTimesheetItems(forceReload: true),
-          ),
+          icon: FluentIcons.refresh,
+          onPressed: provider.isLoading
+              ? null
+              : () => provider.loadTimesheetItems(forceReload: true),
         ),
       ],
     );

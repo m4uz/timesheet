@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:timesheet/models/app_config_model.dart';
 import 'package:timesheet/providers/config_provider.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
+import 'package:timesheet/ui/platform/windows/command_bar_icon_button.dart';
+import 'package:timesheet/ui/platform/windows/windows_layout.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const _logLevels = [
@@ -34,7 +36,7 @@ class _ConfigViewState extends State<ConfigView> {
 
   String _logLevel = 'INFO';
   String? _loadedConfigKey;
-  static const double _labelWidth = 160.0;
+  static const double _labelWidth = WindowsLayout.formLabelWidth;
 
   @override
   void initState() {
@@ -140,37 +142,33 @@ class _ConfigViewState extends State<ConfigView> {
                 // --------------------------------------------------
                 // Reload config
                 // --------------------------------------------------
-                Tooltip(
+                CommandBarIconButton(
                   message: 'Reload config',
-                  child: IconButton(
-                    icon: const Icon(FluentIcons.refresh),
-                    onPressed: provider.isLoading
-                        ? null
-                        : () => provider.loadConfig(),
-                  ),
+                  icon: FluentIcons.refresh,
+                  onPressed: provider.isLoading
+                      ? null
+                      : () => provider.loadConfig(),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: WindowsLayout.space8),
                 // --------------------------------------------------
                 // Save config
                 // --------------------------------------------------
-                Tooltip(
+                CommandBarIconButton(
                   message: 'Save config',
-                  child: FilledButton(
-                    onPressed: provider.isLoading || config == null
-                        ? null
-                        : () {
-                            final portError = _validatePort(
-                              _proxyPortController.text,
-                            );
-                            if (portError != null) {
-                              Snackbar.error(portError);
-                              return;
-                            }
-                            final updated = _buildConfigFromForm(config);
-                            provider.saveConfig(updated);
-                          },
-                    child: const Text('Save'),
-                  ),
+                  icon: FluentIcons.cloud_upload,
+                  onPressed: provider.isLoading || config == null
+                      ? null
+                      : () {
+                          final portError = _validatePort(
+                            _proxyPortController.text,
+                          );
+                          if (portError != null) {
+                            Snackbar.error(portError);
+                            return;
+                          }
+                          final updated = _buildConfigFromForm(config);
+                          provider.saveConfig(updated);
+                        },
                 ),
               ],
             ),
@@ -188,7 +186,7 @@ class _ConfigViewState extends State<ConfigView> {
                   ),
                 )
               : SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+                  padding: WindowsLayout.pagePadding,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -201,10 +199,15 @@ class _ConfigViewState extends State<ConfigView> {
                         label: 'Application Support',
                         value: SelectableText(
                           provider.appSupportPath ?? '-',
-                          style: FluentTheme.of(context).typography.body,
+                          style: WindowsLayout.rowFieldStyle(
+                            FluentTheme.of(context),
+                          ),
                         ),
                         action: IconButton(
-                          icon: const Icon(FluentIcons.folder),
+                          icon: const Icon(
+                            FluentIcons.folder,
+                            size: WindowsLayout.rowIconSize,
+                          ),
                           onPressed:
                               provider.appSupportPath == null ||
                                   provider.appSupportPath!.isEmpty
@@ -214,7 +217,7 @@ class _ConfigViewState extends State<ConfigView> {
                         ),
                       ),
                       const Divider(),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: WindowsLayout.space16),
                       // --------------------------------------------------
                       // Logging
                       // --------------------------------------------------
@@ -246,7 +249,7 @@ class _ConfigViewState extends State<ConfigView> {
                         ),
                       ),
                       const Divider(),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: WindowsLayout.space16),
                       // --------------------------------------------------
                       // Authentication
                       // --------------------------------------------------
@@ -262,7 +265,7 @@ class _ConfigViewState extends State<ConfigView> {
                         value: TextBox(controller: _oidcClientIdController),
                       ),
                       const Divider(),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: WindowsLayout.space16),
                       // --------------------------------------------------
                       // WTM
                       // --------------------------------------------------
@@ -273,7 +276,7 @@ class _ConfigViewState extends State<ConfigView> {
                         value: TextBox(controller: _wtmBaseUrlController),
                       ),
                       const Divider(),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: WindowsLayout.space16),
                       // --------------------------------------------------
                       // Proxy
                       // --------------------------------------------------
@@ -301,8 +304,11 @@ class _ConfigViewState extends State<ConfigView> {
 
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(title, style: FluentTheme.of(context).typography.subtitle),
+      padding: const EdgeInsets.only(bottom: WindowsLayout.space8),
+      child: Text(
+        title,
+        style: WindowsLayout.sectionTitleStyle(FluentTheme.of(context)),
+      ),
     );
   }
 
@@ -312,18 +318,19 @@ class _ConfigViewState extends State<ConfigView> {
     required Widget value,
     Widget? action,
   }) {
+    final theme = FluentTheme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: WindowsLayout.space10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: _labelWidth,
-            child: Text(label, style: FluentTheme.of(context).typography.body),
+            child: Text(label, style: WindowsLayout.rowFieldStyle(theme)),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: WindowsLayout.space12),
           Expanded(child: value),
-          const SizedBox(width: 12),
+          const SizedBox(width: WindowsLayout.space12),
           ?action,
         ],
       ),

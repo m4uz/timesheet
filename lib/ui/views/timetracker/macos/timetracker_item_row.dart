@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cupertino_calendar_picker/cupertino_calendar_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -9,8 +8,14 @@ import 'package:timesheet/models/subject.dart';
 import 'package:timesheet/models/timetracker_item.dart';
 import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
+import 'package:timesheet/ui/platform/macos/macos_layout.dart';
 import 'package:timesheet/ui/views/timetracker/timetracker_item_field_controllers.dart';
+import 'package:timesheet/ui/views/timetracker/timetracker_tab_navigation.dart';
+import 'package:timesheet/ui/widgets/macos_date_entry.dart';
+import 'package:timesheet/ui/widgets/macos_keyboard_search_field.dart';
+import 'package:timesheet/ui/widgets/macos_time_entry.dart';
 import 'package:timesheet/ui/widgets/overflow_clip_box.dart';
+import 'package:timesheet/ui/widgets/segmented_entry/segmented_field_metrics.dart';
 import 'package:timesheet/ui/widgets/weekday_label.dart';
 import 'package:timesheet/utils/duration_utils.dart';
 
@@ -22,6 +27,7 @@ class TimetrackerItemRow extends StatefulWidget {
     required this.index,
     required this.item,
     required this.canReorder,
+    this.onTabFromDescription,
   });
 
   final TimetrackerProvider timeTrackerProvider;
@@ -30,38 +36,68 @@ class TimetrackerItemRow extends StatefulWidget {
   final TimetrackerItem item;
   final bool canReorder;
 
+  /// Called when Tab is pressed in the description field (not Shift+Tab).
+  final Future<void> Function()? onTabFromDescription;
+
   @override
-  State<TimetrackerItemRow> createState() => _TimetrackerItemRowState();
+  TimetrackerItemRowState createState() => TimetrackerItemRowState();
 }
 
-class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
-  static const double _btnPrefW = 30.0;
-  static const double _dayPrefW = 40.0;
-  static const double _timePickerPrefW = 80.0;
-  static const double _workedPrefW = 55.0;
-  static const double _spacingPrefW = 8.0;
-  static const double _flexMinW = 120.0;
+class TimetrackerItemRowState extends State<TimetrackerItemRow> {
+  static const double _btnPrefW = MacosLayout.rowActionWidth;
+  static const double _dayPrefW = MacosLayout.dayColumnWidth;
+  static const double _datePickerPrefW = SegmentedFieldMetrics.dateColumnWidth;
+  static const double _timePickerPrefW = SegmentedFieldMetrics.timeColumnWidth;
+  static const double _workedPrefW = MacosLayout.workedColumnWidth;
+  static const double _spacingPrefW = MacosLayout.space8;
+  static const double _flexMinW = MacosLayout.flexFieldMinWidth;
 
   static const double _fixedTotalW =
       _btnPrefW * 3 + // drag, status, delete
       _dayPrefW +
-      _timePickerPrefW * 3 + // date, from, to
+      _datePickerPrefW +
+      _timePickerPrefW * 2 + // from, to
       _workedPrefW +
       _spacingPrefW * 9;
 
   static const double _minRowW = _fixedTotalW + _flexMinW * 2;
 
   final _fieldControllers = TimetrackerItemFieldControllers();
+  final _dateEntryKey = GlobalKey<MacosDateEntryState>();
+  late final FocusNode _subjectFocusNode;
+  late final FocusNode _descriptionFocusNode;
   Timer? _subjectFetchDebounce;
+
+  /// Focus the month segment (`MM`) — used when Tabbing from the previous
+  /// row's description so the caret lands mid-date for quick edits.
+  void focusDateMonth() {
+    final state = _dateEntryKey.currentState;
+    if (state == null) return;
+    final ctx = _dateEntryKey.currentContext;
+    if (ctx != null) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 150),
+        alignment: 0.2,
+      );
+    }
+    state.focusMonthSegment();
+  }
+
+  KeyEventResult _onDescriptionKey(FocusNode node, KeyEvent event) {
+    return onDescriptionTabKeyEvent(
+      event,
+      onTabFromDescription: widget.onTabFromDescription,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    const pad = EdgeInsets.all(10);
     final locale = Localizations.localeOf(context).toString();
     final dayLabel = DateFormat('EEE', locale).format(widget.item.from);
 
     return Container(
-      padding: pad,
+      padding: MacosLayout.rowCellPadding,
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(color: MacosTheme.of(context).dividerColor),
@@ -81,204 +117,220 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
 
     return SizedBox(
       width: rowW,
-      child: Row(
-        spacing: _spacingPrefW,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: _btnPrefW,
-            child: widget.canReorder
-                ? ReorderableDragStartListener(
-                    index: widget.index,
-                    child: MacosIcon(
-                      CupertinoIcons.bars,
-                      color: MacosTheme.of(context).primaryColor,
-                    ),
-                  )
-                : MacosIcon(CupertinoIcons.bars, color: Colors.grey),
-          ),
-          SizedBox(
-            width: _dayPrefW,
-            child: WeekdayLabel(
-              date: widget.item.from,
-              label: dayLabel,
-              textStyle: fieldStyle,
-            ),
-          ),
-          SizedBox(
-            width: _timePickerPrefW,
-            child: CupertinoCalendarPickerButton(
-              firstDayOfWeekIndex: 1,
-              initialDateTime: widget.item.from,
-              minimumDateTime: DateTime.now().subtract(const Duration(days: 365)),
-              maximumDateTime: DateTime.now().add(const Duration(days: 365)),
-              formatter: (date) => DateFormat('d.M.').format(date),
-              onCompleted: (value) async {
-                if (value == null) {
-                  return;
-                }
-                final newFrom = value.copyWith(
-                  hour: widget.item.from.hour,
-                  minute: widget.item.from.minute,
-                  second: widget.item.from.second,
-                );
-                final newTo = value.copyWith(
-                  hour: widget.item.to.hour,
-                  minute: widget.item.to.minute,
-                  second: widget.item.to.second,
-                );
-                widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(from: newFrom, to: newTo),
-                );
-              },
-              buttonDecoration: PickerButtonDecoration(
-                textStyle: fieldStyle,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: _timePickerPrefW,
-            child: CupertinoTimePickerButton(
-              initialTime: TimeOfDay.fromDateTime(widget.item.from),
-              minuteInterval: 15,
-              onCompleted: (value) {
-                if (value == null) {
-                  return;
-                }
-                final newFrom = widget.item.from.copyWith(
-                  hour: value.hour,
-                  minute: value.minute,
-                );
-                widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(from: newFrom),
-                );
-              },
-              buttonDecoration: PickerButtonDecoration(
-                textStyle: fieldStyle,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: _timePickerPrefW,
-            child: CupertinoTimePickerButton(
-              initialTime: TimeOfDay.fromDateTime(widget.item.to),
-              minuteInterval: 15,
-              onCompleted: (value) {
-                if (value == null) {
-                  return;
-                }
-                final newTo = widget.item.to.copyWith(
-                  hour: value.hour,
-                  minute: value.minute,
-                );
-                widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(to: newTo),
-                );
-              },
-              buttonDecoration: PickerButtonDecoration(
-                textStyle: fieldStyle,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: _workedPrefW,
-            child: Text(
-              toHmString(widget.item.to.difference(widget.item.from)),
-            ),
-          ),
-          SizedBox(
-            width: flexW,
-            child: MacosSearchField(
-              results: widget.userConfigProvider.subjects
-                  .map(
-                    (e) => SearchResultItem(
-                      // Include name and URI so MacosSearchField matches either.
-                      e.name.isNotEmpty ? '${e.name} ${e.uri}' : e.uri,
-                      child: Text(
-                        e.name.isNotEmpty ? e.name : e.uri,
-                        overflow: TextOverflow.ellipsis,
+      child: FocusTraversalGroup(
+        policy: OrderedTraversalPolicy(),
+        child: Row(
+          spacing: _spacingPrefW,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: _btnPrefW,
+              child: widget.canReorder
+                  ? ReorderableDragStartListener(
+                      index: widget.index,
+                      child: MacosIcon(
+                        CupertinoIcons.bars,
+                        color: MacosTheme.of(context).primaryColor,
                       ),
-                    ),
-                  )
-                  .toList(),
-              maxLines: 1,
-              maxResultsToShow: 10,
-              controller: _fieldControllers.subject,
-              placeholder: 'Subject',
-              onChanged: _onSubjectChanged,
-              onResultSelected: (value) {
-                Subject? subject;
-                for (final s in widget.userConfigProvider.subjects) {
-                  if (value.searchKey.contains(s.uri)) {
-                    subject = s;
-                    break;
-                  }
-                }
-                if (subject == null) {
-                  return;
-                }
-                final subjectName = subject.name;
-                widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(
-                    subject: subject.uri,
-                    subjectName: subjectName,
-                  ),
-                );
-                _fieldControllers.subject.text =
-                    subjectName.isNotEmpty ? subjectName : subject.uri;
-              },
+                    )
+                  : MacosIcon(CupertinoIcons.bars, color: Colors.grey),
             ),
-          ),
-          SizedBox(
-            width: flexW,
-            child: MacosTextField(
-              controller: _fieldControllers.description,
-              placeholder: 'Description',
-              maxLines: null,
-              minLines: null,
-              expands: true,
-              style: fieldStyle,
-              onChanged: (value) {
-                widget.timeTrackerProvider.updateItem(
-                  widget.item.copyWith(description: value),
-                );
-              },
-            ),
-          ),
-          SizedBox(
-            width: _btnPrefW,
-            child: widget.timeTrackerProvider.isSavingItem(widget.item)
-                ? const ProgressCircle()
-                : switch (widget.item.status) {
-                    TimetrackerItemStatus.staged => MacosIcon(
-                      CupertinoIcons.cloud_fill,
-                      color: Colors.grey,
-                    ),
-                    TimetrackerItemStatus.saved => MacosIcon(
-                      CupertinoIcons.cloud_fill,
-                      color: Colors.green,
-                    ),
-                    TimetrackerItemStatus.error => MacosIcon(
-                      CupertinoIcons.cloud_fill,
-                      color: Colors.red,
-                    ),
-                  },
-          ),
-          SizedBox(
-            width: _btnPrefW,
-            child: MacosIconButton(
-              icon: MacosIcon(
-                CupertinoIcons.delete,
-                color: MacosTheme.of(context).primaryColor,
+            SizedBox(
+              width: _dayPrefW,
+              child: WeekdayLabel(
+                date: widget.item.from,
+                label: dayLabel,
+                textStyle: fieldStyle,
               ),
-              onPressed: () {
-                widget.timeTrackerProvider.deleteItem(widget.item);
-              },
             ),
-          ),
-        ],
+            SizedBox(
+              width: _datePickerPrefW,
+              child: FocusTraversalOrder(
+                order: const NumericFocusOrder(1),
+                child: MacosDateEntry(
+                  key: _dateEntryKey,
+                  date: widget.item.from,
+                  minimumDate: DateTime.now().subtract(
+                    const Duration(days: 365),
+                  ),
+                  maximumDate: DateTime.now().add(const Duration(days: 365)),
+                  style: fieldStyle,
+                  semanticLabel: 'Date',
+                  calendarSemanticLabel: 'Open calendar',
+                  onChanged: (value) {
+                    final newFrom = value.copyWith(
+                      hour: widget.item.from.hour,
+                      minute: widget.item.from.minute,
+                      second: widget.item.from.second,
+                    );
+                    final newTo = value.copyWith(
+                      hour: widget.item.to.hour,
+                      minute: widget.item.to.minute,
+                      second: widget.item.to.second,
+                    );
+                    widget.timeTrackerProvider.updateItem(
+                      widget.item.copyWith(from: newFrom, to: newTo),
+                    );
+                  },
+                ),
+              ),
+            ),
+            SizedBox(
+              width: _timePickerPrefW,
+              child: FocusTraversalOrder(
+                order: const NumericFocusOrder(2),
+                child: MacosTimeEntry(
+                  time: TimeOfDay.fromDateTime(widget.item.from),
+                  minuteInterval: 15,
+                  style: fieldStyle,
+                  semanticLabel: 'Start time',
+                  pickerSemanticLabel: 'Open start time picker',
+                  onChanged: (value) {
+                    final newFrom = widget.item.from.copyWith(
+                      hour: value.hour,
+                      minute: value.minute,
+                    );
+                    widget.timeTrackerProvider.updateItem(
+                      widget.item.copyWith(from: newFrom),
+                    );
+                  },
+                ),
+              ),
+            ),
+            SizedBox(
+              width: _timePickerPrefW,
+              child: FocusTraversalOrder(
+                order: const NumericFocusOrder(3),
+                child: MacosTimeEntry(
+                  time: TimeOfDay.fromDateTime(widget.item.to),
+                  minuteInterval: 15,
+                  style: fieldStyle,
+                  semanticLabel: 'End time',
+                  pickerSemanticLabel: 'Open end time picker',
+                  onChanged: (value) {
+                    final newTo = widget.item.to.copyWith(
+                      hour: value.hour,
+                      minute: value.minute,
+                    );
+                    widget.timeTrackerProvider.updateItem(
+                      widget.item.copyWith(to: newTo),
+                    );
+                  },
+                ),
+              ),
+            ),
+            SizedBox(
+              width: _workedPrefW,
+              child: Text(
+                toHmString(widget.item.to.difference(widget.item.from)),
+                style: fieldStyle,
+              ),
+            ),
+            SizedBox(
+              width: flexW,
+              child: FocusTraversalOrder(
+                order: const NumericFocusOrder(4),
+                child: MacosKeyboardSearchField(
+                  results: widget.userConfigProvider.subjects
+                      .map(
+                        (e) => SearchResultItem(
+                          // Include name and URI so filtering matches either.
+                          e.name.isNotEmpty ? '${e.name} ${e.uri}' : e.uri,
+                          child: Text(
+                            e.name.isNotEmpty ? e.name : e.uri,
+                            overflow: TextOverflow.ellipsis,
+                            style: fieldStyle,
+                          ),
+                          onSelected: () => _onSubjectSelected(e),
+                        ),
+                      )
+                      .toList(),
+                  maxLines: 1,
+                  maxResultsToShow: 10,
+                  controller: _fieldControllers.subject,
+                  focusNode: _subjectFocusNode,
+                  style: fieldStyle,
+                  placeholder: 'Subject',
+                  onChanged: _onSubjectChanged,
+                  onResultSelected: (_) {
+                    // URI-keyed select runs via SearchResultItem.onSelected;
+                    // advance focus like Windows AutoSuggestBox.
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!mounted) return;
+                      _descriptionFocusNode.requestFocus();
+                    });
+                  },
+                ),
+              ),
+            ),
+            SizedBox(
+              width: flexW,
+              child: FocusTraversalOrder(
+                order: const NumericFocusOrder(5),
+                child: MacosTextField(
+                  focusNode: _descriptionFocusNode,
+                  controller: _fieldControllers.description,
+                  placeholder: 'Description',
+                  maxLines: null,
+                  minLines: null,
+                  expands: true,
+                  style: fieldStyle,
+                  onChanged: (value) {
+                    widget.timeTrackerProvider.updateItem(
+                      widget.item.copyWith(description: value),
+                    );
+                  },
+                ),
+              ),
+            ),
+            SizedBox(
+              width: _btnPrefW,
+              child: widget.timeTrackerProvider.isSavingItem(widget.item)
+                  ? const ProgressCircle()
+                  : switch (widget.item.status) {
+                      TimetrackerItemStatus.staged => MacosIcon(
+                        CupertinoIcons.cloud_fill,
+                        color: Colors.grey,
+                      ),
+                      TimetrackerItemStatus.saved => MacosIcon(
+                        CupertinoIcons.cloud_fill,
+                        color: Colors.green,
+                      ),
+                      TimetrackerItemStatus.error => MacosIcon(
+                        CupertinoIcons.cloud_fill,
+                        color: Colors.red,
+                      ),
+                    },
+            ),
+            SizedBox(
+              width: _btnPrefW,
+              child: ExcludeFocus(
+                child: MacosIconButton(
+                  icon: MacosIcon(
+                    CupertinoIcons.delete,
+                    color: MacosTheme.of(context).primaryColor,
+                  ),
+                  onPressed: () {
+                    widget.timeTrackerProvider.deleteItem(widget.item);
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  void _onSubjectSelected(Subject subject) {
+    final subjectName = subject.name;
+    final display = subjectName.isNotEmpty ? subjectName : subject.uri;
+    widget.timeTrackerProvider.updateItem(
+      widget.item.copyWith(subject: subject.uri, subjectName: subjectName),
+    );
+    if (_fieldControllers.subject.text != display) {
+      _fieldControllers.subject.text = display;
+    }
   }
 
   void _onSubjectChanged(String value) {
@@ -312,6 +364,8 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
   void initState() {
     super.initState();
     _fieldControllers.initFrom(widget.item);
+    _subjectFocusNode = FocusNode();
+    _descriptionFocusNode = FocusNode(onKeyEvent: _onDescriptionKey);
   }
 
   @override
@@ -323,6 +377,8 @@ class _TimetrackerItemRowState extends State<TimetrackerItemRow> {
   @override
   void dispose() {
     _subjectFetchDebounce?.cancel();
+    _subjectFocusNode.dispose();
+    _descriptionFocusNode.dispose();
     _fieldControllers.dispose();
     super.dispose();
   }

@@ -8,6 +8,9 @@ import 'package:timesheet/providers/subjects_and_categories_provider.dart';
 import 'package:timesheet/providers/timetracker_provider.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
+import 'package:timesheet/ui/platform/windows/command_bar_icon_button.dart';
+import 'package:timesheet/ui/platform/windows/windows_layout.dart';
+import 'package:timesheet/ui/views/timetracker/timetracker_tab_navigation.dart';
 import 'package:timesheet/ui/views/timetracker/windows/timetracker_item_row.dart';
 import 'package:timesheet/ui/views/timetracker/timetracker_summary_footer.dart';
 import 'package:timesheet/ui/widgets/pinned_footer_layout.dart';
@@ -21,6 +24,21 @@ class TimetrackerView extends StatefulWidget {
 
 class _TimetrackerViewState extends State<TimetrackerView> {
   final TextEditingController _filterController = TextEditingController();
+  final _rowKeys = TimetrackerRowKeyMap<TimetrackerItemRowState>();
+
+  Future<void> _onTabFromDescription({
+    required TimetrackerProvider provider,
+    required int index,
+  }) {
+    return handleTimetrackerTabFromDescription(
+      provider: provider,
+      index: index,
+      isMounted: () => mounted,
+      focusDateMonth: (itemId) {
+        _rowKeys.forId(itemId).currentState?.focusDateMonth();
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,52 +103,46 @@ class _TimetrackerViewState extends State<TimetrackerView> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Tooltip(
+        CommandBarIconButton(
           message: 'Add timesheet item',
-          child: IconButton(
-            icon: const Icon(FluentIcons.add),
-            onPressed: () => timeTrackerProvider.addItem(),
-          ),
+          icon: FluentIcons.add,
+          onPressed: () => timeTrackerProvider.addItem(),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: WindowsLayout.space8),
         SizedBox(
-          width: 160,
+          width: WindowsLayout.toolbarFilterWidth,
           child: TextBox(
             controller: _filterController,
             placeholder: 'Filter',
             onChanged: timeTrackerProvider.setFilter,
           ),
         ),
-        const SizedBox(width: 8),
-        Tooltip(
+        const SizedBox(width: WindowsLayout.space8),
+        CommandBarIconButton(
           message: 'Send timesheet items to WTM',
-          child: IconButton(
-            icon: const Icon(FluentIcons.cloud_upload),
-            onPressed: () async {
-              await timeTrackerProvider.saveToWTM();
-              await userConfigProvider.loadSubjectsAndCategories();
-            },
-          ),
+          icon: FluentIcons.cloud_upload,
+          onPressed: () async {
+            await timeTrackerProvider.saveToWTM();
+            await userConfigProvider.loadSubjectsAndCategories();
+          },
         ),
-        const SizedBox(width: 8),
-        Tooltip(
+        const SizedBox(width: WindowsLayout.space8),
+        CommandBarIconButton(
           message: 'Clear all timesheet items',
-          child: IconButton(
-            icon: const Icon(FluentIcons.delete),
-            onPressed: () {
-              Dialog.warningConfirmation(
-                title: 'Warning',
-                message: 'Are you sure you want to delete all items?',
-                confirmText: 'Yes',
-                cancelText: 'No',
-                onResult: (confirmed) {
-                  if (confirmed) {
-                    timeTrackerProvider.deleteAll();
-                  }
-                },
-              );
-            },
-          ),
+          icon: FluentIcons.delete,
+          onPressed: () {
+            Dialog.warningConfirmation(
+              title: 'Warning',
+              message: 'Are you sure you want to delete all items?',
+              confirmText: 'Yes',
+              cancelText: 'No',
+              onResult: (confirmed) {
+                if (confirmed) {
+                  timeTrackerProvider.deleteAll();
+                }
+              },
+            );
+          },
         ),
       ],
     );
@@ -159,6 +171,8 @@ class _TimetrackerViewState extends State<TimetrackerView> {
     required SubjectsAndCategoriesProvider userConfigProvider,
   }) {
     final theme = FluentTheme.of(context);
+    _rowKeys.pruneTo(timeTrackerProvider.items.map((e) => e.id));
+
     return material.ReorderableListView(
       buildDefaultDragHandles: false,
       // Skip Material's default proxy (wraps in Material + inherit:true
@@ -198,12 +212,16 @@ class _TimetrackerViewState extends State<TimetrackerView> {
       children: [
         for (int index = 0; index < timeTrackerProvider.items.length; index++)
           TimetrackerItemRow(
-            key: ValueKey(timeTrackerProvider.items[index].itemIndex),
+            key: _rowKeys.forId(timeTrackerProvider.items[index].id),
             timeTrackerProvider: timeTrackerProvider,
             userConfigProvider: userConfigProvider,
             index: index,
             item: timeTrackerProvider.items[index],
             canReorder: !timeTrackerProvider.hasFilter,
+            onTabFromDescription: () => _onTabFromDescription(
+              provider: timeTrackerProvider,
+              index: index,
+            ),
           ),
       ],
     );
