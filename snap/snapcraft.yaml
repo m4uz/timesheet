@@ -1,0 +1,45 @@
+name: timesheet
+version: 0.0.0
+summary: Timesheet
+description: Cross-platform timesheet application.
+confinement: strict
+base: core22
+grade: stable
+icon: assets/icon.png
+
+apps:
+  timesheet:
+    command: bin/timesheet
+    desktop: snap/gui/timesheet.desktop
+    extensions: [gnome]
+    plugs:
+      - network
+      - home
+      - desktop
+      - desktop-legacy
+      - gsettings
+      - opengl
+      - wayland
+      - x11
+
+parts:
+  timesheet:
+    plugin: nil
+    source: .
+    build-packages:
+      - clang
+      - cmake
+      - curl
+      - libgtk-3-dev
+      - ninja-build
+      - pkg-config
+      - unzip
+      - xz-utils
+      - zip
+    override-build: |
+      set -eux
+      flutter config --enable-linux-desktop
+      flutter pub get
+      flutter build linux --release
+      mkdir -p "$CRAFT_PART_INSTALL/bin"
+      cp -r build/linux/*/release/bundle/* "$CRAFT_PART_INSTALL/bin/"

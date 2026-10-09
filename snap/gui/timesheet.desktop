@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Timesheet
+Comment=Cross-platform timesheet application
+Exec=timesheet
+Icon=${SNAP}/meta/gui/timesheet.png
+Terminal=false
+Type=Application
+Categories=Office;

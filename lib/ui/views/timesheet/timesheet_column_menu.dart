@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
+import 'package:timesheet/ui/views/timesheet/linux/timesheet_column_menu.dart'
+    as linux_timesheet_column_menu;
 import 'package:timesheet/ui/views/timesheet/macos/timesheet_column_menu.dart'
     as mac_timesheet_column_menu;
 import 'package:timesheet/ui/views/timesheet/windows/timesheet_column_menu.dart'
@@ -12,6 +14,13 @@ Future<void> showTimesheetColumnMenu(
 ) {
   if (Platform.isWindows) {
     return win_timesheet_column_menu.showTimesheetColumnMenu(
+      context,
+      globalPosition,
+    );
+  }
+
+  if (Platform.isLinux) {
+    return linux_timesheet_column_menu.showTimesheetColumnMenu(
       context,
       globalPosition,
     );

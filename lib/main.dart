@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show MaterialApp;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:macos_ui/macos_ui.dart';
@@ -24,9 +25,12 @@ import 'package:timesheet/services/session_manager.dart';
 import 'package:timesheet/services/timetracker_db_service.dart';
 import 'package:timesheet/services/wtm_service.dart';
 import 'package:timesheet/ui/platform/platform_auth_ui_delegate.dart';
+import 'package:timesheet/ui/views/login/linux/login_view.dart'
+    as linux_login_view;
 import 'package:timesheet/ui/views/login/macos/login_view.dart' as mac_login_view;
 import 'package:timesheet/ui/views/login/windows/login_view.dart'
     as win_login_view;
+import 'package:timesheet/ui/views/menu/linux/menu_view.dart' as linux_menu_view;
 import 'package:timesheet/ui/views/menu/macos/menu_view.dart' as mac_menu_view;
 import 'package:timesheet/ui/views/menu/windows/menu_view.dart' as win_menu_view;
 import 'package:timesheet/ui/theme.dart';
@@ -34,10 +38,13 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:timesheet/ui/platform/dialog.dart';
 import 'package:timesheet/ui/platform/snackbar.dart';
 import 'package:timesheet/services/oidc_auth_coordinator.dart';
+import 'package:timesheet/ui/platform/linux/oidc_auth_host.dart'
+    as linux_oidc_auth_host;
 import 'package:timesheet/ui/platform/macos/oidc_auth_host.dart' as mac_oidc_auth_host;
 import 'package:timesheet/ui/platform/windows/oidc_auth_host.dart' as win_oidc_auth_host;
 import 'package:webview_all/webview_all.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
+import 'package:yaru/yaru.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -50,6 +57,13 @@ Future<void> main() async {
   if (Platform.isMacOS) {
     WebViewPlatform.instance = WebKitWebViewPlatform();
     await MacosWindowUtilsConfig().apply();
+  }
+
+  if (Platform.isLinux) {
+    // Do not register LinuxWebViewPlatform: creating a WebKitGTK webview
+    // breaks Flutter's GL surface on Wayland. Linux OIDC uses the system
+    // browser + localhost redirect instead.
+    await YaruWindowTitleBar.ensureInitialized();
   }
 
   await AppConfig.init();
@@ -196,6 +210,37 @@ class _TimesheetAppState extends State<TimesheetApp> {
                     : const win_login_view.LoginView();
               },
             ),
+          );
+        }
+
+        if (Platform.isLinux) {
+          return YaruTheme(
+            builder: (context, yaru, _) {
+              return MaterialApp(
+                navigatorKey: navigatorKey,
+                title: '🦄⏰💩',
+                theme: yaru.theme,
+                darkTheme: yaru.darkTheme,
+                themeMode: appTheme.mode,
+                localizationsDelegates: const [
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [Locale('en')],
+                debugShowCheckedModeBanner: !kReleaseMode,
+                builder: (context, child) {
+                  return linux_oidc_auth_host.LinuxOidcAuthHost(child: child);
+                },
+                home: Consumer<AuthProvider>(
+                  builder: (context, auth, _) {
+                    return auth.isAuthenticated
+                        ? const linux_menu_view.MenuView()
+                        : const linux_login_view.LoginView();
+                  },
+                ),
+              );
+            },
           );
         }
 

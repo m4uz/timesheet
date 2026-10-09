@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-/// Shared layout metrics for segmented date/time fields (macOS + Windows).
+/// Shared layout metrics for segmented date/time fields (macOS + Windows + Linux).
 class SegmentedFieldMetrics {
   SegmentedFieldMetrics._();
 

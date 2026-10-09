@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
+import 'package:timesheet/ui/platform/linux/snackbar_manager.dart' as linux_snackbar_manager;
 import 'package:timesheet/ui/platform/macos/snackbar_manager.dart' as mac_snackbar_manager;
 import 'package:timesheet/ui/platform/windows/infobar_manager.dart' as win_infobar_manager;
 
@@ -10,11 +11,14 @@ class Snackbar {
   static void initialize(GlobalKey<NavigatorState> navigatorKey) {
     mac_snackbar_manager.SnackBarManager.initialize(navigatorKey);
     win_infobar_manager.InfoBarManager.initialize(navigatorKey);
+    linux_snackbar_manager.SnackBarManager.initialize(navigatorKey);
   }
 
   static void info(String message) {
     if (Platform.isWindows) {
       win_infobar_manager.InfoBarManager.info(message);
+    } else if (Platform.isLinux) {
+      linux_snackbar_manager.SnackBarManager.info(message);
     } else {
       mac_snackbar_manager.SnackBarManager.info(message);
     }
@@ -23,6 +27,8 @@ class Snackbar {
   static void success(String message) {
     if (Platform.isWindows) {
       win_infobar_manager.InfoBarManager.success(message);
+    } else if (Platform.isLinux) {
+      linux_snackbar_manager.SnackBarManager.success(message);
     } else {
       mac_snackbar_manager.SnackBarManager.success(message);
     }
@@ -31,6 +37,8 @@ class Snackbar {
   static void warning(String message) {
     if (Platform.isWindows) {
       win_infobar_manager.InfoBarManager.warning(message);
+    } else if (Platform.isLinux) {
+      linux_snackbar_manager.SnackBarManager.warning(message);
     } else {
       mac_snackbar_manager.SnackBarManager.warning(message);
     }
@@ -39,6 +47,8 @@ class Snackbar {
   static void error(String message) {
     if (Platform.isWindows) {
       win_infobar_manager.InfoBarManager.error(message);
+    } else if (Platform.isLinux) {
+      linux_snackbar_manager.SnackBarManager.error(message);
     } else {
       mac_snackbar_manager.SnackBarManager.error(message);
     }
